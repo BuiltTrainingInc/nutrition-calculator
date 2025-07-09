@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUILT Phase Guide</title>
+</head>
+<body>
+<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
+  <h2 style="text-align: center; font-size: 22px;">BUILT PHASE GUIDE</h2>
+  <p style="text-align: center; margin-bottom: 30px;">Find out which BUILT phase you're ready for.</p>
+
+  <label>Height</label>
+  <input id="height" type="text" placeholder="e.g. 5'10 or 178cm" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+
+  <label>Current Weight</label>
+  <input id="weight" type="text" placeholder="e.g. 185 lbs" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+
+  <label>Body Fat % (Estimate)</label>
+  <select id="bodyfat" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>Under 10%</option>
+    <option>10–15%</option>
+    <option>15–20%</option>
+    <option>20–25%</option>
+    <option>25–30%</option>
+    <option>30%+</option>
+  </select>
+
+  <label>Time in Current Phase</label>
+  <select id="phaseLength" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>< 4 weeks</option>
+    <option>4–8 weeks</option>
+    <option>8–16 weeks</option>
+    <option>16+ weeks</option>
+  </select>
+
+  <label>Training Performance</label>
+  <select id="training" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>Crushing it</option>
+    <option>Decent but inconsistent</option>
+    <option>Stalled out</option>
+    <option>Burnt out</option>
+  </select>
+
+  <label>Recovered from Current Phase?</label>
+  <select id="recovered" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>Yes</option>
+    <option>Somewhat</option>
+    <option>No – I feel drained or inflamed</option>
+  </select>
+
+  <label>Sleep Quality (1–10)</label>
+  <input id="sleep" type="number" min="1" max="10" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+
+  <label>Stress Level (1–10)</label>
+  <input id="stress" type="number" min="1" max="10" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+
+  <label>Digestion Quality</label>
+  <select id="digestion" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>Consistent & solid</option>
+    <option>Some bloat or irregularity</option>
+    <option>Poor or inconsistent</option>
+  </select>
+
+  <label>Appetite</label>
+  <select id="appetite" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>Always hungry</option>
+    <option>Neutral</option>
+    <option>Low appetite</option>
+  </select>
+
+  <label>Energy Levels</label>
+  <select id="energy" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>High</option>
+    <option>Medium</option>
+    <option>Low</option>
+  </select>
+
+  <label>Primary Goal</label>
+  <select id="goal" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>Lose fat</option>
+    <option>Build muscle</option>
+    <option>Get leaner slowly</option>
+    <option>Feel better & get healthy</option>
+    <option>Not sure</option>
+  </select>
+
+  <label>Readiness to Push</label>
+  <select id="readiness" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <option>Locked in</option>
+    <option>Willing but busy/stressed</option>
+    <option>Not ready for intensity</option>
+  </select>
+
+  <label>Health Concerns / Bloodwork</label>
+  <textarea id="health" rows="3" placeholder="List anything relevant..." style="width: 100%; padding: 10px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;"></textarea>
+
+  <label>Optional: Upload Progress Photos</label>
+  <input type="file" accept="image/*" style="width: 100%; padding: 8px; background: #1e1e1e; color: white; border: 1px solid #333; margin-bottom: 5px;">
+  <small style="color: #888;">Front / Side / Back if possible – used to better assess body fat % (not required).</small>
+  <br><br>
+
+  <button onclick="sendPhaseRequest()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px;">Get My Phase Recommendation</button>
+
+  <div id="response" style="margin-top: 30px; white-space: pre-wrap; background: #1b1b1b; padding: 15px; border-radius: 8px; border: 1px solid #333;"></div>
+</div>
+
+<script>
+  async function sendPhaseRequest() {
+    const inputs = {
+      height: document.getElementById("height").value,
+      weight: document.getElementById("weight").value,
+      bodyfat: document.getElementById("bodyfat").value,
+      phaseLength: document.getElementById("phaseLength").value,
+      training: document.getElementById("training").value,
+      recovered: document.getElementById("recovered").value,
+      sleep: document.getElementById("sleep").value,
+      stress: document.getElementById("stress").value,
+      digestion: document.getElementById("digestion").value,
+      appetite: document.getElementById("appetite").value,
+      energy: document.getElementById("energy").value,
+      goal: document.getElementById("goal").value,
+      readiness: document.getElementById("readiness").value,
+      health: document.getElementById("health").value,
+    };
+
+    document.getElementById("response").innerText = "Analyzing your inputs...";
+
+    try {
+      // Call your secure Vercel API instead of OpenAI directly
+      const res = await fetch("/api/phase-guide", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          inputs: inputs
+        })
+      });
+
+      const data = await res.json();
+      
+      if (data.error) {
+        document.getElementById("response").innerText = "Error getting recommendation. Please try again.";
+        return;
+      }
+
+      const reply = data.choices?.[0]?.message?.content || "Something went wrong.";
+      document.getElementById("response").innerText = reply;
+      
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById("response").innerText = "Error connecting to server. Please try again.";
+    }
+  }
+</script>
+</body>
+</html>
