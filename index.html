@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Food Log Calculator</title>
+</head>
+<body>
+<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
+  <h2 style="font-size: 22px; text-align: center;">BUILT TRAINING — Daily Food Log Calculator</h2>
+
+  <div id="mealContainer">
+    <div class="meal-entry">
+      <label><strong>Meal 1</strong></label>
+      <textarea rows="4" placeholder="e.g. 2 eggs, 1 slice toast" style="width: 100%; padding: 10px; margin-bottom: 10px; background-color: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;"></textarea>
+    </div>
+  </div>
+
+  <button onclick="addMeal()" style="margin-top: 5px; padding: 10px 15px; font-size: 16px; width: 100%; background-color: #2e2e2e; color: white; border: none; border-radius: 6px; margin-bottom: 10px;">+ Add Meal</button>
+
+  <button onclick="sendMessage()" style="padding: 12px 20px; font-size: 16px; width: 100%; background-color: #2e2e2e; color: white; border: none; border-radius: 6px;">Calculate Totals</button>
+
+  <div id="response" style="margin-top: 20px; white-space: normal; background: #1b1b1b; padding: 15px; border-radius: 8px; font-size: 15px; border: 1px solid #333;"></div>
+</div>
+
+<script>
+  let mealCount = 1;
+
+  function addMeal() {
+    mealCount++;
+    const container = document.getElementById("mealContainer");
+
+    const newMealDiv = document.createElement("div");
+    newMealDiv.className = "meal-entry";
+    newMealDiv.innerHTML = `
+      <label><strong>Meal ${mealCount}</strong></label>
+      <textarea rows="4" placeholder="e.g. chicken breast, rice, veggies" style="width: 100%; padding: 10px; margin-bottom: 10px; background-color: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;"></textarea>
+    `;
+
+    container.appendChild(newMealDiv);
+  }
+
+  function formatGPTResponse(text) {
+    const lines = text.split('\n').filter(l => l.trim() !== '');
+    let html = '';
+
+    lines.forEach(line => {
+      if (/^Meal \d+:/.test(line)) {
+        html += `<h3 style="margin-top: 20px; font-size: 18px; color: #f0f0f0;">${line}</h3>`;
+      } else if (/^Total:/i.test(line)) {
+        html += `<h3 style="margin-top: 25px; font-size: 18px; color: #f0f0f0;">${line}</h3>`;
+      } else if (line.includes(':') && line.match(/\d/)) {
+        const [label, value] = line.split(':');
+        html += `
+          <table style="width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 10px;">
+            <tr>
+              <td style="padding: 6px; font-weight: bold; border: 1px solid #333; background-color: #2a2a2a;">${label.trim()}</td>
+              <td style="padding: 6px; border: 1px solid #333; background-color: #2a2a2a;">${value.trim()}</td>
+            </tr>
+          </table>`;
+      } else {
+        html += `<p style="margin-top: 10px;">${line}</p>`;
+      }
+    });
+
+    return html;
+  }
+
+  async function sendMessage() {
+    const responseBox = document.getElementById("response");
+    responseBox.innerHTML = "Calculating macros...";
+
+    const mealDivs = document.querySelectorAll(".meal-entry textarea");
+    let combinedInput = "";
+
+    mealDivs.forEach((textarea, index) => {
+      const mealText = textarea.value.trim();
+      if (mealText !== "") {
+        combinedInput += `Meal ${index + 1}:\n${mealText}\n\n`;
+      }
+    });
+
+    try {
+      // This will call your Vercel serverless function
+      const res = await fetch("/api/calculate-nutrition", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          meals: combinedInput
+        })
+      });
+
+      const data = await res.json();
+      
+      if (data.error) {
+        responseBox.innerHTML = "Error calculating nutrition. Please try again.";
+        return;
+      }
+
+      const rawReply = data.choices?.[0]?.message?.content || "Something went wrong. Try again.";
+      const formatted = formatGPTResponse(rawReply);
+      responseBox.innerHTML = formatted;
+      
+    } catch (error) {
+      console.error('Error:', error);
+      responseBox.innerHTML = "Error connecting to server. Please try again.";
+    }
+  }
+</script>
+</body>
+</html>
