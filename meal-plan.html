@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUILT Meal Plan Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+<div style="max-width: 700px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #1a1a1a; color: #f5f5f5; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+  <h2 style="text-align: center;">BUILT Meal Plan Generator</h2>
+
+  <label>Total Protein (g)</label>
+  <input id="totalProtein" type="number" placeholder="e.g. 180" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+
+  <label>Total Carbs (g)</label>
+  <input id="totalCarbs" type="number" placeholder="e.g. 250" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+
+  <label>Total Fats (g)</label>
+  <input id="totalFats" type="number" placeholder="e.g. 65" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+
+  <label>Meals Per Day</label>
+  <input id="mealsPerDay" type="number" placeholder="e.g. 4" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+
+  <label>Proteins You Like</label>
+  <input id="preferredProteins" type="text" placeholder="chicken, egg whites..." style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+
+  <label>Carbs You Like</label>
+  <input id="preferredCarbs" type="text" placeholder="rice, oats..." style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+
+  <label>Veggies & Fruits You Like</label>
+  <input id="preferredVeggies" type="text" placeholder="spinach, berries..." style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+
+  <label>Fats You Like</label>
+  <input id="preferredFats" type="text" placeholder="avocado, nut butter..." style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:20px;">
+
+  <button onclick="generateMealPlan()" style="width:100%; padding:12px; font-size:16px; background-color:#333; color:white; border:none; border-radius:6px;">Create Meal Plan</button>
+
+  <div id="mealPlanResponse" style="margin-top: 30px; white-space: pre-wrap; background: #1b1b1b; padding: 15px; border-radius: 8px; border: 1px solid #333;"></div>
+
+  <button onclick="downloadImage()" style="display:none; margin-top: 15px; width: 100%; padding: 12px; font-size: 16px; background-color: #444; color: white; border: none; border-radius: 6px;" id="downloadBtn">Download as Image</button>
+</div>
+
+<script>
+async function generateMealPlan() {
+  const protein = document.getElementById("totalProtein").value;
+  const carbs = document.getElementById("totalCarbs").value;
+  const fats = document.getElementById("totalFats").value;
+  const meals = document.getElementById("mealsPerDay").value;
+  const proteinsLike = document.getElementById("preferredProteins").value;
+  const carbsLike = document.getElementById("preferredCarbs").value;
+  const veggiesLike = document.getElementById("preferredVeggies").value;
+  const fatsLike = document.getElementById("preferredFats").value;
+
+  const userPrompt = `Protein: ${protein}g\nCarbs: ${carbs}g\nFats: ${fats}g\nMeals: ${meals}\nProteins: ${proteinsLike}\nCarbs: ${carbsLike}\nVeggies: ${veggiesLike}\nFats: ${fatsLike}`;
+
+  document.getElementById("mealPlanResponse").innerText = "Generating plan...";
+
+  try {
+    // Call your secure Vercel API instead of OpenAI directly
+    const res = await fetch("/api/meal-plan", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userPrompt: userPrompt
+      })
+    });
+
+    const data = await res.json();
+    
+    if (data.error) {
+      document.getElementById("mealPlanResponse").innerText = "Error generating meal plan. Please try again.";
+      return;
+    }
+
+    const reply = data.choices?.[0]?.message?.content || "Something went wrong.";
+    document.getElementById("mealPlanResponse").innerText = reply;
+    document.getElementById("downloadBtn").style.display = "block";
+    
+  } catch (error) {
+    console.error('Error:', error);
+    document.getElementById("mealPlanResponse").innerText = "Error connecting to server. Please try again.";
+  }
+}
+
+function downloadImage() {
+  const mealPlanElement = document.getElementById("mealPlanResponse");
+
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
+
+  const wrapper = document.createElement("div");
+  wrapper.style.background = "#fff";
+  wrapper.style.color = "#000";
+  wrapper.style.padding = "40px";
+  wrapper.style.fontFamily = "Arial, sans-serif";
+  wrapper.style.maxWidth = "700px";
+  wrapper.style.lineHeight = "1.6";
+
+  const title = document.createElement("h2");
+  title.innerText = `BUILT MEAL PLAN – ${formattedDate}`;
+  title.style.textAlign = "center";
+  title.style.marginBottom = "30px";
+  title.style.color = "#000";
+
+  const content = document.createElement("pre");
+  content.innerText = mealPlanElement.innerText;
+  content.style.whiteSpace = "pre-wrap";
+  content.style.fontSize = "14px";
+  content.style.color = "#000";
+
+  wrapper.appendChild(title);
+  wrapper.appendChild(content);
+  document.body.appendChild(wrapper);
+
+  html2canvas(wrapper, { scale: 2 }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = `BUILT_Meal_Plan_${formattedDate.replace(/\s/g, "_")}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    document.body.removeChild(wrapper);
+  });
+}
+</script>
+</body>
+</html>
