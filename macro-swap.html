@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUILT Macro Swap Tool</title>
+</head>
+<body>
+<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
+  <h2 style="text-align: center; font-size: 22px;">BUILT Macro Swap Tool</h2>
+  <p style="text-align: center; margin-bottom: 30px;">Swap any food for a similar macro equivalent</p>
+
+  <label>Original Food</label>
+  <input id="originalFood" type="text" placeholder="e.g. 100g chicken breast" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+
+  <label>Replacement Food</label>
+  <input id="replacementFood" type="text" placeholder="e.g. ground turkey" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;">
+
+  <button onclick="swapMacros()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px;">Get Equivalent Quantity</button>
+
+  <div id="replacementQty" style="margin-top: 30px; font-weight: bold; color: #f0f0f0;"></div>
+
+  <div id="macroTable" style="margin-top: 20px; display: none;">
+    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Macro Comparison</h3>
+    <table style="width: 100%; border-collapse: collapse; background: #181818;">
+      <thead>
+        <tr style="background-color: #222;">
+          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Food</th>
+          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Quantity</th>
+          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Protein (g)</th>
+          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Carbs (g)</th>
+          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Fat (g)</th>
+          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Calories</th>
+        </tr>
+      </thead>
+      <tbody id="macroTableBody"></tbody>
+    </table>
+  </div>
+
+  <div id="swapSuggestions" style="margin-top: 30px;">
+    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Suggested Swaps</h3>
+    <ul style="line-height: 1.8; font-size: 15px;">
+      <li><strong>Chicken Breast →</strong> Ground Turkey, White Fish, Tofu</li>
+      <li><strong>Rice →</strong> Quinoa, Sweet Potato, Couscous</li>
+      <li><strong>Oats →</strong> Cream of Rice, Whole Grain Bread, Rice Cakes</li>
+      <li><strong>Greek Yogurt →</strong> Skyr, Cottage Cheese, Egg Whites</li>
+      <li><strong>Peanut Butter →</strong> Almond Butter, Tahini, Avocado</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  async function swapMacros() {
+    const originalFood = document.getElementById("originalFood").value;
+    const replacementFood = document.getElementById("replacementFood").value;
+
+    if (!originalFood || !replacementFood) {
+      document.getElementById("replacementQty").innerText = "Please fill in both foods.";
+      return;
+    }
+
+    document.getElementById("replacementQty").innerText = "Calculating equivalent...";
+    document.getElementById("macroTable").style.display = "none";
+
+    try {
+      // Call your secure Vercel API instead of OpenAI directly
+      const res = await fetch("/api/macro-swap", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          originalFood: originalFood,
+          replacementFood: replacementFood
+        })
+      });
+
+      const data = await res.json();
+      
+      if (data.error) {
+        document.getElementById("replacementQty").innerText = "Error calculating swap. Please try again.";
+        return;
+      }
+
+      const reply = data.choices?.[0]?.message?.content || "Something went wrong.";
+
+      const qtyMatch = reply.match(/Replacement Quantity: ([^\n]+)/);
+      const tableMatch = reply.match(/\| Original \|(.|\n)*?\| Replacement \|(.|\n)*?\|/);
+
+      if (qtyMatch) {
+        document.getElementById("replacementQty").innerText = `Replacement Quantity: ${qtyMatch[1]}`;
+      } else {
+        document.getElementById("replacementQty").innerText = "Replacement Quantity: Not found.";
+      }
+
+      if (tableMatch) {
+        const rows = tableMatch[0].trim().split("\n").slice(2);
+        const tableHTML = rows.map(row => {
+          const cols = row.split("|").slice(1, -1).map(cell => `<td style='padding: 10px; border: 1px solid #333; font-weight: 500;'>${cell.trim()}</td>`);
+          return `<tr>${cols.join("")}</tr>`;
+        }).join("");
+        document.getElementById("macroTableBody").innerHTML = tableHTML;
+        document.getElementById("macroTable").style.display = "block";
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById("replacementQty").innerText = "Error connecting to server. Please try again.";
+    }
+  }
+</script>
+</body>
+</html>
