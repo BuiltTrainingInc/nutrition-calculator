@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PED Injection Calculator</title>
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .dose-splitter-container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #2d2d2d;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    h3 {
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    p {
+      text-align: center;
+      color: #b0b0b0;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    .compound-block {
+      background: #333333;
+      border-radius: 8px;
+      padding: 25px;
+      margin-bottom: 20px;
+      border: 1px solid #444444;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #ffffff;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #555555;
+      border-radius: 6px;
+      background-color: #404040;
+      color: #ffffff;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+    }
+
+    input::placeholder {
+      color: #888888;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 6px;
+      background-color: #0066cc;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0052a3;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .add-compound-btn {
+      background-color: #28a745;
+      margin-bottom: 10px;
+    }
+
+    .add-compound-btn:hover {
+      background-color: #218838;
+    }
+
+    .dose-splitter-result {
+      margin-top: 20px;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #444444;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .dose-splitter-result strong {
+      color: #ffffff;
+    }
+
+    .dose-splitter-result u {
+      color: #0066cc;
+    }
+
+    #totalResult {
+      background: #0d1117;
+      border: 1px solid #0066cc;
+      margin-top: 30px;
+    }
+
+    #totalResult ul {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+
+    #totalResult li {
+      margin: 8px 0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .button-group button {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    @media (max-width: 600px) {
+      .dose-splitter-container {
+        padding: 20px;
+        margin: 10px;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .button-group button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="dose-splitter-container">
+  <h3>PED Injection Calculator</h3>
+  <p><em>Calculate your weekly gear split by compound, concentration, and frequency.</em></p>
+
+  <div id="compoundList"></div>
+
+  <div class="button-group">
+    <button class="add-compound-btn" onclick="addCompoundBlock()">Add Compound</button>
+    <button onclick="calculateAllDoses()">Calculate All</button>
+  </div>
+
+  <div class="dose-splitter-result" id="totalResult" style="display:none;"></div>
+</div>
+
+<script>
+  let compoundIndex = 0;
+
+  function addCompoundBlock() {
+    const container = document.getElementById('compoundList');
+
+    const block = document.createElement('div');
+    block.className = 'compound-block';
+    block.innerHTML = `
+      <label>Name of Compound</label>
+      <input type="text" id="compoundName_${compoundIndex}" placeholder="e.g. Testosterone Enanthate">
+
+      <label>Total Desired Weekly Dose (mg)</label>
+      <input type="number" id="totalDose_${compoundIndex}" placeholder="e.g. 500">
+
+      <label>Compound Concentration (mg/mL)</label>
+      <input type="number" id="concentration_${compoundIndex}" placeholder="e.g. 250">
+
+      <label>Injections per Week</label>
+      <input type="number" id="injections_${compoundIndex}" placeholder="e.g. 2">
+
+      <div id="result_${compoundIndex}" class="dose-splitter-result" style="display:none;"></div>
+    `;
+    container.appendChild(block);
+    compoundIndex++;
+  }
+
+  function calculateAllDoses() {
+    let totalWeeklyDose = 0;
+    let finalSummary = '<strong>Total Breakdown:</strong><br><ul>';
+
+    for (let i = 0; i < compoundIndex; i++) {
+      const name = document.getElementById(`compoundName_${i}`)?.value;
+      const totalDose = parseFloat(document.getElementById(`totalDose_${i}`)?.value);
+      const concentration = parseFloat(document.getElementById(`concentration_${i}`)?.value);
+      const injections = parseFloat(document.getElementById(`injections_${i}`)?.value);
+
+      if (!name || isNaN(totalDose) || isNaN(concentration) || isNaN(injections) || injections === 0 || concentration === 0) {
+        continue;
+      }
+
+      const mgPerInjection = totalDose / injections;
+      let mlPerInjection = mgPerInjection / concentration;
+      mlPerInjection = Math.round(mlPerInjection * 200) / 200; // rounds to nearest 0.005 mL
+
+      totalWeeklyDose += totalDose;
+
+      const resultDiv = document.getElementById(`result_${i}`);
+      resultDiv.innerHTML = `
+        <strong>Results for ${name}:</strong><br>
+        Total Weekly Dose: ${totalDose.toFixed(0)} mg<br>
+        ${mgPerInjection.toFixed(1)} mg per injection<br>
+        = <strong>${mlPerInjection.toFixed(3)} mL</strong> per shot<br>
+        <u>Schedule:</u> ${injections} injection(s) per week — each ${mgPerInjection.toFixed(1)} mg / ${mlPerInjection.toFixed(3)} mL
+      `;
+      resultDiv.style.display = 'block';
+
+      finalSummary += `<li><strong>${name}</strong>: ${totalDose.toFixed(0)} mg/week (${injections}x ${mgPerInjection.toFixed(1)} mg / ${mlPerInjection.toFixed(3)} mL)</li>`;
+    }
+
+    finalSummary += `</ul><br><strong>Total Weekly Dosage:</strong> ${totalWeeklyDose.toFixed(0)} mg`;
+
+    const totalResult = document.getElementById('totalResult');
+    totalResult.innerHTML = finalSummary;
+    totalResult.style.display = 'block';
+  }
+
+  // Add one compound block by default
+  addCompoundBlock();
+</script>
+</body>
+</html>
