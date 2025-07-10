@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUILT Weekly Phase Check-In</title>
+</head>
+<body>
+<!-- BUILT Phase Check-In Tool -->
+<div style="max-width: 700px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #1a1a1a; color: #f5f5f5; border-radius: 10px;">
+  <h2 style="text-align: center;">BUILT Weekly Phase Check-In</h2>
+
+  <label>Which Phase Are You In?</label>
+  <select id="phase" style="width: 100%; padding: 10px; margin-bottom: 10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+    <option value="1">Phase 1: Foundations</option>
+    <option value="2">Phase 2: Muscle Gain</option>
+    <option value="3">Phase 3: Reset/Recomp</option>
+    <option value="4">Phase 4: Fat-loss</option>
+    <option value="5">Phase 5: Reset/Reverse</option>
+  </select>
+
+  <label>Starting Weight (lbs)</label>
+  <input id="startingWeight" type="number" placeholder="e.g. 180" style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <label>Current Weight (lbs)</label>
+  <input id="currentWeight" type="number" placeholder="e.g. 182" style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <label>Week Number In This Phase</label>
+  <input id="weekNumber" type="number" placeholder="e.g. 2" style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <label>Current Protein (g)</label>
+  <input id="protein" type="number" style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <label>Current Carbs (g)</label>
+  <input id="carbs" type="number" style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <label>Current Fats (g)</label>
+  <input id="fats" type="number" style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <label>How Was Your Training Performance?</label>
+  <input id="training" type="text" placeholder="e.g. Strength up, felt flat, etc." style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <label>How Was Your Recovery?</label>
+  <input id="recovery" type="text" placeholder="e.g. Rested, poor sleep, good pumps..." style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <label>Stress Level This Week (1–10)</label>
+  <input id="stress" type="number" min="1" max="10" style="width:100%; padding:10px; margin-bottom:10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px;">
+
+  <button onclick="evaluatePhase()" style="width:100%; padding:12px; font-size:16px; background-color:#333; color:white; border:none; border-radius:6px;">Check Progress</button>
+
+  <div id="result" style="margin-top: 30px; white-space: pre-wrap; background: #1b1b1b; padding: 15px; border-radius: 8px; border: 1px solid #333;"></div>
+</div>
+
+<script>
+function evaluatePhase() {
+  const phase = parseInt(document.getElementById("phase").value);
+  const start = parseFloat(document.getElementById("startingWeight").value);
+  const current = parseFloat(document.getElementById("currentWeight").value);
+  const week = parseInt(document.getElementById("weekNumber").value);
+  const protein = parseFloat(document.getElementById("protein").value);
+  const carbs = parseFloat(document.getElementById("carbs").value);
+  const fats = parseFloat(document.getElementById("fats").value);
+  const training = document.getElementById("training").value;
+  const recovery = document.getElementById("recovery").value;
+  const stress = parseInt(document.getElementById("stress").value);
+
+  const result = document.getElementById("result");
+
+  const weightChange = current - start;
+  const percentChange = (weightChange / start) * 100;
+  let message = `Phase ${phase} Check-In Summary:\n\nStarting Weight: ${start} lbs\nCurrent Weight: ${current} lbs\nChange: ${weightChange.toFixed(1)} lbs (${percentChange.toFixed(2)}%) over ${week} week(s)\n\nTraining: ${training}\nRecovery: ${recovery}\nStress Level: ${stress}/10\n\n`;
+
+  let target = "";
+  let adjust = false;
+  let newCarbs = carbs;
+  let newFats = fats;
+  let calShift = 0;
+
+  if (phase === 1) {
+    target = "Goal: Hold steady. You're finding true current intake.";
+  } else if (phase === 2) {
+    target = "Goal: Gain 0.5–1% per week.";
+    if (percentChange / week < 0.5) {
+      adjust = true;
+      calShift = 400;
+    }
+  } else if (phase === 3) {
+    target = "Goal: Lose 0–0.5% per week.";
+    if (percentChange / week > -0.5) {
+      adjust = true;
+      calShift = -200;
+    }
+  } else if (phase === 4) {
+    target = "Goal: Lose 1–1.5% per week.";
+    if (percentChange / week < -1) {
+      // good
+    } else {
+      adjust = true;
+      calShift = -400;
+    }
+  } else if (phase === 5) {
+    target = "Goal: Gain 0–0.5% per week.";
+    if (percentChange / week < 0.1) {
+      adjust = true;
+      calShift = 200;
+    }
+  }
+
+  message += `${target}\n`;
+
+  if (adjust) {
+    const carbAdj = (calShift * 0.75) / 4;
+    const fatAdj = (calShift * 0.25) / 9;
+    newCarbs += carbAdj;
+    newFats += fatAdj;
+    message += `\nRecommended Adjustment:\n→ Add/Remove ${Math.round(carbAdj)}g carbs\n→ Add/Remove ${Math.round(fatAdj)}g fats\n\n`;
+    message += `New Macro Targets:\n→ Protein: ${protein}g\n→ Carbs: ${Math.round(newCarbs)}g\n→ Fats: ${Math.round(newFats)}g`;
+  } else {
+    message += `\nNo macro changes needed this week. Stay the course.`;
+  }
+
+  result.innerText = message;
+}
+</script>
+</body>
+</html>
