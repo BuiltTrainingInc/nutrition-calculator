@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Peptide Dose Calculator</title>
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .calculator-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #2d2d2d;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    h3 {
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #ffffff;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #555555;
+      border-radius: 6px;
+      background-color: #404040;
+      color: #ffffff;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+    }
+
+    input::placeholder {
+      color: #888888;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    select option {
+      background-color: #404040;
+      color: #ffffff;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 25px;
+      border: none;
+      border-radius: 6px;
+      background-color: #0066cc;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0052a3;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .calculator-result {
+      margin-top: 30px;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #0066cc;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .calculator-result strong {
+      color: #ffffff;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .input-group input {
+      flex: 2;
+    }
+
+    .input-group select {
+      flex: 1;
+    }
+
+    .dose-input-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dose-inputs {
+      display: flex;
+      gap: 10px;
+    }
+
+    .dose-inputs input {
+      flex: 2;
+    }
+
+    .dose-inputs select {
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      .calculator-container {
+        padding: 20px;
+        margin: 10px;
+      }
+      
+      .dose-inputs {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .dose-inputs input,
+      .dose-inputs select {
+        flex: none;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="calculator-container">
+  <h3>Peptide Dose Calculator</h3>
+  
+  <div class="form-group">
+    <label for="desiredDose">Desired Amount per Injection</label>
+    <div class="dose-inputs">
+      <input type="number" id="desiredDose" placeholder="e.g. 200">
+      <select id="doseUnit">
+        <option value="mcg">mcg</option>
+        <option value="mg">mg</option>
+        <option value="iu">IU</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="powderConcentration">Concentration of Unmixed Powder (same unit as above)</label>
+    <input type="number" id="powderConcentration" placeholder="e.g. 5000">
+  </div>
+
+  <div class="form-group">
+    <label for="dilutionVolume">Sterile Solution Added (mL)</label>
+    <input type="number" id="dilutionVolume" placeholder="e.g. 2">
+  </div>
+
+  <button onclick="calculatePeptideDose()">Calculate</button>
+  <div class="calculator-result" id="peptideResult" style="display:none;"></div>
+</div>
+
+<script>
+  function calculatePeptideDose() {
+    const desiredDose = parseFloat(document.getElementById('desiredDose').value);
+    const doseUnit = document.getElementById('doseUnit').value;
+    const powderConcentration = parseFloat(document.getElementById('powderConcentration').value);
+    const dilutionVolume = parseFloat(document.getElementById('dilutionVolume').value);
+    
+    if (isNaN(desiredDose) || isNaN(powderConcentration) || isNaN(dilutionVolume) || powderConcentration === 0 || dilutionVolume === 0) {
+      alert("Please enter valid numbers in all fields.");
+      return;
+    }
+    
+    const concentrationPerML = powderConcentration / dilutionVolume;
+    const mlPerInjection = desiredDose / concentrationPerML;
+    const mlPerInjectionRounded = Math.ceil(mlPerInjection * 100) / 100; // round up to nearest 0.01 mL
+    const iuEquivalent = mlPerInjectionRounded * 100; // 1.0 mL = 100 IU on insulin syringe
+    
+    const resultDiv = document.getElementById('peptideResult');
+    resultDiv.innerHTML = `
+      <strong>Results:</strong><br>
+      New Concentration = ${concentrationPerML.toFixed(1)} ${doseUnit}/mL<br>
+      You will need to inject <strong>${mlPerInjectionRounded.toFixed(2)} mL</strong><br>
+      = <strong>${iuEquivalent.toFixed(0)} IU</strong> on a 100 IU insulin syringe
+    `;
+    resultDiv.style.display = 'block';
+  }
+</script>
+</body>
+</html>
