@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUILT Compound Health Checker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .compound-checker-container {
+            max-width: 700px;
+            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #f5f5f5;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+
+        .compound-checker-title {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .compound-checker-subtitle {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .compound-block {
+            margin-bottom: 15px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .toggle-btn {
+            width: 100%;
+            padding: 14px 16px;
+            text-align: left;
+            background-color: #3a3a3a;
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-btn:hover {
+            background-color: #4a4a4a;
+        }
+
+        .toggle-btn:focus {
+            outline: 2px solid #007bff;
+            outline-offset: -2px;
+        }
+
+        .toggle-btn::after {
+            content: '+';
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .toggle-btn.active::after {
+            transform: rotate(45deg);
+        }
+
+        .toggle-content {
+            display: none;
+            padding: 16px;
+            background-color: #333;
+            border-top: 1px solid #555;
+            font-size: 14px;
+        }
+
+        .toggle-content.active {
+            display: block;
+        }
+
+        .category-label {
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .section-header {
+            font-weight: bold;
+            color: #4db8ff;
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+
+        .marker-list, .supplement-list {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .marker-list li, .supplement-list li {
+            margin-bottom: 4px;
+            color: #e0e0e0;
+        }
+
+        @media screen and (max-width: 600px) {
+            .compound-checker-container {
+                padding: 15px;
+            }
+            
+            .toggle-btn {
+                font-size: 15px;
+                padding: 12px 14px;
+            }
+            
+            .toggle-content {
+                font-size: 13px;
+                padding: 14px;
+            }
+            
+            .compound-checker-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="compound-checker-container">
+        <h2 class="compound-checker-title">BUILT Compound Health Checker</h2>
+        <p class="compound-checker-subtitle">Select a compound to view health markers and supplement recommendations.</p>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-0')">
+                <span>Testosterone Enanthate / Cypionate / Propionate</span>
+            </button>
+            <div id="content-0" class="toggle-content">
+                <div class="category-label">Category: Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Total Testosterone</li>
+                    <li>Free Testosterone</li>
+                    <li>Estradiol</li>
+                    <li>LH/FSH</li>
+                    <li>Hematocrit</li>
+                    <li>HDL/LDL</li>
+                    <li>ALT/AST</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Omega-3s</li>
+                    <li>NAC</li>
+                    <li>TUDCA</li>
+                    <li>Curcumin</li>
+                    <li>Citrus Bergamot</li>
+                    <li>Vitamin D3 + K2</li>
+                    <li>Magnesium</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-1')">
+                <span>Sustanon 250</span>
+            </button>
+            <div id="content-1" class="toggle-content">
+                <div class="category-label">Category: Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Total Testosterone</li>
+                    <li>Free Testosterone</li>
+                    <li>Estradiol</li>
+                    <li>LH/FSH</li>
+                    <li>Hematocrit</li>
+                    <li>HDL/LDL</li>
+                    <li>ALT/AST</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Omega-3s</li>
+                    <li>NAC</li>
+                    <li>TUDCA</li>
+                    <li>Curcumin</li>
+                    <li>Citrus Bergamot</li>
+                    <li>Vitamin D3 + K2</li>
+                    <li>Magnesium</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-2')">
+                <span>Nandrolone Decanoate (Deca)</span>
+            </button>
+            <div id="content-2" class="toggle-content">
+                <div class="category-label">Category: Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Prolactin</li>
+                    <li>Estradiol</li>
+                    <li>HDL/LDL</li>
+                    <li>ALT/AST</li>
+                    <li>Hematocrit</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Cabergoline (if prolactin elevated)</li>
+                    <li>Omega-3s</li>
+                    <li>NAC</li>
+                    <li>TUDCA</li>
+                    <li>Vitamin B6</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-3')">
+                <span>Boldenone Undecylenate (Equipoise)</span>
+            </button>
+            <div id="content-3" class="toggle-content">
+                <div class="category-label">Category: Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Hematocrit</li>
+                    <li>RBC Count</li>
+                    <li>Hemoglobin</li>
+                    <li>Estradiol</li>
+                    <li>HDL/LDL</li>
+                    <li>ALT/AST</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Omega-3s</li>
+                    <li>NAC</li>
+                    <li>TUDCA</li>
+                    <li>Curcumin</li>
+                    <li>Grapefruit seed extract</li>
+                    <li>Vitamin D3 + K2</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-4')">
+                <span>Trenbolone Acetate / Enanthate</span>
+            </button>
+            <div id="content-4" class="toggle-content">
+                <div class="category-label">Category: Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>ALT/AST</li>
+                    <li>Creatinine, eGFR, BUN</li>
+                    <li>HDL</li>
+                    <li>Hematocrit</li>
+                    <li>CRP</li>
+                    <li>Prolactin</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>TUDCA</li>
+                    <li>Astragalus</li>
+                    <li>P5P</li>
+                    <li>Electrolytes</li>
+                    <li>Omega-3s</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-5')">
+                <span>Masteron Propionate / Enanthate</span>
+            </button>
+            <div id="content-5" class="toggle-content">
+                <div class="category-label">Category: Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Estradiol</li>
+                    <li>DHT</li>
+                    <li>HDL/LDL</li>
+                    <li>ALT/AST</li>
+                    <li>Hematocrit</li>
+                    <li>SHBG</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Omega-3s</li>
+                    <li>NAC</li>
+                    <li>TUDCA</li>
+                    <li>Saw Palmetto</li>
+                    <li>Citrus Bergamot</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-6')">
+                <span>Primobolan</span>
+            </button>
+            <div id="content-6" class="toggle-content">
+                <div class="category-label">Category: Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>HDL/LDL</li>
+                    <li>ALT/AST</li>
+                    <li>Hematocrit</li>
+                    <li>Total Testosterone</li>
+                    <li>SHBG</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Omega-3s</li>
+                    <li>NAC</li>
+                    <li>TUDCA</li>
+                    <li>Citrus Bergamot</li>
+                    <li>Vitamin D3 + K2</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-7')">
+                <span>Anavar (Oxandrolone)</span>
+            </button>
+            <div id="content-7" class="toggle-content">
+                <div class="category-label">Category: Oral Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>ALT/AST</li>
+                    <li>GGT</li>
+                    <li>HDL/LDL</li>
+                    <li>Total Testosterone</li>
+                    <li>SHBG</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>TUDCA</li>
+                    <li>NAC</li>
+                    <li>Omega-3s</li>
+                    <li>CoQ10</li>
+                    <li>Citrus Bergamot</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-8')">
+                <span>Winstrol (Stanozolol)</span>
+            </button>
+            <div id="content-8" class="toggle-content">
+                <div class="category-label">Category: Oral Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Liver enzymes</li>
+                    <li>Lipids</li>
+                    <li>SHBG</li>
+                    <li>Hematocrit</li>
+                    <li>CRP</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>TUDCA</li>
+                    <li>Omega-3s</li>
+                    <li>Curcumin</li>
+                    <li>NAC</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-9')">
+                <span>Dianabol (Methandrostenolone)</span>
+            </button>
+            <div id="content-9" class="toggle-content">
+                <div class="category-label">Category: Oral Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>ALT/AST</li>
+                    <li>GGT</li>
+                    <li>Estradiol</li>
+                    <li>HDL/LDL</li>
+                    <li>Hematocrit</li>
+                    <li>Blood Pressure</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>TUDCA</li>
+                    <li>NAC</li>
+                    <li>Omega-3s</li>
+                    <li>Curcumin</li>
+                    <li>Hawthorn Berry</li>
+                    <li>Celery Seed Extract</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-10')">
+                <span>Anadrol (Oxymetholone)</span>
+            </button>
+            <div id="content-10" class="toggle-content">
+                <div class="category-label">Category: Oral Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>ALT/AST</li>
+                    <li>GGT</li>
+                    <li>Bilirubin</li>
+                    <li>Hematocrit</li>
+                    <li>HDL/LDL</li>
+                    <li>Blood Pressure</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>TUDCA</li>
+                    <li>NAC</li>
+                    <li>Omega-3s</li>
+                    <li>Milk Thistle</li>
+                    <li>Curcumin</li>
+                    <li>Hawthorn Berry</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-11')">
+                <span>Turinabol</span>
+            </button>
+            <div id="content-11" class="toggle-content">
+                <div class="category-label">Category: Oral Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>ALT/AST</li>
+                    <li>GGT</li>
+                    <li>HDL/LDL</li>
+                    <li>Hematocrit</li>
+                    <li>SHBG</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>TUDCA</li>
+                    <li>NAC</li>
+                    <li>Omega-3s</li>
+                    <li>Curcumin</li>
+                    <li>Citrus Bergamot</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-12')">
+                <span>Superdrol</span>
+            </button>
+            <div id="content-12" class="toggle-content">
+                <div class="category-label">Category: Oral Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>ALT/AST</li>
+                    <li>GGT</li>
+                    <li>Bilirubin</li>
+                    <li>HDL/LDL</li>
+                    <li>Hematocrit</li>
+                    <li>Blood Pressure</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>TUDCA</li>
+                    <li>NAC</li>
+                    <li>Omega-3s</li>
+                    <li>Milk Thistle</li>
+                    <li>Curcumin</li>
+                    <li>Hawthorn Berry</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-13')">
+                <span>Halotestin</span>
+            </button>
+            <div id="content-13" class="toggle-content">
+                <div class="category-label">Category: Oral Anabolic Steroid (AAS)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>ALT/AST</li>
+                    <li>GGT</li>
+                    <li>Bilirubin</li>
+                    <li>HDL/LDL</li>
+                    <li>Hematocrit</li>
+                    <li>Blood Pressure</li>
+                    <li>Aggression markers</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>TUDCA</li>
+                    <li>NAC</li>
+                    <li>Omega-3s</li>
+                    <li>Milk Thistle</li>
+                    <li>Curcumin</li>
+                    <li>Ashwagandha</li>
+                    <li>Magnesium</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-14')">
+                <span>Growth Hormone (GH)</span>
+            </button>
+            <div id="content-14" class="toggle-content">
+                <div class="category-label">Category: Peptide Hormone</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>IGF-1</li>
+                    <li>Fasting Glucose</li>
+                    <li>HbA1c</li>
+                    <li>Lipids</li>
+                    <li>TSH</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Magnesium</li>
+                    <li>Alpha-Lipoic Acid</li>
+                    <li>Inositol</li>
+                    <li>Chromium</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-15')">
+                <span>Insulin (Humalog / Lantus)</span>
+            </button>
+            <div id="content-15" class="toggle-content">
+                <div class="category-label">Category: Hormone / Glucose Regulator</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Fasting Glucose</li>
+                    <li>Insulin</li>
+                    <li>HbA1c</li>
+                    <li>Electrolytes</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Magnesium</li>
+                    <li>Potassium</li>
+                    <li>Electrolyte support</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-16')">
+                <span>IGF-1 LR3</span>
+            </button>
+            <div id="content-16" class="toggle-content">
+                <div class="category-label">Category: Peptide / Growth Factor</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>IGF-1</li>
+                    <li>Fasting Glucose</li>
+                    <li>Electrolytes</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Inositol</li>
+                    <li>Magnesium</li>
+                    <li>Electrolytes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-17')">
+                <span>MK-677</span>
+            </button>
+            <div id="content-17" class="toggle-content">
+                <div class="category-label">Category: GH Secretagogue (SARM/Peptide hybrid)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Fasting Glucose</li>
+                    <li>Insulin</li>
+                    <li>IGF-1</li>
+                    <li>Prolactin</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Ashwagandha</li>
+                    <li>Chromium</li>
+                    <li>Magnesium</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-18')">
+                <span>RAD-140</span>
+            </button>
+            <div id="content-18" class="toggle-content">
+                <div class="category-label">Category: SARM</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>ALT/AST</li>
+                    <li>Total Testosterone</li>
+                    <li>Lipids</li>
+                    <li>SHBG</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>NAC</li>
+                    <li>Omega-3s</li>
+                    <li>Liver support</li>
+                    <li>AI (if estrogen rises)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-19')">
+                <span>Yohimbine HCL</span>
+            </button>
+            <div id="content-19" class="toggle-content">
+                <div class="category-label">Category: Stimulant / Fat Burner</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Blood Pressure</li>
+                    <li>Heart Rate</li>
+                    <li>Cortisol</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Magnesium</li>
+                    <li>Ashwagandha</li>
+                    <li>L-Theanine (to buffer stress)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-20')">
+                <span>Clenbuterol</span>
+            </button>
+            <div id="content-20" class="toggle-content">
+                <div class="category-label">Category: Beta-2 Agonist / Fat Burner</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Heart Rate</li>
+                    <li>ECG</li>
+                    <li>Potassium</li>
+                    <li>TSH</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Taurine</li>
+                    <li>Potassium</li>
+                    <li>Electrolytes</li>
+                    <li>Magnesium</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-21')">
+                <span>Arimidex (Anastrozole)</span>
+            </button>
+            <div id="content-21" class="toggle-content">
+                <div class="category-label">Category: Aromatase Inhibitor (AI)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Estradiol</li>
+                    <li>Lipids</li>
+                    <li>Liver Enzymes</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Omega-3s</li>
+                    <li>Vitamin D3 + K2</li>
+                    <li>Liver support</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-22')">
+                <span>Aromasin (Exemestane)</span>
+            </button>
+            <div id="content-22" class="toggle-content">
+                <div class="category-label">Category: Aromatase Inhibitor</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Estradiol (E2, Sensitive)</li>
+                    <li>Cholesterol (HDL/LDL)</li>
+                    <li>Liver Enzymes</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Omega-3s</li>
+                    <li>Vitamin D3 + K2</li>
+                    <li>Curcumin</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-23')">
+                <span>Tamoxifen / Nolvadex</span>
+            </button>
+            <div id="content-23" class="toggle-content">
+                <div class="category-label">Category: SERM</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Liver enzymes</li>
+                    <li>Estradiol</li>
+                    <li>Lipids</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>NAC</li>
+                    <li>Omega-3s</li>
+                    <li>Fiber (for estrogen clearance)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-24')">
+                <span>Metformin</span>
+            </button>
+            <div id="content-24" class="toggle-content">
+                <div class="category-label">Category: Glucose Management</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Fasting Glucose</li>
+                    <li>HbA1C</li>
+                    <li>Insulin</li>
+                    <li>Vitamin B12</li>
+                    <li>eGFR</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Vitamin B12</li>
+                    <li>Berberine</li>
+                    <li>Inositol</li>
+                    <li>ALA (Alpha Lipoic Acid)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-25')">
+                <span>Sermorelin / Ipamorelin / CJC-1295</span>
+            </button>
+            <div id="content-25" class="toggle-content">
+                <div class="category-label">Category: GH Secretagogue (Pulsatile)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>IGF-1</li>
+                    <li>Fasting Glucose</li>
+                    <li>HbA1c</li>
+                    <li>Cortisol</li>
+                    <li>Prolactin</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Magnesium</li>
+                    <li>Zinc</li>
+                    <li>Alpha-Lipoic Acid</li>
+                    <li>Inositol</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-26')">
+                <span>Hexarelin</span>
+            </button>
+            <div id="content-26" class="toggle-content">
+                <div class="category-label">Category: GH Secretagogue (Strong Pulse)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>IGF-1</li>
+                    <li>Fasting Glucose</li>
+                    <li>Cortisol</li>
+                    <li>Prolactin</li>
+                    <li>ACTH</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Ashwagandha</li>
+                    <li>Magnesium</li>
+                    <li>P5P (B6)</li>
+                    <li>Inositol</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-27')">
+                <span>IGF-1 DES</span>
+            </button>
+            <div id="content-27" class="toggle-content">
+                <div class="category-label">Category: Peptide / Growth Factor (Short-Acting)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>IGF-1</li>
+                    <li>Fasting Glucose</li>
+                    <li>Insulin</li>
+                    <li>Electrolytes</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Chromium</li>
+                    <li>Magnesium</li>
+                    <li>Electrolytes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-28')">
+                <span>PEG-MGF</span>
+            </button>
+            <div id="content-28" class="toggle-content">
+                <div class="category-label">Category: Peptide / Muscle Growth Factor</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>IGF-1</li>
+                    <li>CK (Creatine Kinase)</li>
+                    <li>LDH</li>
+                    <li>Fasting Glucose</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Magnesium</li>
+                    <li>Vitamin D3</li>
+                    <li>Protein support</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-29')">
+                <span>AOD-9604</span>
+            </button>
+            <div id="content-29" class="toggle-content">
+                <div class="category-label">Category: GH Fragment / Fat Loss</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Fasting Glucose</li>
+                    <li>Lipids</li>
+                    <li>Thyroid Panel (TSH, T3, T4)</li>
+                    <li>Leptin</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Berberine</li>
+                    <li>Green Tea Extract</li>
+                    <li>L-Carnitine</li>
+                    <li>Omega-3s</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-30')">
+                <span>MOTS-c</span>
+            </button>
+            <div id="content-30" class="toggle-content">
+                <div class="category-label">Category: Mitochondrial Peptide</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Fasting Glucose</li>
+                    <li>HbA1c</li>
+                    <li>Lipids</li>
+                    <li>Lactate</li>
+                    <li>CRP</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>CoQ10</li>
+                    <li>PQQ</li>
+                    <li>NAD+ precursors</li>
+                    <li>Alpha-Lipoic Acid</li>
+                    <li>Berberine</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-31')">
+                <span>5-Amino-1MQ</span>
+            </button>
+            <div id="content-31" class="toggle-content">
+                <div class="category-label">Category: NNMT Inhibitor / Metabolic</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Fasting Glucose</li>
+                    <li>Insulin</li>
+                    <li>Lipids</li>
+                    <li>NAD+ levels</li>
+                    <li>Homocysteine</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>NAD+ precursors</li>
+                    <li>Methyl donors (TMG, SAMe)</li>
+                    <li>B-Complex</li>
+                    <li>Berberine</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-32')">
+                <span>Retatrutide</span>
+            </button>
+            <div id="content-32" class="toggle-content">
+                <div class="category-label">Category: Triple Agonist (GLP-1/GIP/Glucagon)</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Fasting Glucose</li>
+                    <li>HbA1c</li>
+                    <li>Lipids</li>
+                    <li>Pancreatic enzymes</li>
+                    <li>Gallbladder function</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Digestive enzymes</li>
+                    <li>Probiotics</li>
+                    <li>Electrolytes</li>
+                    <li>B-Complex</li>
+                    <li>Omega-3s</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-33')">
+                <span>BPC-157</span>
+            </button>
+            <div id="content-33" class="toggle-content">
+                <div class="category-label">Category: Healing Peptide</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>CRP</li>
+                    <li>ESR</li>
+                    <li>Liver enzymes</li>
+                    <li>GI markers (if used for gut)</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Collagen</li>
+                    <li>Vitamin C</li>
+                    <li>Zinc</li>
+                    <li>Curcumin</li>
+                    <li>Omega-3s</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-34')">
+                <span>TB-500 (Thymosin Beta-4)</span>
+            </button>
+            <div id="content-34" class="toggle-content">
+                <div class="category-label">Category: Healing Peptide / Recovery</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>CRP</li>
+                    <li>ESR</li>
+                    <li>CK (Creatine Kinase)</li>
+                    <li>LDH</li>
+                    <li>Complete Blood Count</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Collagen</li>
+                    <li>Vitamin C</li>
+                    <li>Zinc</li>
+                    <li>Magnesium</li>
+                    <li>Curcumin</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-35')">
+                <span>GHK-Cu</span>
+            </button>
+            <div id="content-35" class="toggle-content">
+                <div class="category-label">Category: Copper Peptide / Skin & Hair</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Copper levels</li>
+                    <li>Zinc levels</li>
+                    <li>Ceruloplasmin</li>
+                    <li>Liver enzymes</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Zinc (to balance copper)</li>
+                    <li>Vitamin C</li>
+                    <li>Collagen</li>
+                    <li>Biotin</li>
+                    <li>Silica</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-36')">
+                <span>KPV</span>
+            </button>
+            <div id="content-36" class="toggle-content">
+                <div class="category-label">Category: Anti-Inflammatory Peptide</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>CRP</li>
+                    <li>ESR</li>
+                    <li>IL-6</li>
+                    <li>TNF-alpha</li>
+                    <li>GI inflammation markers</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Curcumin</li>
+                    <li>Omega-3s</li>
+                    <li>Quercetin</li>
+                    <li>Probiotics</li>
+                    <li>Zinc</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-37')">
+                <span>GLP-1 Agonists (Semaglutide / Tirzepatide / Liraglutide)</span>
+            </button>
+            <div id="content-37" class="toggle-content">
+                <div class="category-label">Category: GLP-1 Receptor Agonist</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Fasting Glucose</li>
+                    <li>HbA1c</li>
+                    <li>Pancreatic enzymes</li>
+                    <li>Gallbladder function</li>
+                    <li>Kidney function</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Digestive enzymes</li>
+                    <li>Probiotics</li>
+                    <li>B-Complex</li>
+                    <li>Electrolytes</li>
+                    <li>Ginger (nausea)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-38')">
+                <span>Tesofensine</span>
+            </button>
+            <div id="content-38" class="toggle-content">
+                <div class="category-label">Category: Neuro-Fat Loss / Stimulant</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Blood Pressure</li>
+                    <li>Heart Rate</li>
+                    <li>Thyroid Panel</li>
+                    <li>Cortisol</li>
+                    <li>Neurotransmitter markers</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Magnesium</li>
+                    <li>Ashwagandha</li>
+                    <li>L-Theanine</li>
+                    <li>Taurine</li>
+                    <li>CoQ10</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="compound-block">
+            <button class="toggle-btn" onclick="toggleContent(this, 'content-39')">
+                <span>Melanotan II</span>
+            </button>
+            <div id="content-39" class="toggle-content">
+                <div class="category-label">Category: Melanocortin Receptor Agonist</div>
+                <div class="section-header">🔬 Bloodwork Markers:</div>
+                <ul class="marker-list">
+                    <li>Liver enzymes</li>
+                    <li>Kidney function</li>
+                    <li>Blood pressure</li>
+                    <li>Mole/skin monitoring</li>
+                </ul>
+                <div class="section-header">💊 Supplement Recommendations:</div>
+                <ul class="supplement-list">
+                    <li>Antioxidants (Vitamin C, E)</li>
+                    <li>Astaxanthin</li>
+                    <li>Beta-carotene</li>
+                    <li>Lycopene</li>
+                    <li>Sunscreen support</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleContent(button, contentId) {
+            const content = document.getElementById(contentId);
+            const isActive = content.classList.contains('active');
+            
+            // Close all other open content
+            const allContents = document.querySelectorAll('.toggle-content');
+            const allButtons = document.querySelectorAll('.toggle-btn');
+            
+            allContents.forEach(c => c.classList.remove('active'));
+            allButtons.forEach(b => b.classList.remove('active'));
+            
+            // Toggle current content
+            if (!isActive) {
+                content.classList.add('active');
+                button.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
