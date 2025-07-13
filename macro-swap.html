@@ -4,14 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BUILT Macro Swap Tool</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            background: #0a0a0a;
-            font-family: Arial, sans-serif;
-        }
-    </style>
 </head>
 <body>
 <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
@@ -45,51 +37,19 @@
     </table>
   </div>
 
-  <div id="swapSuggestions" style="margin-top: 30px;">
-    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Available Foods</h3>
+  <div style="margin-top: 30px;">
+    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">How to Use</h3>
     <ul style="line-height: 1.8; font-size: 15px;">
-      <li><strong>Proteins:</strong> chicken breast, ground turkey, white fish, tofu, greek yogurt, cottage cheese</li>
-      <li><strong>Carbs:</strong> rice, quinoa, sweet potato, oats</li>
-      <li><strong>Fats:</strong> peanut butter, almond butter</li>
+      <li>Enter any food with quantity (e.g., "200g chicken breast", "1 cup rice")</li>
+      <li>Enter the replacement food (e.g., "salmon", "quinoa")</li>
+      <li>Get the equivalent quantity that matches your macros</li>
+      <li>Works with any food - powered by AI!</li>
     </ul>
   </div>
 </div>
 
 <script>
-const foodDatabase = {
-  'chicken breast': { protein: 23, carbs: 0, fat: 3.6, calories: 165 },
-  'ground turkey': { protein: 20, carbs: 0, fat: 8, calories: 149 },
-  'white fish': { protein: 20, carbs: 0, fat: 1, calories: 85 },
-  'tofu': { protein: 8, carbs: 2, fat: 4, calories: 70 },
-  'rice': { protein: 2.7, carbs: 28, fat: 0.3, calories: 130 },
-  'quinoa': { protein: 4.4, carbs: 22, fat: 1.9, calories: 120 },
-  'sweet potato': { protein: 2, carbs: 20, fat: 0.1, calories: 86 },
-  'oats': { protein: 17, carbs: 66, fat: 7, calories: 389 },
-  'greek yogurt': { protein: 10, carbs: 4, fat: 0, calories: 59 },
-  'cottage cheese': { protein: 11, carbs: 3.4, fat: 4.3, calories: 98 },
-  'peanut butter': { protein: 25, carbs: 20, fat: 50, calories: 588 },
-  'almond butter': { protein: 21, carbs: 20, fat: 55, calories: 614 }
-};
-
-function parseFood(foodText) {
-  const text = foodText.toLowerCase();
-  
-  let quantity = 100;
-  const numberMatch = text.match(/(\d+(?:\.\d+)?)/);
-  if (numberMatch) {
-    quantity = parseFloat(numberMatch[1]);
-  }
-  
-  for (let food in foodDatabase) {
-    if (text.includes(food)) {
-      return { food, quantity, data: foodDatabase[food] };
-    }
-  }
-  
-  return null;
-}
-
-function swapMacros() {
+async function swapMacros() {
   const originalFood = document.getElementById("originalFood").value;
   const replacementFood = document.getElementById("replacementFood").value;
 
@@ -98,63 +58,57 @@ function swapMacros() {
     return;
   }
 
-  const original = parseFood(originalFood);
-  const replacement = parseFood(replacementFood);
-  
-  if (!original) {
-    document.getElementById("replacementQty").innerText = `"${originalFood}" not found. Try: chicken breast, rice, oats, etc.`;
-    return;
+  document.getElementById("replacementQty").innerText = "Calculating equivalent...";
+  document.getElementById("macroTable").style.display = "none";
+
+  try {
+    const res = await fetch("/api/macro-swap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        originalFood: originalFood,
+        replacementFood: replacementFood
+      })
+    });
+
+    const data = await res.json();
+    
+    if (data.error) {
+      document.getElementById("replacementQty").innerText = "Error calculating swap. Please try again.";
+      return;
+    }
+
+    const reply = data.choices?.[0]?.message?.content || "Something went wrong.";
+
+    // Extract replacement quantity
+    const qtyMatch = reply.match(/Replacement Quantity: ([^\n]+)/);
+    if (qtyMatch) {
+      document.getElementById("replacementQty").innerText = `Replacement Quantity: ${qtyMatch[1]}`;
+    } else {
+      document.getElementById("replacementQty").innerText = "Replacement Quantity: Not found.";
+    }
+
+    // Extract and format table
+    const tableMatch = reply.match(/\| Food \|(.|\n)*?\| Replacement \|(.|\n)*?\|/);
+    if (tableMatch) {
+      const lines = tableMatch[0].trim().split("\n");
+      const dataRows = lines.slice(2); // Skip header and separator
+      
+      const tableHTML = dataRows.map(row => {
+        const cols = row.split("|").slice(1, -1); // Remove first/last empty elements
+        return `<tr>${cols.map(cell => `<td style='padding: 10px; border: 1px solid #333; font-weight: 500;'>${cell.trim()}</td>`).join("")}</tr>`;
+      }).join("");
+      
+      document.getElementById("macroTableBody").innerHTML = tableHTML;
+      document.getElementById("macroTable").style.display = "block";
+    }
+    
+  } catch (error) {
+    console.error('Error:', error);
+    document.getElementById("replacementQty").innerText = "Error connecting to server. Please try again.";
   }
-  
-  if (!replacement) {
-    document.getElementById("replacementQty").innerText = `"${replacementFood}" not found. Try: ground turkey, quinoa, greek yogurt, etc.`;
-    return;
-  }
-  
-  // Calculate original macros
-  const originalMacros = {
-    protein: (original.data.protein * original.quantity) / 100,
-    carbs: (original.data.carbs * original.quantity) / 100,
-    fat: (original.data.fat * original.quantity) / 100,
-    calories: (original.data.calories * original.quantity) / 100
-  };
-  
-  // Calculate equivalent quantity based on protein
-  const equivalentQty = (originalMacros.protein / replacement.data.protein) * 100;
-  
-  // Calculate replacement macros
-  const replacementMacros = {
-    protein: (replacement.data.protein * equivalentQty) / 100,
-    carbs: (replacement.data.carbs * equivalentQty) / 100,
-    fat: (replacement.data.fat * equivalentQty) / 100,
-    calories: (replacement.data.calories * equivalentQty) / 100
-  };
-  
-  document.getElementById("replacementQty").innerText = 
-    `Replacement: ${equivalentQty.toFixed(0)}g of ${replacement.food}`;
-  
-  // Create comparison table
-  const tableHTML = `
-    <tr>
-      <td style='padding: 10px; border: 1px solid #333;'>${original.food}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${original.quantity}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.protein.toFixed(1)}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.carbs.toFixed(1)}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.fat.toFixed(1)}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.calories.toFixed(0)}</td>
-    </tr>
-    <tr>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacement.food}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${equivalentQty.toFixed(0)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.protein.toFixed(1)}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.carbs.toFixed(1)}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.fat.toFixed(1)}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.calories.toFixed(0)}</td>
-    </tr>
-  `;
-  
-  document.getElementById("macroTableBody").innerHTML = tableHTML;
-  document.getElementById("macroTable").style.display = "block";
 }
 </script>
 </body>
