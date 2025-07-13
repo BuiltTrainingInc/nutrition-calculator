@@ -1,53 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BUILT Macro Swap Tool</title>
-</head>
-<body>
-<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
-  <h2 style="text-align: center; font-size: 22px;">BUILT Macro Swap Tool</h2>
-  <p style="text-align: center; margin-bottom: 30px;">Swap any food for a similar macro equivalent</p>
-
-  <label>Original Food</label>
-  <input id="originalFood" type="text" placeholder="e.g. 100g chicken breast" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box;">
-
-  <label>Replacement Food</label>
-  <input id="replacementFood" type="text" placeholder="e.g. ground turkey" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box;">
-
-  <button onclick="swapMacros()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px;">Get Equivalent Quantity</button>
-
-  <div id="replacementQty" style="margin-top: 30px; font-weight: bold; color: #f0f0f0;"></div>
-
-  <div id="macroTable" style="margin-top: 20px; display: none;">
-    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Macro Comparison</h3>
-    <table style="width: 100%; border-collapse: collapse; background: #181818;">
-      <thead>
-        <tr style="background-color: #222;">
-          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Food</th>
-          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Quantity</th>
-          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Protein (g)</th>
-          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Carbs (g)</th>
-          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Fat (g)</th>
-          <th style="padding: 12px; border: 1px solid #333; text-align: left; font-weight: bold; color: #f0f0f0;">Calories</th>
-        </tr>
-      </thead>
-      <tbody id="macroTableBody"></tbody>
-    </table>
-  </div>
-
-  <div style="margin-top: 30px;">
-    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">How to Use</h3>
-    <ul style="line-height: 1.8; font-size: 15px;">
-      <li>Enter any food with quantity (e.g., "200g chicken breast", "1 cup rice")</li>
-      <li>Enter the replacement food (e.g., "salmon", "quinoa")</li>
-      <li>Get the equivalent quantity that matches your macros</li>
-      <li>Works with any food - powered by AI!</li>
-    </ul>
-  </div>
-</div>
-
 <script>
 async function swapMacros() {
   const originalFood = document.getElementById("originalFood").value;
@@ -62,7 +12,7 @@ async function swapMacros() {
   document.getElementById("macroTable").style.display = "none";
 
   try {
-    const res = await fetch("/api/macro-swap", {
+    const res = await fetch("/api/api/macro-swap", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -111,5 +61,3 @@ async function swapMacros() {
   }
 }
 </script>
-</body>
-</html>
