@@ -8,15 +8,27 @@
 <body>
 <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
   <h2 style="text-align: center; font-size: 22px;">BUILT Macro Swap Tool</h2>
-  <p style="text-align: center; margin-bottom: 30px;">Swap any food for a similar macro equivalent</p>
+  <p style="text-align: center; margin-bottom: 20px;">Swap any food for a similar macro equivalent</p>
 
-  <label>Original Food</label>
-  <input id="originalFood" type="text" placeholder="e.g. 100g chicken breast" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box;">
+  <!-- Instructions Box -->
+  <div style="background: #1a4a6b; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #4da6d9;">
+    <h3 style="margin: 0 0 10px 0; color: #4da6d9; font-size: 16px;">⚠️ For Accurate Calculations, Be Specific:</h3>
+    <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+      <li><strong>Include weight/quantity:</strong> "100g chicken breast" not just "chicken"</li>
+      <li><strong>Specify cooking method:</strong> "100g cooked rice" vs "100g dry rice"</li>
+      <li><strong>Be precise with pasta:</strong> "100g dry weight pasta" vs "100g cooked pasta"</li>
+      <li><strong>Include preparation:</strong> "1 large baked sweet potato" vs "sweet potato"</li>
+      <li><strong>Specify cuts:</strong> "100g lean ground beef (93/7)" vs "ground beef"</li>
+    </ul>
+  </div>
 
-  <label>Replacement Food</label>
-  <input id="replacementFood" type="text" placeholder="e.g. ground turkey" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box;">
+  <label><strong>Original Food</strong></label>
+  <input id="originalFood" type="text" placeholder="e.g. 100g cooked chicken breast, 150g dry weight pasta" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box; border-radius: 4px;">
 
-  <button onclick="swapMacros()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px;">Get Equivalent Quantity</button>
+  <label><strong>Replacement Food</strong></label>
+  <input id="replacementFood" type="text" placeholder="e.g. salmon fillet, quinoa" style="width: 100%; padding: 10px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box; border-radius: 4px;">
+
+  <button onclick="swapMacros()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px; cursor: pointer;">Get Equivalent Quantity</button>
 
   <div id="replacementQty" style="margin-top: 30px; font-weight: bold; color: #f0f0f0;"></div>
 
@@ -38,13 +50,31 @@
   </div>
 
   <div style="margin-top: 30px;">
-    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">How to Use</h3>
-    <ul style="line-height: 1.8; font-size: 15px;">
-      <li>Enter any food with quantity (e.g., "200g chicken breast", "1 cup rice")</li>
-      <li>Enter the replacement food (e.g., "salmon", "quinoa")</li>
-      <li>Get the equivalent quantity that matches your macros</li>
-      <li>Works with any food - powered by AI!</li>
-    </ul>
+    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Example Inputs for Best Results</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; font-size: 14px;">
+      <div>
+        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">✅ Good Examples:</h4>
+        <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
+          <li>100g cooked chicken breast</li>
+          <li>150g dry weight brown rice</li>
+          <li>1 medium baked sweet potato</li>
+          <li>100g lean ground turkey (93/7)</li>
+          <li>200g cooked quinoa</li>
+          <li>30g raw almonds</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: #e74c3c; margin: 0 0 8px 0;">❌ Avoid These:</h4>
+        <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
+          <li>chicken (no weight/prep)</li>
+          <li>rice (cooked vs dry?)</li>
+          <li>ground beef (fat %?)</li>
+          <li>pasta (dry vs cooked?)</li>
+          <li>fish (what type/size?)</li>
+          <li>nuts (roasted vs raw?)</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -54,11 +84,11 @@ async function swapMacros() {
   const replacementFood = document.getElementById("replacementFood").value;
 
   if (!originalFood || !replacementFood) {
-    document.getElementById("replacementQty").innerText = "Please fill in both foods.";
+    document.getElementById("replacementQty").innerText = "Please fill in both foods with specific details (weight, cooking method, etc.)";
     return;
   }
 
-  document.getElementById("replacementQty").innerText = "Calculating equivalent...";
+  document.getElementById("replacementQty").innerText = "Calculating equivalent... (More specific details = better accuracy)";
   document.getElementById("macroTable").style.display = "none";
 
   try {
@@ -76,7 +106,7 @@ async function swapMacros() {
     const data = await res.json();
     
     if (data.error) {
-      document.getElementById("replacementQty").innerText = "Error calculating swap. Please try again.";
+      document.getElementById("replacementQty").innerText = "Error calculating swap. Try being more specific with quantities and cooking methods.";
       return;
     }
 
@@ -86,7 +116,7 @@ async function swapMacros() {
     if (qtyMatch) {
       document.getElementById("replacementQty").innerText = `Replacement Quantity: ${qtyMatch[1]}`;
     } else {
-      document.getElementById("replacementQty").innerText = "Replacement Quantity: Not found.";
+      document.getElementById("replacementQty").innerText = "Replacement Quantity: Not found. Try being more specific with your food descriptions.";
     }
 
     const tableMatch = reply.match(/\| Food \|(.|\n)*?\| Replacement \|(.|\n)*?\|/);
@@ -105,7 +135,7 @@ async function swapMacros() {
     
   } catch (error) {
     console.error('Error:', error);
-    document.getElementById("replacementQty").innerText = "Error connecting to server. Please try again.";
+    document.getElementById("replacementQty").innerText = "Error connecting to server. Please try again with specific food details.";
   }
 }
 </script>
