@@ -4,37 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BUILT Macro Swap Tool</title>
+    <style>
+        .food-search-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .food-input {
+            width: 100%;
+            padding: 10px;
+            background: #1e1e1e;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        
+        .food-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .food-option {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            font-size: 13px;
+        }
+        
+        .food-option:hover {
+            background: #3a3a3a;
+        }
+        
+        .food-option:last-child {
+            border-bottom: none;
+        }
+        
+        .food-name {
+            font-weight: bold;
+            color: #f0f0f0;
+        }
+        
+        .food-macros {
+            font-size: 11px;
+            color: #ccc;
+            margin-top: 2px;
+        }
+        
+        .quantity-input {
+            width: 80px;
+            padding: 8px;
+            background: #1e1e1e;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-right: 8px;
+            text-align: center;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .input-row label {
+            min-width: 60px;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
 <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
   <h2 style="text-align: center; font-size: 22px;">BUILT Macro Swap Tool</h2>
   <p style="text-align: center; margin-bottom: 20px;">Swap any food for a similar macro equivalent</p>
 
-  <!-- Instructions Box -->
-  <div style="background: #1a4a6b; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #4da6d9;">
-    <h3 style="margin: 0 0 10px 0; color: #4da6d9; font-size: 16px;">⚠️ For Accurate Calculations, Be Specific:</h3>
-    <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
-      <li><strong>Include weight/quantity:</strong> "100g chicken breast" not just "chicken"</li>
-      <li><strong>Specify cooking method:</strong> "100g cooked rice" vs "100g dry rice"</li>
-      <li><strong>Be precise with pasta:</strong> "100g dry weight pasta" vs "100g cooked pasta"</li>
-      <li><strong>Include preparation:</strong> "1 large baked sweet potato" vs "sweet potato"</li>
-      <li><strong>Specify cuts:</strong> "100g lean ground beef (93/7)" vs "ground beef"</li>
-    </ul>
-  </div>
-
-  <!-- Data Source Badge -->
+  <!-- USDA Badge -->
   <div style="background: #0f3460; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; border: 1px solid #4da6d9;">
-    <div style="font-size: 14px; color: #4da6d9; font-weight: bold;">🏛️ USDA FoodData Central + 🤖 AI Powered</div>
-    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">Uses official USDA nutrition database with AI fallback for maximum accuracy</div>
+    <div style="font-size: 14px; color: #4da6d9; font-weight: bold;">🏛️ USDA FoodData Central Database</div>
+    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">Search from 300,000+ official nutrition entries</div>
   </div>
 
+  <!-- Original Food Selection -->
+  <div class="input-row">
+    <label><strong>Quantity:</strong></label>
+    <input type="number" id="originalQty" class="quantity-input" value="100" min="1">
+    <span style="margin-right: 10px;">grams of</span>
+  </div>
+  
   <label><strong>Original Food</strong></label>
-  <input id="originalFood" type="text" placeholder="e.g. 100g cooked chicken breast, 150g dry weight pasta" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box; border-radius: 4px;">
+  <div class="food-search-container">
+    <input type="text" id="originalFoodInput" class="food-input" placeholder="Start typing food name... (e.g. chicken breast, brown rice)" oninput="searchFood('original')" onfocus="searchFood('original')">
+    <div id="originalDropdown" class="food-dropdown"></div>
+  </div>
 
+  <!-- Replacement Food Selection -->
   <label><strong>Replacement Food</strong></label>
-  <input id="replacementFood" type="text" placeholder="e.g. salmon fillet, quinoa" style="width: 100%; padding: 10px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box; border-radius: 4px;">
+  <div class="food-search-container">
+    <input type="text" id="replacementFoodInput" class="food-input" placeholder="Start typing replacement food... (e.g. salmon, quinoa)" oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
+    <div id="replacementDropdown" class="food-dropdown"></div>
+  </div>
 
-  <button onclick="swapMacros()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px; cursor: pointer;">Get Equivalent Quantity</button>
+  <button onclick="swapMacros()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px;">Calculate Macro Swap</button>
 
   <div id="replacementQty" style="margin-top: 30px; font-weight: bold; color: #f0f0f0;"></div>
 
@@ -56,28 +138,26 @@
   </div>
 
   <div style="margin-top: 30px;">
-    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Example Inputs for Best Results</h3>
+    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Popular Searches</h3>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; font-size: 14px;">
       <div>
-        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">✅ Good Examples:</h4>
+        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🥩 Proteins:</h4>
         <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
-          <li>100g cooked chicken breast</li>
-          <li>150g dry weight brown rice</li>
-          <li>1 medium baked sweet potato</li>
-          <li>100g lean ground turkey (93/7)</li>
-          <li>200g cooked quinoa</li>
-          <li>30g raw almonds</li>
+          <li>chicken breast</li>
+          <li>salmon fillet</li>
+          <li>ground turkey</li>
+          <li>greek yogurt</li>
+          <li>tofu</li>
         </ul>
       </div>
       <div>
-        <h4 style="color: #e74c3c; margin: 0 0 8px 0;">❌ Avoid These:</h4>
+        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🌾 Carbs:</h4>
         <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
-          <li>chicken (no weight/prep)</li>
-          <li>rice (cooked vs dry?)</li>
-          <li>ground beef (fat %?)</li>
-          <li>pasta (dry vs cooked?)</li>
-          <li>fish (what type/size?)</li>
-          <li>nuts (roasted vs raw?)</li>
+          <li>brown rice</li>
+          <li>quinoa</li>
+          <li>sweet potato</li>
+          <li>oats</li>
+          <li>whole wheat pasta</li>
         </ul>
       </div>
     </div>
@@ -85,79 +165,95 @@
 </div>
 
 <script>
-async function swapMacros() {
-  const originalFood = document.getElementById("originalFood").value;
-  const replacementFood = document.getElementById("replacementFood").value;
+let selectedFoods = {
+  original: null,
+  replacement: null
+};
 
-  if (!originalFood || !replacementFood) {
-    document.getElementById("replacementQty").innerText = "Please fill in both foods with specific details (weight, cooking method, etc.)";
+let searchTimeout;
+
+async function searchFood(type) {
+  const input = document.getElementById(`${type}FoodInput`);
+  const dropdown = document.getElementById(`${type}Dropdown`);
+  const searchTerm = input.value.trim();
+
+  if (searchTerm.length < 2) {
+    dropdown.style.display = 'none';
     return;
   }
 
-  document.getElementById("replacementQty").innerText = "🔍 Searching USDA food database...";
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(async () => {
+    try {
+      const response = await fetch('/api/usda-search-dropdown', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ searchTerm })
+      });
+
+      const data = await response.json();
+      
+      if (data.foods && data.foods.length > 0) {
+        displayFoodOptions(type, data.foods);
+      } else {
+        dropdown.innerHTML = '<div class="food-option" style="color: #ccc;">No foods found. Try a different search term.</div>';
+        dropdown.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      dropdown.innerHTML = '<div class="food-option" style="color: #e74c3c;">Error searching foods. Please try again.</div>';
+      dropdown.style.display = 'block';
+    }
+  }, 300);
+}
+
+function displayFoodOptions(type, foods) {
+  const dropdown = document.getElementById(`${type}Dropdown`);
+  
+  dropdown.innerHTML = foods.map(food => `
+    <div class="food-option" onclick="selectFood('${type}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
+      <div class="food-name">${food.name}</div>
+      <div class="food-macros">
+        Protein: ${food.protein.toFixed(1)}g | 
+        Carbs: ${food.carbs.toFixed(1)}g | 
+        Fat: ${food.fat.toFixed(1)}g | 
+        Calories: ${food.calories.toFixed(0)}
+      </div>
+    </div>
+  `).join('');
+  
+  dropdown.style.display = 'block';
+}
+
+function selectFood(type, food) {
+  selectedFoods[type] = food;
+  document.getElementById(`${type}FoodInput`).value = food.name;
+  document.getElementById(`${type}Dropdown`).style.display = 'none';
+}
+
+// Hide dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.food-search-container')) {
+    document.querySelectorAll('.food-dropdown').forEach(dropdown => {
+      dropdown.style.display = 'none';
+    });
+  }
+});
+
+async function swapMacros() {
+  const originalQty = parseFloat(document.getElementById('originalQty').value) || 100;
+  
+  if (!selectedFoods.original || !selectedFoods.replacement) {
+    document.getElementById("replacementQty").innerText = "Please select both foods from the dropdown options.";
+    return;
+  }
+
+  document.getElementById("replacementQty").innerText = "🔍 Calculating macro swap...";
   document.getElementById("macroTable").style.display = "none";
 
-  try {
-    // Try USDA database first for both foods
-    const [originalResult, replacementResult] = await Promise.all([
-      fetch("/api/usda-food-search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ foodQuery: extractFoodName(originalFood) })
-      }).then(r => r.json()),
-      
-      fetch("/api/usda-food-search", {
-        method: "POST", 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ foodQuery: extractFoodName(replacementFood) })
-      }).then(r => r.json())
-    ]);
+  const originalFood = selectedFoods.original;
+  const replacementFood = selectedFoods.replacement;
 
-    if (originalResult.success && replacementResult.success) {
-      // Both foods found in USDA - use precise data
-      calculateWithUSDAData(originalResult.food, replacementResult.food, originalFood, replacementFood);
-    } else {
-      // Fall back to OpenAI if either food not found in USDA
-      document.getElementById("replacementQty").innerText = "🤖 Using AI for calculation...";
-      await useOpenAICalculation(originalFood, replacementFood);
-    }
-    
-  } catch (error) {
-    console.error('Error:', error);
-    // Fall back to OpenAI on any error
-    await useOpenAICalculation(originalFood, replacementFood);
-  }
-}
-
-function extractFoodName(input) {
-  // Remove quantities and common descriptors to get base food name
-  return input
-    .replace(/\d+\.?\d*\s*(g|grams?|oz|ounces?|cups?|tbsp|tablespoons?|lbs?|pounds?)/gi, '')
-    .replace(/\b(raw|cooked|baked|grilled|fried|steamed|boiled|roasted)\b/gi, '')
-    .replace(/\b(lean|extra lean|93\/7|90\/10|85\/15|80\/20)\b/gi, '')
-    .replace(/\b(dry weight|wet weight)\b/gi, '')
-    .trim();
-}
-
-function parseQuantity(input) {
-  const match = input.match(/(\d+(?:\.\d+)?)\s*(g|grams?|oz|ounces?|cups?|tbsp|lbs?)/i);
-  if (!match) return 100; // default 100g
-  
-  let qty = parseFloat(match[1]);
-  const unit = match[2].toLowerCase();
-  
-  // Convert to grams
-  if (unit.includes('oz')) qty *= 28.35;
-  if (unit.includes('lb')) qty *= 453.59;
-  if (unit.includes('cup')) qty *= 240; // approximate for most foods
-  if (unit.includes('tbsp')) qty *= 15;
-  
-  return qty;
-}
-
-function calculateWithUSDAData(originalFood, replacementFood, originalInput, replacementInput) {
-  const originalQty = parseQuantity(originalInput);
-  
   // Calculate original macros based on input quantity
   const originalMacros = {
     protein: (originalFood.protein * originalQty) / 100,
@@ -178,10 +274,10 @@ function calculateWithUSDAData(originalFood, replacementFood, originalInput, rep
     calories: (replacementFood.calories * equivalentQty) / 100
   };
   
-  // Display results with USDA badge
+  // Display results
   document.getElementById("replacementQty").innerHTML = 
     `<strong>Replacement Quantity:</strong> ${equivalentQty.toFixed(0)}g of ${replacementFood.name}<br>
-    <small style="color: #4da6d9; font-weight: bold;">✅ Precise USDA FoodData Central</small>`;
+    <small style="color: #4da6d9; font-weight: bold;">✅ USDA FoodData Central</small>`;
   
   // Create comparison table
   const tableHTML = `
@@ -205,52 +301,6 @@ function calculateWithUSDAData(originalFood, replacementFood, originalInput, rep
   
   document.getElementById("macroTableBody").innerHTML = tableHTML;
   document.getElementById("macroTable").style.display = "block";
-}
-
-async function useOpenAICalculation(originalFood, replacementFood) {
-  try {
-    const res = await fetch("/api/api/macro-swap", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ originalFood, replacementFood })
-    });
-
-    const data = await res.json();
-    
-    if (data.error) {
-      document.getElementById("replacementQty").innerText = "Error calculating swap. Try being more specific with quantities and cooking methods.";
-      return;
-    }
-
-    const reply = data.choices?.[0]?.message?.content || "Something went wrong.";
-
-    const qtyMatch = reply.match(/Replacement Quantity: ([^\n]+)/);
-    if (qtyMatch) {
-      document.getElementById("replacementQty").innerHTML = 
-        `<strong>Replacement Quantity:</strong> ${qtyMatch[1]}<br>
-        <small style="color: #ffa500; font-weight: bold;">🤖 AI-Powered Calculation</small>`;
-    } else {
-      document.getElementById("replacementQty").innerText = "Replacement Quantity: Not found. Try being more specific.";
-    }
-
-    const tableMatch = reply.match(/\| Food \|(.|\n)*?\| Replacement \|(.|\n)*?\|/);
-    if (tableMatch) {
-      const lines = tableMatch[0].trim().split("\n");
-      const dataRows = lines.slice(2);
-      
-      const tableHTML = dataRows.map(row => {
-        const cols = row.split("|").slice(1, -1);
-        return `<tr>${cols.map(cell => `<td style='padding: 10px; border: 1px solid #333;'>${cell.trim()}</td>`).join("")}</tr>`;
-      }).join("");
-      
-      document.getElementById("macroTableBody").innerHTML = tableHTML;
-      document.getElementById("macroTable").style.display = "block";
-    }
-    
-  } catch (error) {
-    console.error('OpenAI Error:', error);
-    document.getElementById("replacementQty").innerText = "Error connecting to server. Please try again.";
-  }
 }
 </script>
 </body>
