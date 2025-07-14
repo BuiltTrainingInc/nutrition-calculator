@@ -187,7 +187,7 @@
   
   <label><strong>Original Food</strong></label>
   <div class="food-search-container">
-    <input type="text" id="originalFoodInput" class="food-input" placeholder="e.g. 150g cooked brown rice, 100g grilled chicken breast" oninput="searchFood('original')" onfocus="searchFood('original')">
+    <input type="text" id="originalFoodInput" class="food-input" placeholder="e.g. chicken breast, cooked brown rice" oninput="searchFood('original')" onfocus="searchFood('original')">
     <div id="originalDropdown" class="food-dropdown"></div>
   </div>
   <div id="originalPreparationInfo" class="preparation-info"></div>
@@ -195,7 +195,7 @@
   <!-- Replacement Food Selection -->
   <label><strong>Replacement Food</strong></label>
   <div class="food-search-container">
-    <input type="text" id="replacementFoodInput" class="food-input" placeholder="e.g. quinoa, salmon fillet" oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
+    <input type="text" id="replacementFoodInput" class="food-input" placeholder="e.g. salmon, quinoa" oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
     <div id="replacementDropdown" class="food-dropdown"></div>
   </div>
   <div id="replacementPreparationInfo" class="preparation-info"></div>
@@ -239,7 +239,7 @@
           <li>Cooked grains = dry equivalent</li>
           <li>Fried foods = +20-40% calories</li>
           <li>Grilled meats = -15% fat</li>
-          <li>Baked foods = moisture loss</li>
+          <li>USDA data respected as-is</li>
         </ul>
       </div>
     </div>
@@ -257,99 +257,72 @@ let searchTimeout;
 // Preparation factor system
 const preparationFactors = {
   'cooked': {
-    'rice': 0.28,        // 100g dry rice = ~280g cooked rice
-    'pasta': 0.31,       // 100g dry pasta = ~310g cooked pasta
-    'oats': 0.33,        // 100g dry oats = ~330g cooked oats
-    'quinoa': 0.25,      // 100g dry quinoa = ~250g cooked quinoa
-    'lentils': 0.4,      // 100g dry lentils = ~400g cooked lentils
-    'beans': 0.45,       // 100g dry beans = ~450g cooked beans
-    'barley': 0.3,       // 100g dry barley = ~300g cooked barley
-    'default': 0.75      // general cooked factor
+    'rice': 0.28,        
+    'pasta': 0.31,       
+    'oats': 0.33,        
+    'quinoa': 0.25,      
+    'lentils': 0.4,      
+    'beans': 0.45,       
+    'barley': 0.3,       
+    'default': 0.75      
   },
-  
   'fried': {
-    'chicken': 1.3,      // adds ~30% calories from oil
-    'fish': 1.25,        // adds ~25% calories from oil
-    'vegetables': 1.4,   // adds ~40% calories from oil
-    'potato': 1.5,       // french fries
+    'chicken': 1.3,      
+    'fish': 1.25,        
+    'vegetables': 1.4,   
+    'potato': 1.5,       
     'default': 1.2
   },
-  
   'grilled': {
-    'chicken': 0.85,     // loses some fat
-    'beef': 0.8,         // loses more fat
-    'fish': 0.9,         // loses less fat
-    'pork': 0.82,        // loses fat
+    'chicken': 0.85,     
+    'beef': 0.8,         
+    'fish': 0.9,         
+    'pork': 0.82,        
     'default': 0.85
   },
-  
   'baked': {
-    'chicken': 0.9,      // slight moisture loss
-    'fish': 0.85,        // more moisture loss
-    'potato': 0.8,       // water evaporation
-    'vegetables': 0.9,   // slight moisture loss
+    'chicken': 0.9,      
+    'fish': 0.85,        
+    'potato': 0.8,       
+    'vegetables': 0.9,   
     'default': 0.85
   },
-  
-  'steamed': {
-    'vegetables': 0.95,  // minimal nutrient loss
-    'fish': 0.9,         // slight moisture loss
-    'default': 0.9
-  },
-  
-  'roasted': {
-    'chicken': 0.88,     // fat and moisture loss
-    'vegetables': 0.85,  // moisture loss
-    'nuts': 1.0,         // no change
-    'default': 0.85
-  },
-  
   'raw': {
-    'default': 1.0       // no change
+    'default': 1.0       
   }
 };
 
 function detectPreparation(foodName) {
   const name = foodName.toLowerCase();
   
-  // Check for cooking method keywords
-  if (name.includes('cooked') || name.includes('boiled')) return 'cooked';
-  if (name.includes('fried') || name.includes('deep-fried') || name.includes('pan-fried')) return 'fried';
-  if (name.includes('grilled') || name.includes('barbecued') || name.includes('bbq')) return 'grilled';
+  if (name.includes('cooked') || name.includes('boiled') || name.includes('prepared')) return 'cooked';
+  if (name.includes('fried') || name.includes('deep-fried')) return 'fried';
+  if (name.includes('grilled') || name.includes('barbecued')) return 'grilled';
   if (name.includes('baked') || name.includes('roasted')) return 'baked';
-  if (name.includes('steamed')) return 'steamed';
-  if (name.includes('raw') || name.includes('fresh')) return 'raw';
+  if (name.includes('raw') || name.includes('fresh') || name.includes('dry')) return 'raw';
   
-  // Default assumptions based on food type
-  if (name.includes('rice') || name.includes('pasta') || name.includes('oats') || name.includes('quinoa')) {
-    return name.includes('dry') || name.includes('uncooked') ? 'raw' : 'cooked';
+  // Smart defaults for grains
+  if ((name.includes('rice') || name.includes('pasta') || name.includes('quinoa')) && 
+      !name.includes('dry') && !name.includes('uncooked')) {
+    return 'cooked';
   }
   
-  // Meat defaults
-  if (name.includes('chicken') || name.includes('beef') || name.includes('fish') || name.includes('salmon')) {
-    return 'cooked'; // assume cooked unless specified raw
-  }
-  
-  return 'raw'; // default
+  return 'raw';
 }
 
 function detectFoodType(foodName) {
   const name = foodName.toLowerCase();
   
   if (name.includes('rice')) return 'rice';
-  if (name.includes('pasta') || name.includes('noodle')) return 'pasta';
-  if (name.includes('oats') || name.includes('oatmeal')) return 'oats';
+  if (name.includes('pasta')) return 'pasta';
+  if (name.includes('oats')) return 'oats';
   if (name.includes('quinoa')) return 'quinoa';
   if (name.includes('lentil')) return 'lentils';
   if (name.includes('bean')) return 'beans';
-  if (name.includes('barley')) return 'barley';
   if (name.includes('chicken')) return 'chicken';
   if (name.includes('beef')) return 'beef';
-  if (name.includes('fish') || name.includes('salmon') || name.includes('tuna') || name.includes('cod')) return 'fish';
-  if (name.includes('pork')) return 'pork';
+  if (name.includes('fish') || name.includes('salmon')) return 'fish';
   if (name.includes('potato')) return 'potato';
-  if (name.includes('vegetable')) return 'vegetables';
-  if (name.includes('nuts') || name.includes('almond') || name.includes('walnut')) return 'nuts';
   
   return 'default';
 }
@@ -357,31 +330,47 @@ function detectFoodType(foodName) {
 function applyPreparationFactor(food, quantity) {
   const preparation = detectPreparation(food.name);
   const foodType = detectFoodType(food.name);
+  const usdaName = food.name.toLowerCase();
   
-  // Get the appropriate factor
+  // Check if USDA data already represents the desired state
+  const isAlreadyCooked = usdaName.includes('cooked') || usdaName.includes('boiled') || usdaName.includes('prepared');
+  const isAlreadyRaw = usdaName.includes('raw') || usdaName.includes('dry') || usdaName.includes('uncooked');
+  
   const factors = preparationFactors[preparation] || {};
   const factor = factors[foodType] || factors['default'] || 1.0;
   
   let adjustedFood = { ...food };
   let explanation = '';
   
-  // For cooked grains/legumes, convert to dry equivalent
-  if (preparation === 'cooked' && ['rice', 'pasta', 'oats', 'quinoa', 'lentils', 'beans', 'barley'].includes(foodType)) {
-    const dryEquivalent = quantity * factor;
-    explanation = `${quantity}g cooked ≈ ${dryEquivalent.toFixed(0)}g dry weight`;
-    return {
-      adjustedQuantity: dryEquivalent,
-      adjustedFood: adjustedFood,
-      factor: factor,
-      explanation: explanation,
-      preparation: preparation
-    };
-  } 
-  // For fried foods, increase fat and calories
-  else if (preparation === 'fried') {
+  // Handle grain conversions carefully
+  if (['rice', 'pasta', 'oats', 'quinoa', 'lentils', 'beans'].includes(foodType)) {
+    if (isAlreadyCooked && preparation === 'cooked') {
+      explanation = 'USDA data already shows cooked values';
+      return {
+        adjustedQuantity: quantity,
+        adjustedFood: adjustedFood,
+        factor: 1.0,
+        explanation: explanation,
+        preparation: preparation
+      };
+    } else if (isAlreadyRaw && preparation === 'cooked') {
+      const dryEquivalent = quantity * factor;
+      explanation = `${quantity}g cooked ≈ ${dryEquivalent.toFixed(0)}g dry weight`;
+      return {
+        adjustedQuantity: dryEquivalent,
+        adjustedFood: adjustedFood,
+        factor: factor,
+        explanation: explanation,
+        preparation: preparation
+      };
+    }
+  }
+  
+  // Handle fried foods
+  if (preparation === 'fried' && !usdaName.includes('fried')) {
     adjustedFood.fat *= factor;
     adjustedFood.calories *= factor;
-    explanation = `+${((factor - 1) * 100).toFixed(0)}% calories from cooking oil`;
+    explanation = `+${((factor - 1) * 100).toFixed(0)}% calories from oil`;
     return {
       adjustedQuantity: quantity,
       adjustedFood: adjustedFood,
@@ -390,11 +379,12 @@ function applyPreparationFactor(food, quantity) {
       preparation: preparation
     };
   }
-  // For grilled/baked foods, reduce fat slightly
-  else if (['grilled', 'baked', 'roasted'].includes(preparation)) {
+  
+  // Handle grilled/baked foods
+  if (['grilled', 'baked'].includes(preparation) && !usdaName.includes(preparation)) {
     adjustedFood.fat *= factor;
     adjustedFood.calories = adjustedFood.protein * 4 + adjustedFood.carbs * 4 + adjustedFood.fat * 9;
-    explanation = `${preparation} preparation: ${((1 - factor) * 100).toFixed(0)}% fat/moisture reduction`;
+    explanation = `${preparation}: ${((1 - factor) * 100).toFixed(0)}% fat reduction`;
     return {
       adjustedQuantity: quantity,
       adjustedFood: adjustedFood,
@@ -403,16 +393,15 @@ function applyPreparationFactor(food, quantity) {
       preparation: preparation
     };
   }
+  
   // No adjustment needed
-  else {
-    return {
-      adjustedQuantity: quantity,
-      adjustedFood: adjustedFood,
-      factor: 1.0,
-      explanation: preparation === 'raw' ? '' : `${preparation} preparation detected`,
-      preparation: preparation
-    };
-  }
+  return {
+    adjustedQuantity: quantity,
+    adjustedFood: adjustedFood,
+    factor: 1.0,
+    explanation: isAlreadyCooked ? 'USDA data already prepared' : '',
+    preparation: preparation
+  };
 }
 
 function getFoodType(food) {
@@ -467,7 +456,15 @@ async function searchFood(type) {
         body: JSON.stringify({ searchTerm })
       });
 
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
       const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
       
       if (data.foods && data.foods.length > 0) {
         displayFoodOptions(type, data.foods);
@@ -477,7 +474,7 @@ async function searchFood(type) {
       }
     } catch (error) {
       console.error('Search error:', error);
-      dropdown.innerHTML = '<div class="food-option" style="color: #e74c3c;">Error searching foods. Please try again.</div>';
+      dropdown.innerHTML = `<div class="food-option" style="color: #e74c3c;">Error: ${error.message}</div>`;
       dropdown.style.display = 'block';
     }
   }, 300);
@@ -545,7 +542,7 @@ function getMatchingStrategy() {
     if (foodType === 'protein') return 'protein';
     if (foodType === 'carb') return 'carbs';
     if (foodType === 'fat') return 'fat';
-    return 'protein'; // default fallback
+    return 'protein';
   }
   
   return selected;
@@ -563,7 +560,7 @@ async function swapMacros() {
   const originalFood = selectedFoods.original;
   const replacementFood = selectedFoods.replacement;
   
-  document.getElementById("replacementQty").innerText = `🔍 Calculating ${strategy} match with preparation adjustments...`;
+  document.getElementById("replacementQty").innerText = `🔍 Calculating ${strategy} match...`;
   document.getElementById("macroTable").style.display = "none";
 
   // Apply preparation factors
@@ -578,7 +575,7 @@ async function swapMacros() {
     calories: (originalPrep.adjustedFood.calories * originalPrep.adjustedQuantity) / 100
   };
   
-  // Calculate equivalent quantity based on selected strategy
+  // Calculate equivalent quantity based on strategy
   let equivalentQty = 100;
   let matchedMacro = '';
   
@@ -609,54 +606,5 @@ async function swapMacros() {
       break;
   }
   
-  // Apply preparation factor to replacement quantity if needed
-  const finalReplacementPrep = applyPreparationFactor(replacementFood, equivalentQty);
-  
   // Calculate replacement macros
-  const replacementMacros = {
-    protein: (finalReplacementPrep.adjustedFood.protein * finalReplacementPrep.adjustedQuantity) / 100,
-    carbs: (finalReplacementPrep.adjustedFood.carbs * finalReplacementPrep.adjustedQuantity) / 100,
-    fat: (finalReplacementPrep.adjustedFood.fat * finalReplacementPrep.adjustedQuantity) / 100,
-    calories: (finalReplacementPrep.adjustedFood.calories * finalReplacementPrep.adjustedQuantity) / 100
-  };
-  
-  // Display results with preparation info
-  let resultHTML = `<strong>Replacement Quantity:</strong> ${equivalentQty.toFixed(0)}g of ${replacementFood.name}<br>`;
-  resultHTML += `<small style="color: #4da6d9; font-weight: bold;">✅ Matched by ${strategy}: ${matchedMacro}</small><br>`;
-  
-  if (originalPrep.explanation) {
-    resultHTML += `<small style="color: #ffa500;">Original: ${originalPrep.explanation}</small><br>`;
-  }
-  if (finalReplacementPrep.explanation && finalReplacementPrep.explanation !== originalPrep.explanation) {
-    resultHTML += `<small style="color: #ffa500;">Replacement: ${finalReplacementPrep.explanation}</small>`;
-  }
-  
-  document.getElementById("replacementQty").innerHTML = resultHTML;
-  
-  // Create comparison table with highlighting
-  const tableHTML = `
-    <tr>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalFood.name}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalQty.toFixed(0)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'protein' ? 'background: #e74c3c; color: white;' : ''}'>${originalMacros.protein.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'carbs' ? 'background: #f39c12; color: white;' : ''}'>${originalMacros.carbs.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'fat' ? 'background: #9b59b6; color: white;' : ''}'>${originalMacros.fat.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'calories' ? 'background: #2ecc71; color: white;' : ''}'>${originalMacros.calories.toFixed(0)}</td>
-    </tr>
-    <tr>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementFood.name}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${equivalentQty.toFixed(0)}g</td>
-      <td style='padding: 10px; border: 1px solid #
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'protein' ? 'background: #e74c3c; color: white;' : ''}'>${replacementMacros.protein.toFixed(1)}g</td>
-     <td style='padding: 10px; border: 1px solid #333; ${strategy === 'carbs' ? 'background: #f39c12; color: white;' : ''}'>${replacementMacros.carbs.toFixed(1)}g</td>
-     <td style='padding: 10px; border: 1px solid #333; ${strategy === 'fat' ? 'background: #9b59b6; color: white;' : ''}'>${replacementMacros.fat.toFixed(1)}g</td>
-     <td style='padding: 10px; border: 1px solid #333; ${strategy === 'calories' ? 'background: #2ecc71; color: white;' : ''}'>${replacementMacros.calories.toFixed(0)}</td>
-   </tr>
- `;
- 
- document.getElementById("macroTableBody").innerHTML = tableHTML;
- document.getElementById("macroTable").style.display = "block";
-}
-</script>
-</body>
-</html>
+  const
