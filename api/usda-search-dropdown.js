@@ -1,242 +1,100 @@
-<script>
-let selectedFoods = {
-  original: null,
-  replacement: null
-};
-
-let searchTimeout;
-
-function getFoodType(food) {
-  const protein = food.protein || 0;
-  const carbs = food.carbs || 0;
-  const fat = food.fat || 0;
+export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  const totalMacros = protein * 4 + carbs * 4 + fat * 9;
-  if (totalMacros === 0) return 'mixed';
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
   
-  const proteinPercent = (protein * 4 / totalMacros) * 100;
-  const carbPercent = (carbs * 4 / totalMacros) * 100;
-  const fatPercent = (fat * 9 / totalMacros) * 100;
-  
-  if (proteinPercent >= 40) return 'protein';
-  if (carbPercent >= 50) return 'carb';
-  if (fatPercent >= 50) return 'fat';
-  return 'mixed';
-}
-
-function getFoodTypeLabel(type) {
-  const labels = {
-    'protein': '<span class="macro-type protein-source">PROTEIN</span>',
-    'carb': '<span class="macro-type carb-source">CARB</span>',
-    'fat': '<span class="macro-type fat-source">FAT</span>',
-    'mixed': '<span class="macro-type mixed-source">MIXED</span>'
-  };
-  return labels[type] || '';
-}
-
-async function searchFood(type) {
-  const input = document.getElementById(`${type}FoodInput`);
-  const dropdown = document.getElementById(`${type}Dropdown`);
-  const searchTerm = input.value.trim();
-
-  console.log('Searching for:', searchTerm); // Debug log
-
-  if (searchTerm.length < 2) {
-    dropdown.style.display = 'none';
-    return;
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Show loading
-  dropdown.innerHTML = '<div class="food-option" style="color: #4da6d9;">🔍 Searching...</div>';
-  dropdown.style.display = 'block';
+  const { searchTerm } = req.body;
+  const apiKey = process.env.USDA_API_KEY;
 
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(async () => {
-    try {
-      console.log('Making API call...'); // Debug log
-      
-      const response = await fetch('/api/usda-search-dropdown', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ searchTerm })
+  if (!searchTerm || searchTerm.length < 2) {
+    return res.json({ foods: [] });
+  }
+
+  try {
+    console.log('Searching USDA for:', searchTerm);
+    
+    // Use GET request instead of POST (simpler)
+    const searchUrl = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${apiKey}&query=${encodeURIComponent(searchTerm)}&pageSize=10`;
+    
+    const searchResponse = await fetch(searchUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!searchResponse.ok) {
+      console.error('USDA API Error:', searchResponse.status, searchResponse.statusText);
+      return res.status(500).json({ error: `USDA API returned ${searchResponse.status}` });
+    }
+
+    const searchData = await searchResponse.json();
+    console.log('USDA Response received');
+    
+    if (searchData.foods && searchData.foods.length > 0) {
+      const foods = searchData.foods.slice(0, 8).map(food => {
+        const nutrients = food.foodNutrients || [];
+        
+        // Extract nutrients
+        let protein = 0, carbs = 0, fat = 0, calories = 0;
+
+        nutrients.forEach(nutrient => {
+          const value = nutrient.value || 0;
+          
+          // By nutrient number (most reliable)
+          if (nutrient.nutrientNumber === 203) protein = value;
+          if (nutrient.nutrientNumber === 204) fat = value;
+          if (nutrient.nutrientNumber === 205) carbs = value;
+          if (nutrient.nutrientNumber === 208) calories = value;
+          
+          // By name (backup)
+          if (nutrient.nutrientName) {
+            const name = nutrient.nutrientName.toLowerCase();
+            if (protein === 0 && name.includes('protein')) protein = value;
+            if (carbs === 0 && name.includes('carbohydrate')) carbs = value;
+            if (fat === 0 && (name.includes('total lipid') || name.includes('fat'))) fat = value;
+            if (calories === 0 && name.includes('energy')) calories = value;
+          }
+        });
+
+        return {
+          id: food.fdcId,
+          name: food.description,
+          protein: Math.max(0, protein || 0),
+          carbs: Math.max(0, carbs || 0),
+          fat: Math.max(0, fat || 0),
+          calories: Math.max(0, calories || 0),
+          dataType: food.dataType || 'USDA'
+        };
       });
 
-      console.log('API response status:', response.status); // Debug log
+      // Filter out foods with no nutrition data
+      const validFoods = foods.filter(food => 
+        food.protein > 0 || food.carbs > 0 || food.fat > 0 || food.calories > 0
+      );
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
-      }
+      console.log('Valid foods found:', validFoods.length);
 
-      const data = await response.json();
-      console.log('API response data:', data); // Debug log
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      if (data.foods && data.foods.length > 0) {
-        displayFoodOptions(type, data.foods);
-      } else {
-        dropdown.innerHTML = '<div class="food-option" style="color: #ccc;">No foods found. Try different keywords like "chicken" or "rice".</div>';
-        dropdown.style.display = 'block';
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      dropdown.innerHTML = `<div class="food-option" style="color: #e74c3c;">Error: ${error.message}<br><small>Check console (F12) for details</small></div>`;
-      dropdown.style.display = 'block';
-    }
-  }, 500); // Increased timeout to 500ms
-}
-
-function displayFoodOptions(type, foods) {
-  const dropdown = document.getElementById(`${type}Dropdown`);
-  
-  console.log('Displaying foods:', foods.length); // Debug log
-  
-  const foodsHTML = foods.map(food => {
-    const foodType = getFoodType(food);
-    const typeLabel = getFoodTypeLabel(foodType);
-    
-    let displayName = food.name;
-    if (displayName.length > 60) {
-      displayName = displayName.substring(0, 60) + '...';
+      res.json({ foods: validFoods });
+    } else {
+      console.log('No foods found in USDA response');
+      res.json({ foods: [] });
     }
     
-    return `
-      <div class="food-option" onclick="selectFood('${type}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
-        <div class="food-name">${displayName} ${typeLabel}</div>
-        <div class="food-macros">
-          P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g | Cal: ${food.calories.toFixed(0)}
-        </div>
-        <div class="food-type">${food.dataType}</div>
-      </div>
-    `;
-  }).join('');
-  
-  dropdown.innerHTML = foodsHTML;
-  dropdown.style.display = 'block';
-}
-
-function selectFood(type, food) {
-  console.log('Selected food:', food); // Debug log
-  selectedFoods[type] = food;
-  document.getElementById(`${type}FoodInput`).value = food.name;
-  document.getElementById(`${type}Dropdown`).style.display = 'none';
-}
-
-// Hide dropdowns when clicking outside
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.food-search-container')) {
-    document.querySelectorAll('.food-dropdown').forEach(dropdown => {
-      dropdown.style.display = 'none';
+  } catch (error) {
+    console.error('USDA Search Error:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to search USDA database',
+      details: error.message 
     });
   }
-});
-
-function getMatchingStrategy() {
-  const selected = document.querySelector('input[name="matchingStrategy"]:checked').value;
-  
-  if (selected === 'auto' && selectedFoods.original) {
-    const foodType = getFoodType(selectedFoods.original);
-    if (foodType === 'protein') return 'protein';
-    if (foodType === 'carb') return 'carbs';
-    if (foodType === 'fat') return 'fat';
-    return 'protein';
-  }
-  
-  return selected;
 }
-
-async function swapMacros() {
-  const originalQty = parseFloat(document.getElementById('originalQty').value) || 100;
-  
-  if (!selectedFoods.original || !selectedFoods.replacement) {
-    document.getElementById("replacementQty").innerText = "Please select both foods from the dropdown options.";
-    return;
-  }
-
-  const strategy = getMatchingStrategy();
-  const originalFood = selectedFoods.original;
-  const replacementFood = selectedFoods.replacement;
-  
-  console.log('Calculating swap:', { originalFood, replacementFood, strategy }); // Debug log
-  
-  document.getElementById("replacementQty").innerText = `🔍 Calculating ${strategy} match...`;
-  document.getElementById("macroTable").style.display = "none";
-
-  // Calculate original macros
-  const originalMacros = {
-    protein: (originalFood.protein * originalQty) / 100,
-    carbs: (originalFood.carbs * originalQty) / 100,
-    fat: (originalFood.fat * originalQty) / 100,
-    calories: (originalFood.calories * originalQty) / 100
-  };
-  
-  // Calculate equivalent quantity based on strategy
-  let equivalentQty = 100;
-  let matchedMacro = '';
-  
-  switch (strategy) {
-    case 'protein':
-      if (replacementFood.protein > 0) {
-        equivalentQty = (originalMacros.protein / replacementFood.protein) * 100;
-        matchedMacro = `${originalMacros.protein.toFixed(1)}g protein`;
-      }
-      break;
-    case 'carbs':
-      if (replacementFood.carbs > 0) {
-        equivalentQty = (originalMacros.carbs / replacementFood.carbs) * 100;
-        matchedMacro = `${originalMacros.carbs.toFixed(1)}g carbs`;
-      }
-      break;
-    case 'fat':
-      if (replacementFood.fat > 0) {
-        equivalentQty = (originalMacros.fat / replacementFood.fat) * 100;
-        matchedMacro = `${originalMacros.fat.toFixed(1)}g fat`;
-      }
-      break;
-    case 'calories':
-      if (replacementFood.calories > 0) {
-        equivalentQty = (originalMacros.calories / replacementFood.calories) * 100;
-        matchedMacro = `${originalMacros.calories.toFixed(0)} calories`;
-      }
-      break;
-  }
-  
-  // Calculate replacement macros
-  const replacementMacros = {
-    protein: (replacementFood.protein * equivalentQty) / 100,
-    carbs: (replacementFood.carbs * equivalentQty) / 100,
-    fat: (replacementFood.fat * equivalentQty) / 100,
-    calories: (replacementFood.calories * equivalentQty) / 100
-  };
-  
-  // Display results
-  document.getElementById("replacementQty").innerHTML = 
-    `<strong>Replacement Quantity:</strong> ${equivalentQty.toFixed(0)}g of ${replacementFood.name}<br>
-    <small style="color: #4da6d9; font-weight: bold;">✅ Matched by ${strategy}: ${matchedMacro}</small>`;
-  
-  // Create comparison table
-  const tableHTML = `
-    <tr>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalFood.name}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalQty.toFixed(0)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'protein' ? 'background: #e74c3c; color: white;' : ''}'>${originalMacros.protein.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'carbs' ? 'background: #f39c12; color: white;' : ''}'>${originalMacros.carbs.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'fat' ? 'background: #9b59b6; color: white;' : ''}'>${originalMacros.fat.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'calories' ? 'background: #2ecc71; color: white;' : ''}'>${originalMacros.calories.toFixed(0)}</td>
-    </tr>
-    <tr>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementFood.name}</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${equivalentQty.toFixed(0)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'protein' ? 'background: #e74c3c; color: white;' : ''}'>${replacementMacros.protein.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'carbs' ? 'background: #f39c12; color: white;' : ''}'>${replacementMacros.carbs.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'fat' ? 'background: #9b59b6; color: white;' : ''}'>${replacementMacros.fat.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'calories' ? 'background: #2ecc71; color: white;' : ''}'>${replacementMacros.calories.toFixed(0)}</td>
-    </tr>
-  `;
-  
-  document.getElementById("macroTableBody").innerHTML = tableHTML;
-  document.getElementById("macroTable").style.display = "block";
-}
-</script>
