@@ -26,102 +26,99 @@ export default async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: searchTerm,
-          pageSize: 25, // Increased for more results
+          pageSize: 15,
           pageNumber: pageNumber,
-          // Include ALL data types for complete database access
           dataType: [
-            'Survey (FNDDS)',    // What We Eat in America
-            'Foundation',        // Foundation Foods
-            'SR Legacy',         // Standard Reference Legacy
-            'Branded'            // Branded Food Products
+            'Survey (FNDDS)',
+            'Foundation',
+            'SR Legacy',
+            'Branded'
           ],
-          // Better sorting for relevance
           sortBy: 'dataType.keyword',
-          sortOrder: 'asc',
-          // Include all nutrients
-          nutrients: [203, 204, 205, 208] // Protein, Fat, Carbs, Calories
+          sortOrder: 'asc'
         })
       }
     );
 
     const searchData = await searchResponse.json();
+    console.log('USDA Response:', JSON.stringify(searchData, null, 2));
     
     if (searchData.foods && searchData.foods.length > 0) {
-      // Get detailed nutrition data for each food
-      const foodPromises = searchData.foods.slice(0, 15).map(async (food) => {
-        try {
-          // Get full nutrition details
-          const detailResponse = await fetch(
-            `https://api.nal.usda.gov/fdc/v1/food/${food.fdcId}?api_key=${apiKey}&nutrients=203,204,205,208`
-          );
-          
-          if (detailResponse.ok) {
-            const detailData = await detailResponse.json();
-            const nutrients = detailData.foodNutrients || [];
-            
-            const protein = nutrients.find(n => n.nutrient?.number === 203)?.amount || 0;
-            const fat = nutrients.find(n => n.nutrient?.number === 204)?.amount || 0;
-            const carbs = nutrients.find(n => n.nutrient?.number === 205)?.amount || 0;
-            const calories = nutrients.find(n => n.nutrient?.number === 208)?.amount || 0;
-            
-            return {
-              id: food.fdcId,
-              name: detailData.description || food.description,
-              protein: protein,
-              carbs: carbs,
-              fat: fat,
-              calories: calories,
-              dataType: food.dataType,
-              brandOwner: food.brandOwner || null,
-              ingredients: food.ingredients || null
-            };
-          } else {
-            // Fallback to search result nutrients if detail call fails
-            const nutrients = food.foodNutrients || [];
-            
-            const protein = nutrients.find(n => 
-              n.nutrientName?.toLowerCase().includes('protein') ||
-              n.nutrientNumber === 203
-            )?.value || 0;
-            
-            const fat = nutrients.find(n => 
-              n.nutrientName?.toLowerCase().includes('total lipid') ||
-              n.nutrientName?.toLowerCase().includes('fat') ||
-              n.nutrientNumber === 204
-            )?.value || 0;
-            
-            const carbs = nutrients.find(n => 
-              n.nutrientName?.toLowerCase().includes('carbohydrate') ||
-              n.nutrientNumber === 205
-            )?.value || 0;
-            
-            const calories = nutrients.find(n => 
-              n.nutrientName?.toLowerCase().includes('energy') ||
-              n.nutrientNumber === 208
-            )?.value || 0;
+      const foods = searchData.foods.map(food => {
+        const nutrients = food.foodNutrients || [];
+        console.log('Food:', food.description, 'Nutrients:', nutrients);
+        
+        // Multiple ways to find nutrients - USDA API is inconsistent
+        let protein = 0, carbs = 0, fat = 0, calories = 0;
 
-            return {
-              id: food.fdcId,
-              name: food.description,
-              protein: protein,
-              carbs: carbs,
-              fat: fat,
-              calories: calories,
-              dataType: food.dataType,
-              brandOwner: food.brandOwner || null,
-              ingredients: food.ingredients || null
-            };
-          }
-        } catch (error) {
-          console.error(`Error fetching details for food ${food.fdcId}:`, error);
-          return null;
+        // Method 1: Search by nutrient number (most reliable)
+        const proteinNutrient = nutrients.find(n => n.nutrientNumber === 203);
+        const fatNutrient = nutrients.find(n => n.nutrientNumber === 204);
+        const carbNutrient = nutrients.find(n => n.nutrientNumber === 205);
+        const calorieNutrient = nutrients.find(n => n.nutrientNumber === 208);
+
+        if (proteinNutrient) protein = proteinNutrient.value || 0;
+        if (fatNutrient) fat = fatNutrient.value || 0;
+        if (carbNutrient) carbs = carbNutrient.value || 0;
+        if (calorieNutrient) calories = calorieNutrient.value || 0;
+
+        // Method 2: Search by nutrient name (fallback)
+        if (protein === 0) {
+          const proteinByName = nutrients.find(n => 
+            n.nutrientName?.toLowerCase().includes('protein')
+          );
+          if (proteinByName) protein = proteinByName.value || 0;
         }
+
+        if (fat === 0) {
+          const fatByName = nutrients.find(n => 
+            n.nutrientName?.toLowerCase().includes('total lipid') ||
+            n.nutrientName?.toLowerCase().includes('fat')
+          );
+          if (fatByName) fat = fatByName.value || 0;
+        }
+
+        if (carbs === 0) {
+          const carbsByName = nutrients.find(n => 
+            n.nutrientName?.toLowerCase().includes('carbohydrate')
+          );
+          if (carbsByName) carbs = carbsByName.value || 0;
+        }
+
+        if (calories === 0) {
+          const caloriesByName = nutrients.find(n => 
+            n.nutrientName?.toLowerCase().includes('energy')
+          );
+          if (caloriesByName) calories = caloriesByName.value || 0;
+        }
+
+        console.log('Extracted:', { protein, fat, carbs, calories });
+
+        return {
+          id: food.fdcId,
+          name: food.description,
+          protein: protein,
+          carbs: carbs,
+          fat: fat,
+          calories: calories,
+          dataType: food.dataType,
+          brandOwner: food.brandOwner || null,
+          // Keep raw nutrients for debugging
+          rawNutrients: nutrients.map(n => ({
+            name: n.nutrientName,
+            number: n.nutrientNumber,
+            value: n.value
+          }))
+        };
       });
 
-      const foods = (await Promise.all(foodPromises)).filter(food => food !== null);
-      
-      // Sort by data type priority (Foundation > SR Legacy > Survey > Branded)
-      foods.sort((a, b) => {
+      // Filter out foods with no nutrition data
+      const validFoods = foods.filter(food => 
+        food.protein > 0 || food.carbs > 0 || food.fat > 0 || food.calories > 0
+      );
+
+      // Sort by data type priority
+      validFoods.sort((a, b) => {
         const priority = {
           'Foundation': 1,
           'SR Legacy': 2,
@@ -132,10 +129,14 @@ export default async function handler(req, res) {
       });
 
       res.json({ 
-        foods,
+        foods: validFoods,
         totalHits: searchData.totalHits,
-        totalPages: Math.ceil(searchData.totalHits / 25),
-        currentPage: pageNumber
+        totalPages: Math.ceil(searchData.totalHits / 15),
+        currentPage: pageNumber,
+        debug: {
+          originalCount: foods.length,
+          validCount: validFoods.length
+        }
       });
     } else {
       res.json({ foods: [], totalPages: 0, totalHits: 0 });
@@ -143,6 +144,6 @@ export default async function handler(req, res) {
     
   } catch (error) {
     console.error('USDA Search Error:', error);
-    res.status(500).json({ error: 'Failed to search USDA database' });
+    res.status(500).json({ error: 'Failed to search USDA database', details: error.message });
   }
 }
