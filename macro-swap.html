@@ -124,12 +124,12 @@
 <body>
 <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
   <h2 style="text-align: center; font-size: 22px;">BUILT Smart Macro Swap Tool</h2>
-  <p style="text-align: center; margin-bottom: 20px;">Intelligent macro matching with USDA database</p>
+  <p style="text-align: center; margin-bottom: 20px;">Official USDA nutrition data with intelligent macro matching</p>
 
   <!-- USDA Badge -->
   <div style="background: #0f3460; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; border: 1px solid #4da6d9;">
     <div style="font-size: 14px; color: #4da6d9; font-weight: bold;">🏛️ USDA FoodData Central</div>
-    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">400,000+ official nutrition entries with smart macro matching</div>
+    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">400,000+ official nutrition entries from the U.S. Department of Agriculture</div>
   </div>
 
   <!-- Matching Strategy Selection -->
@@ -166,14 +166,14 @@
   
   <label><strong>Original Food</strong></label>
   <div class="food-search-container">
-    <input type="text" id="originalFoodInput" class="food-input" placeholder="Start typing... (e.g. chicken breast, brown rice)" oninput="searchFood('original')" onfocus="searchFood('original')">
+    <input type="text" id="originalFoodInput" class="food-input" placeholder="Search USDA database... (e.g. chicken breast, brown rice)" oninput="searchFood('original')" onfocus="searchFood('original')">
     <div id="originalDropdown" class="food-dropdown"></div>
   </div>
 
   <!-- Replacement Food Selection -->
   <label><strong>Replacement Food</strong></label>
   <div class="food-search-container">
-    <input type="text" id="replacementFoodInput" class="food-input" placeholder="Start typing... (e.g. salmon, quinoa)" oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
+    <input type="text" id="replacementFoodInput" class="food-input" placeholder="Search USDA database... (e.g. salmon, quinoa)" oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
     <div id="replacementDropdown" class="food-dropdown"></div>
   </div>
 
@@ -199,24 +199,24 @@
   </div>
 
   <div style="margin-top: 30px;">
-    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">How It Works</h3>
+    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">USDA Database Coverage</h3>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; font-size: 14px;">
       <div>
-        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🎯 Smart Matching:</h4>
+        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🥗 Food Types:</h4>
         <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
-          <li>Protein sources → Protein match</li>
-          <li>Carb sources → Carb match</li>
-          <li>Fat sources → Fat match</li>
-          <li>Or choose manual strategy</li>
+          <li>Foundation Foods (raw ingredients)</li>
+          <li>Survey Foods (prepared meals)</li>
+          <li>Legacy Foods (classic database)</li>
+          <li>Branded Foods (name brands)</li>
         </ul>
       </div>
       <div>
-        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🏛️ Official Data:</h4>
+        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🏛️ Data Quality:</h4>
         <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
-          <li>USDA nutrition database</li>
-          <li>Foundation foods priority</li>
-          <li>Brand name products</li>
-          <li>Restaurant menu items</li>
+          <li>Government-verified nutrition</li>
+          <li>Laboratory-tested values</li>
+          <li>Restaurant chain data</li>
+          <li>400,000+ food entries</li>
         </ul>
       </div>
     </div>
@@ -261,13 +261,11 @@ function getFoodTypeLabel(type) {
   return labels[type] || '';
 }
 
-// Search function
+// USDA-only search function
 async function searchFood(type) {
   const input = document.getElementById(`${type}FoodInput`);
   const dropdown = document.getElementById(`${type}Dropdown`);
   const searchTerm = input.value.trim();
-
-  console.log('Searching for:', searchTerm);
 
   if (searchTerm.length < 2) {
     dropdown.style.display = 'none';
@@ -281,7 +279,7 @@ async function searchFood(type) {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(async () => {
     try {
-      console.log('Making API call...');
+      console.log('Searching USDA for:', searchTerm);
       
       const response = await fetch('/api/usda-search-dropdown', {
         method: 'POST',
@@ -296,7 +294,7 @@ async function searchFood(type) {
       }
 
       const data = await response.json();
-      console.log('API response data:', data);
+      console.log('USDA response:', data);
       
       if (data.error) {
         throw new Error(data.error);
@@ -305,22 +303,22 @@ async function searchFood(type) {
       if (data.foods && data.foods.length > 0) {
         displayFoodOptions(type, data.foods);
       } else {
-        dropdown.innerHTML = '<div class="food-option" style="color: #ccc;">No foods found. Try different keywords like "chicken" or "rice".</div>';
+        dropdown.innerHTML = '<div class="food-option" style="color: #ccc;">No USDA foods found. Try different keywords like "chicken breast" or "brown rice".</div>';
         dropdown.style.display = 'block';
       }
     } catch (error) {
-      console.error('Search error:', error);
-      dropdown.innerHTML = `<div class="food-option" style="color: #e74c3c;">Error: ${error.message}<br><small>Check console (F12) for details</small></div>`;
+      console.error('USDA search error:', error);
+      dropdown.innerHTML = `<div class="food-option" style="color: #e74c3c;">USDA search failed: ${error.message}<br><small>Check network connection or try again</small></div>`;
       dropdown.style.display = 'block';
     }
   }, 500);
 }
 
-// Display food options
+// Display USDA food options
 function displayFoodOptions(type, foods) {
   const dropdown = document.getElementById(`${type}Dropdown`);
   
-  console.log('Displaying foods:', foods.length);
+  console.log('Displaying USDA foods:', foods.length);
   
   const foodsHTML = foods.map(food => {
     const foodType = getFoodType(food);
@@ -337,7 +335,7 @@ function displayFoodOptions(type, foods) {
         <div class="food-macros">
           P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g | Cal: ${food.calories.toFixed(0)}
         </div>
-        <div class="food-type">${food.dataType}</div>
+        <div class="food-type">USDA ${food.dataType}</div>
       </div>
     `;
   }).join('');
@@ -348,7 +346,7 @@ function displayFoodOptions(type, foods) {
 
 // Select food function
 function selectFood(type, food) {
-  console.log('Selected food:', food);
+  console.log('Selected USDA food:', food);
   selectedFoods[type] = food;
   document.getElementById(`${type}FoodInput`).value = food.name;
   document.getElementById(`${type}Dropdown`).style.display = 'none';
@@ -374,7 +372,7 @@ async function swapMacros() {
   const originalQty = parseFloat(document.getElementById('originalQty').value) || 100;
   
   if (!selectedFoods.original || !selectedFoods.replacement) {
-    document.getElementById("replacementQty").innerText = "Please select both foods from the dropdown options.";
+    document.getElementById("replacementQty").innerText = "Please select both foods from the USDA dropdown options.";
     return;
   }
 
@@ -382,7 +380,7 @@ async function swapMacros() {
   const originalFood = selectedFoods.original;
   const replacementFood = selectedFoods.replacement;
   
-  console.log('Calculating swap:', { originalFood, replacementFood, strategy });
+  console.log('Calculating swap with USDA data:', { originalFood, replacementFood, strategy });
   
   document.getElementById("replacementQty").innerText = `🔍 Calculating ${strategy} match...`;
   document.getElementById("macroTable").style.display = "none";
@@ -437,7 +435,7 @@ async function swapMacros() {
   // Display results
   document.getElementById("replacementQty").innerHTML = 
     `<strong>Replacement Quantity:</strong> ${equivalentQty.toFixed(0)}g of ${replacementFood.name}<br>
-    <small style="color: #4da6d9; font-weight: bold;">✅ Matched by ${strategy}: ${matchedMacro}</small>`;
+    <small style="color: #4da6d9; font-weight: bold;">✅ Matched by ${strategy}: ${matchedMacro} (USDA ID: ${replacementFood.id})</small>`;
   
   // Create comparison table
   const tableHTML = `
