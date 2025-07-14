@@ -47,10 +47,6 @@
             background: #3a3a3a;
         }
         
-        .food-option:last-child {
-            border-bottom: none;
-        }
-        
         .food-name {
             font-weight: bold;
             color: #f0f0f0;
@@ -69,11 +65,19 @@
             font-weight: bold;
         }
         
-        .food-brand {
+        .macro-type {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
             font-size: 10px;
-            color: #ffa500;
-            font-style: italic;
+            font-weight: bold;
+            margin-left: 5px;
         }
+        
+        .protein-source { background: #e74c3c; color: white; }
+        .carb-source { background: #f39c12; color: white; }
+        .fat-source { background: #9b59b6; color: white; }
+        .mixed-source { background: #34495e; color: white; }
         
         .quantity-input {
             width: 80px;
@@ -92,44 +96,65 @@
             margin-bottom: 15px;
         }
         
-        .input-row label {
-            min-width: 60px;
-            margin-right: 10px;
-        }
-        
-        .search-info {
-            padding: 8px;
-            background: #1a1a1a;
-            color: #ccc;
-            font-size: 11px;
-            text-align: center;
-            border-bottom: 1px solid #333;
-        }
-        
-        .load-more {
-            padding: 8px;
-            background: #0f3460;
-            color: #4da6d9;
-            text-align: center;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .load-more:hover {
+        .matching-strategy {
             background: #1a4a6b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4da6d9;
+        }
+        
+        .strategy-option {
+            margin: 8px 0;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .strategy-option:hover {
+            background: rgba(77, 166, 217, 0.1);
+        }
+        
+        .strategy-option input {
+            margin-right: 8px;
         }
     </style>
 </head>
 <body>
 <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
-  <h2 style="text-align: center; font-size: 22px;">BUILT Macro Swap Tool</h2>
-  <p style="text-align: center; margin-bottom: 20px;">Complete USDA Food Database Access</p>
+  <h2 style="text-align: center; font-size: 22px;">BUILT Smart Macro Swap Tool</h2>
+  <p style="text-align: center; margin-bottom: 20px;">Intelligent macro-based food matching</p>
 
   <!-- USDA Badge -->
   <div style="background: #0f3460; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; border: 1px solid #4da6d9;">
     <div style="font-size: 14px; color: #4da6d9; font-weight: bold;">🏛️ Full USDA FoodData Central</div>
-    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">400,000+ foods including Foundation, Legacy, Survey, and Branded foods</div>
+    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">Smart matching: Protein sources → Protein sources, Carbs → Carbs, Fats → Fats</div>
+  </div>
+
+  <!-- Matching Strategy Selection -->
+  <div class="matching-strategy">
+    <h3 style="margin: 0 0 10px 0; color: #4da6d9; font-size: 16px;">🎯 Matching Strategy:</h3>
+    <div class="strategy-option">
+      <input type="radio" id="auto" name="matchingStrategy" value="auto" checked>
+      <label for="auto"><strong>Auto-Detect</strong> - Match based on the original food's primary macro</label>
+    </div>
+    <div class="strategy-option">
+      <input type="radio" id="protein" name="matchingStrategy" value="protein">
+      <label for="protein"><strong>Protein Match</strong> - Find equivalent protein amount</label>
+    </div>
+    <div class="strategy-option">
+      <input type="radio" id="carbs" name="matchingStrategy" value="carbs">
+      <label for="carbs"><strong>Carb Match</strong> - Find equivalent carb amount</label>
+    </div>
+    <div class="strategy-option">
+      <input type="radio" id="fat" name="matchingStrategy" value="fat">
+      <label for="fat"><strong>Fat Match</strong> - Find equivalent fat amount</label>
+    </div>
+    <div class="strategy-option">
+      <input type="radio" id="calories" name="matchingStrategy" value="calories">
+      <label for="calories"><strong>Calorie Match</strong> - Find equivalent calories</label>
+    </div>
   </div>
 
   <!-- Original Food Selection -->
@@ -141,18 +166,18 @@
   
   <label><strong>Original Food</strong></label>
   <div class="food-search-container">
-    <input type="text" id="originalFoodInput" class="food-input" placeholder="Search any food... (e.g. chicken breast, cheerios, mcdonald's)" oninput="searchFood('original')" onfocus="searchFood('original')">
+    <input type="text" id="originalFoodInput" class="food-input" placeholder="Search any food..." oninput="searchFood('original')" onfocus="searchFood('original')">
     <div id="originalDropdown" class="food-dropdown"></div>
   </div>
 
   <!-- Replacement Food Selection -->
   <label><strong>Replacement Food</strong></label>
   <div class="food-search-container">
-    <input type="text" id="replacementFoodInput" class="food-input" placeholder="Search replacement food... (any brand, preparation, or generic food)" oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
+    <input type="text" id="replacementFoodInput" class="food-input" placeholder="Search replacement food..." oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
     <div id="replacementDropdown" class="food-dropdown"></div>
   </div>
 
-  <button onclick="swapMacros()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px;">Calculate Macro Swap</button>
+  <button onclick="swapMacros()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px;">Calculate Smart Macro Swap</button>
 
   <div id="replacementQty" style="margin-top: 30px; font-weight: bold; color: #f0f0f0;"></div>
 
@@ -174,25 +199,30 @@
   </div>
 
   <div style="margin-top: 30px;">
-    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Database Coverage</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; font-size: 14px;">
+    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Food Categories</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px; font-size: 14px;">
       <div>
-        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🥗 Food Types:</h4>
+        <h4 style="color: #e74c3c; margin: 0 0 8px 0;">🥩 Protein Sources:</h4>
         <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
-          <li>Raw ingredients</li>
-          <li>Cooked foods</li>
-          <li>Restaurant items</li>
-          <li>Branded products</li>
-          <li>Prepared meals</li>
+          <li>Chicken, fish, beef</li>
+          <li>Greek yogurt, eggs</li>
+          <li>Protein powder</li>
         </ul>
       </div>
       <div>
-        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🏪 Brands:</h4>
+        <h4 style="color: #f39c12; margin: 0 0 8px 0;">🌾 Carb Sources:</h4>
         <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
-          <li>McDonald's, KFC, etc.</li>
-          <li>Kellogg's, General Mills</li>
-          <li>Pepsi, Coca-Cola</li>
-          <li>And thousands more</li>
+          <li>Rice, pasta, oats</li>
+          <li>Fruits, vegetables</li>
+          <li>Bread, cereals</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: #9b59b6; margin: 0 0 8px 0;">🥑 Fat Sources:</h4>
+        <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
+          <li>Nuts, seeds, oils</li>
+          <li>Avocado, fatty fish</li>
+          <li>Nut butters</li>
         </ul>
       </div>
     </div>
@@ -206,12 +236,38 @@ let selectedFoods = {
 };
 
 let searchTimeout;
-let currentSearches = {
-  original: { page: 1, hasMore: true, totalHits: 0 },
-  replacement: { page: 1, hasMore: true, totalHits: 0 }
-};
 
-async function searchFood(type, loadMore = false) {
+function getFoodType(food) {
+  const protein = food.protein || 0;
+  const carbs = food.carbs || 0;
+  const fat = food.fat || 0;
+  
+  // Calculate percentages of total macros
+  const totalMacros = protein * 4 + carbs * 4 + fat * 9; // calories from macros
+  if (totalMacros === 0) return 'mixed';
+  
+  const proteinPercent = (protein * 4 / totalMacros) * 100;
+  const carbPercent = (carbs * 4 / totalMacros) * 100;
+  const fatPercent = (fat * 9 / totalMacros) * 100;
+  
+  // Classify based on dominant macro
+  if (proteinPercent >= 40) return 'protein';
+  if (carbPercent >= 50) return 'carb';
+  if (fatPercent >= 50) return 'fat';
+  return 'mixed';
+}
+
+function getFoodTypeLabel(type) {
+  const labels = {
+    'protein': '<span class="macro-type protein-source">PROTEIN</span>',
+    'carb': '<span class="macro-type carb-source">CARB</span>',
+    'fat': '<span class="macro-type fat-source">FAT</span>',
+    'mixed': '<span class="macro-type mixed-source">MIXED</span>'
+  };
+  return labels[type] || '';
+}
+
+async function searchFood(type) {
   const input = document.getElementById(`${type}FoodInput`);
   const dropdown = document.getElementById(`${type}Dropdown`);
   const searchTerm = input.value.trim();
@@ -221,29 +277,19 @@ async function searchFood(type, loadMore = false) {
     return;
   }
 
-  if (!loadMore) {
-    currentSearches[type] = { page: 1, hasMore: true, totalHits: 0 };
-  }
-
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(async () => {
     try {
       const response = await fetch('/api/usda-search-dropdown', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          searchTerm,
-          pageNumber: currentSearches[type].page
-        })
+        body: JSON.stringify({ searchTerm })
       });
 
       const data = await response.json();
       
       if (data.foods && data.foods.length > 0) {
-        currentSearches[type].totalHits = data.totalHits;
-        currentSearches[type].hasMore = currentSearches[type].page < data.totalPages;
-        
-        displayFoodOptions(type, data.foods, loadMore, data.totalHits);
+        displayFoodOptions(type, data.foods);
       } else {
         dropdown.innerHTML = '<div class="food-option" style="color: #ccc;">No foods found. Try different keywords.</div>';
         dropdown.style.display = 'block';
@@ -256,10 +302,13 @@ async function searchFood(type, loadMore = false) {
   }, 300);
 }
 
-function displayFoodOptions(type, foods, append = false, totalHits = 0) {
+function displayFoodOptions(type, foods) {
   const dropdown = document.getElementById(`${type}Dropdown`);
   
   const foodsHTML = foods.map(food => {
+    const foodType = getFoodType(food);
+    const typeLabel = getFoodTypeLabel(foodType);
+    
     let displayName = food.name;
     if (displayName.length > 60) {
       displayName = displayName.substring(0, 60) + '...';
@@ -267,44 +316,17 @@ function displayFoodOptions(type, foods, append = false, totalHits = 0) {
     
     return `
       <div class="food-option" onclick="selectFood('${type}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
-        <div class="food-name">${displayName}</div>
+        <div class="food-name">${displayName} ${typeLabel}</div>
         <div class="food-macros">
           P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g | Cal: ${food.calories.toFixed(0)}
         </div>
-        <div class="food-type">${food.dataType}${food.brandOwner ? ` | ${food.brandOwner}` : ''}</div>
+        <div class="food-type">${food.dataType}</div>
       </div>
     `;
   }).join('');
   
-  let content = '';
-  
-  if (!append) {
-    content += `<div class="search-info">Found ${totalHits.toLocaleString()} foods. Showing best matches first.</div>`;
-  }
-  
-  content += foodsHTML;
-  
-  if (currentSearches[type].hasMore) {
-    content += `<div class="load-more" onclick="loadMoreResults('${type}')">Load More Results...</div>`;
-  }
-  
-  if (append) {
-    // Remove old "Load More" button and append new results
-    const existingLoadMore = dropdown.querySelector('.load-more');
-    if (existingLoadMore) {
-      existingLoadMore.remove();
-    }
-    dropdown.innerHTML += content;
-  } else {
-    dropdown.innerHTML = content;
-  }
-  
+  dropdown.innerHTML = foodsHTML;
   dropdown.style.display = 'block';
-}
-
-function loadMoreResults(type) {
-  currentSearches[type].page++;
-  searchFood(type, true);
 }
 
 function selectFood(type, food) {
@@ -322,6 +344,20 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function getMatchingStrategy() {
+  const selected = document.querySelector('input[name="matchingStrategy"]:checked').value;
+  
+  if (selected === 'auto' && selectedFoods.original) {
+    const foodType = getFoodType(selectedFoods.original);
+    if (foodType === 'protein') return 'protein';
+    if (foodType === 'carb') return 'carbs';
+    if (foodType === 'fat') return 'fat';
+    return 'protein'; // default fallback
+  }
+  
+  return selected;
+}
+
 async function swapMacros() {
   const originalQty = parseFloat(document.getElementById('originalQty').value) || 100;
   
@@ -330,11 +366,12 @@ async function swapMacros() {
     return;
   }
 
-  document.getElementById("replacementQty").innerText = "🔍 Calculating macro swap...";
-  document.getElementById("macroTable").style.display = "none";
-
+  const strategy = getMatchingStrategy();
   const originalFood = selectedFoods.original;
   const replacementFood = selectedFoods.replacement;
+  
+  document.getElementById("replacementQty").innerText = `🔍 Calculating ${strategy} match...`;
+  document.getElementById("macroTable").style.display = "none";
 
   // Calculate original macros based on input quantity
   const originalMacros = {
@@ -344,9 +381,36 @@ async function swapMacros() {
     calories: (originalFood.calories * originalQty) / 100
   };
   
-  // Calculate equivalent quantity based on protein matching
-  const equivalentQty = originalMacros.protein > 0 ? 
-    (originalMacros.protein / replacementFood.protein) * 100 : 100;
+  // Calculate equivalent quantity based on selected strategy
+  let equivalentQty = 100;
+  let matchedMacro = '';
+  
+  switch (strategy) {
+    case 'protein':
+      if (replacementFood.protein > 0) {
+        equivalentQty = (originalMacros.protein / replacementFood.protein) * 100;
+        matchedMacro = `${originalMacros.protein.toFixed(1)}g protein`;
+      }
+      break;
+    case 'carbs':
+      if (replacementFood.carbs > 0) {
+        equivalentQty = (originalMacros.carbs / replacementFood.carbs) * 100;
+        matchedMacro = `${originalMacros.carbs.toFixed(1)}g carbs`;
+      }
+      break;
+    case 'fat':
+      if (replacementFood.fat > 0) {
+        equivalentQty = (originalMacros.fat / replacementFood.fat) * 100;
+        matchedMacro = `${originalMacros.fat.toFixed(1)}g fat`;
+      }
+      break;
+    case 'calories':
+      if (replacementFood.calories > 0) {
+        equivalentQty = (originalMacros.calories / replacementFood.calories) * 100;
+        matchedMacro = `${originalMacros.calories.toFixed(0)} calories`;
+      }
+      break;
+  }
   
   // Calculate replacement macros
   const replacementMacros = {
@@ -359,25 +423,25 @@ async function swapMacros() {
   // Display results
   document.getElementById("replacementQty").innerHTML = 
     `<strong>Replacement Quantity:</strong> ${equivalentQty.toFixed(0)}g of ${replacementFood.name}<br>
-    <small style="color: #4da6d9; font-weight: bold;">✅ USDA FoodData Central (ID: ${replacementFood.id})</small>`;
+    <small style="color: #4da6d9; font-weight: bold;">✅ Matched by ${strategy}: ${matchedMacro}</small>`;
   
-  // Create comparison table
+  // Create comparison table with highlighting
   const tableHTML = `
     <tr>
       <td style='padding: 10px; border: 1px solid #333;'>${originalFood.name}</td>
       <td style='padding: 10px; border: 1px solid #333;'>${originalQty.toFixed(0)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.protein.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.carbs.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.fat.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.calories.toFixed(0)}</td>
+      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'protein' ? 'background: #e74c3c; color: white;' : ''}'>${originalMacros.protein.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'carbs' ? 'background: #f39c12; color: white;' : ''}'>${originalMacros.carbs.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'fat' ? 'background: #9b59b6; color: white;' : ''}'>${originalMacros.fat.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'calories' ? 'background: #2ecc71; color: white;' : ''}'>${originalMacros.calories.toFixed(0)}</td>
     </tr>
     <tr>
       <td style='padding: 10px; border: 1px solid #333;'>${replacementFood.name}</td>
       <td style='padding: 10px; border: 1px solid #333;'>${equivalentQty.toFixed(0)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.protein.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.carbs.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.fat.toFixed(1)}g</td>
-      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.calories.toFixed(0)}</td>
+      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'protein' ? 'background: #e74c3c; color: white;' : ''}'>${replacementMacros.protein.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'carbs' ? 'background: #f39c12; color: white;' : ''}'>${replacementMacros.carbs.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'fat' ? 'background: #9b59b6; color: white;' : ''}'>${replacementMacros.fat.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333; ${strategy === 'calories' ? 'background: #2ecc71; color: white;' : ''}'>${replacementMacros.calories.toFixed(0)}</td>
     </tr>
   `;
   
