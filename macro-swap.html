@@ -30,7 +30,7 @@
             border: 1px solid #333;
             border-top: none;
             border-radius: 0 0 4px 4px;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             z-index: 1000;
             display: none;
@@ -54,12 +54,25 @@
         .food-name {
             font-weight: bold;
             color: #f0f0f0;
+            margin-bottom: 3px;
         }
         
         .food-macros {
             font-size: 11px;
             color: #ccc;
-            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+        
+        .food-type {
+            font-size: 10px;
+            color: #4da6d9;
+            font-weight: bold;
+        }
+        
+        .food-brand {
+            font-size: 10px;
+            color: #ffa500;
+            font-style: italic;
         }
         
         .quantity-input {
@@ -83,17 +96,40 @@
             min-width: 60px;
             margin-right: 10px;
         }
+        
+        .search-info {
+            padding: 8px;
+            background: #1a1a1a;
+            color: #ccc;
+            font-size: 11px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+        
+        .load-more {
+            padding: 8px;
+            background: #0f3460;
+            color: #4da6d9;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .load-more:hover {
+            background: #1a4a6b;
+        }
     </style>
 </head>
 <body>
 <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
   <h2 style="text-align: center; font-size: 22px;">BUILT Macro Swap Tool</h2>
-  <p style="text-align: center; margin-bottom: 20px;">Swap any food for a similar macro equivalent</p>
+  <p style="text-align: center; margin-bottom: 20px;">Complete USDA Food Database Access</p>
 
   <!-- USDA Badge -->
   <div style="background: #0f3460; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; border: 1px solid #4da6d9;">
-    <div style="font-size: 14px; color: #4da6d9; font-weight: bold;">🏛️ USDA FoodData Central Database</div>
-    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">Search from 300,000+ official nutrition entries</div>
+    <div style="font-size: 14px; color: #4da6d9; font-weight: bold;">🏛️ Full USDA FoodData Central</div>
+    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">400,000+ foods including Foundation, Legacy, Survey, and Branded foods</div>
   </div>
 
   <!-- Original Food Selection -->
@@ -105,14 +141,14 @@
   
   <label><strong>Original Food</strong></label>
   <div class="food-search-container">
-    <input type="text" id="originalFoodInput" class="food-input" placeholder="Start typing food name... (e.g. chicken breast, brown rice)" oninput="searchFood('original')" onfocus="searchFood('original')">
+    <input type="text" id="originalFoodInput" class="food-input" placeholder="Search any food... (e.g. chicken breast, cheerios, mcdonald's)" oninput="searchFood('original')" onfocus="searchFood('original')">
     <div id="originalDropdown" class="food-dropdown"></div>
   </div>
 
   <!-- Replacement Food Selection -->
   <label><strong>Replacement Food</strong></label>
   <div class="food-search-container">
-    <input type="text" id="replacementFoodInput" class="food-input" placeholder="Start typing replacement food... (e.g. salmon, quinoa)" oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
+    <input type="text" id="replacementFoodInput" class="food-input" placeholder="Search replacement food... (any brand, preparation, or generic food)" oninput="searchFood('replacement')" onfocus="searchFood('replacement')">
     <div id="replacementDropdown" class="food-dropdown"></div>
   </div>
 
@@ -138,26 +174,25 @@
   </div>
 
   <div style="margin-top: 30px;">
-    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Popular Searches</h3>
+    <h3 style="border-bottom: 1px solid #444; padding-bottom: 5px;">Database Coverage</h3>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; font-size: 14px;">
       <div>
-        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🥩 Proteins:</h4>
+        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🥗 Food Types:</h4>
         <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
-          <li>chicken breast</li>
-          <li>salmon fillet</li>
-          <li>ground turkey</li>
-          <li>greek yogurt</li>
-          <li>tofu</li>
+          <li>Raw ingredients</li>
+          <li>Cooked foods</li>
+          <li>Restaurant items</li>
+          <li>Branded products</li>
+          <li>Prepared meals</li>
         </ul>
       </div>
       <div>
-        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🌾 Carbs:</h4>
+        <h4 style="color: #4da6d9; margin: 0 0 8px 0;">🏪 Brands:</h4>
         <ul style="margin: 0; padding-left: 15px; line-height: 1.6;">
-          <li>brown rice</li>
-          <li>quinoa</li>
-          <li>sweet potato</li>
-          <li>oats</li>
-          <li>whole wheat pasta</li>
+          <li>McDonald's, KFC, etc.</li>
+          <li>Kellogg's, General Mills</li>
+          <li>Pepsi, Coca-Cola</li>
+          <li>And thousands more</li>
         </ul>
       </div>
     </div>
@@ -171,8 +206,12 @@ let selectedFoods = {
 };
 
 let searchTimeout;
+let currentSearches = {
+  original: { page: 1, hasMore: true, totalHits: 0 },
+  replacement: { page: 1, hasMore: true, totalHits: 0 }
+};
 
-async function searchFood(type) {
+async function searchFood(type, loadMore = false) {
   const input = document.getElementById(`${type}FoodInput`);
   const dropdown = document.getElementById(`${type}Dropdown`);
   const searchTerm = input.value.trim();
@@ -182,21 +221,31 @@ async function searchFood(type) {
     return;
   }
 
+  if (!loadMore) {
+    currentSearches[type] = { page: 1, hasMore: true, totalHits: 0 };
+  }
+
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(async () => {
     try {
       const response = await fetch('/api/usda-search-dropdown', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ searchTerm })
+        body: JSON.stringify({ 
+          searchTerm,
+          pageNumber: currentSearches[type].page
+        })
       });
 
       const data = await response.json();
       
       if (data.foods && data.foods.length > 0) {
-        displayFoodOptions(type, data.foods);
+        currentSearches[type].totalHits = data.totalHits;
+        currentSearches[type].hasMore = currentSearches[type].page < data.totalPages;
+        
+        displayFoodOptions(type, data.foods, loadMore, data.totalHits);
       } else {
-        dropdown.innerHTML = '<div class="food-option" style="color: #ccc;">No foods found. Try a different search term.</div>';
+        dropdown.innerHTML = '<div class="food-option" style="color: #ccc;">No foods found. Try different keywords.</div>';
         dropdown.style.display = 'block';
       }
     } catch (error) {
@@ -207,22 +256,55 @@ async function searchFood(type) {
   }, 300);
 }
 
-function displayFoodOptions(type, foods) {
+function displayFoodOptions(type, foods, append = false, totalHits = 0) {
   const dropdown = document.getElementById(`${type}Dropdown`);
   
-  dropdown.innerHTML = foods.map(food => `
-    <div class="food-option" onclick="selectFood('${type}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
-      <div class="food-name">${food.name}</div>
-      <div class="food-macros">
-        Protein: ${food.protein.toFixed(1)}g | 
-        Carbs: ${food.carbs.toFixed(1)}g | 
-        Fat: ${food.fat.toFixed(1)}g | 
-        Calories: ${food.calories.toFixed(0)}
+  const foodsHTML = foods.map(food => {
+    let displayName = food.name;
+    if (displayName.length > 60) {
+      displayName = displayName.substring(0, 60) + '...';
+    }
+    
+    return `
+      <div class="food-option" onclick="selectFood('${type}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
+        <div class="food-name">${displayName}</div>
+        <div class="food-macros">
+          P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g | Cal: ${food.calories.toFixed(0)}
+        </div>
+        <div class="food-type">${food.dataType}${food.brandOwner ? ` | ${food.brandOwner}` : ''}</div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+  
+  let content = '';
+  
+  if (!append) {
+    content += `<div class="search-info">Found ${totalHits.toLocaleString()} foods. Showing best matches first.</div>`;
+  }
+  
+  content += foodsHTML;
+  
+  if (currentSearches[type].hasMore) {
+    content += `<div class="load-more" onclick="loadMoreResults('${type}')">Load More Results...</div>`;
+  }
+  
+  if (append) {
+    // Remove old "Load More" button and append new results
+    const existingLoadMore = dropdown.querySelector('.load-more');
+    if (existingLoadMore) {
+      existingLoadMore.remove();
+    }
+    dropdown.innerHTML += content;
+  } else {
+    dropdown.innerHTML = content;
+  }
   
   dropdown.style.display = 'block';
+}
+
+function loadMoreResults(type) {
+  currentSearches[type].page++;
+  searchFood(type, true);
 }
 
 function selectFood(type, food) {
@@ -277,7 +359,7 @@ async function swapMacros() {
   // Display results
   document.getElementById("replacementQty").innerHTML = 
     `<strong>Replacement Quantity:</strong> ${equivalentQty.toFixed(0)}g of ${replacementFood.name}<br>
-    <small style="color: #4da6d9; font-weight: bold;">✅ USDA FoodData Central</small>`;
+    <small style="color: #4da6d9; font-weight: bold;">✅ USDA FoodData Central (ID: ${replacementFood.id})</small>`;
   
   // Create comparison table
   const tableHTML = `
