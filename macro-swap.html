@@ -22,6 +22,12 @@
     </ul>
   </div>
 
+  <!-- Data Source Badge -->
+  <div style="background: #0f3460; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; border: 1px solid #4da6d9;">
+    <div style="font-size: 14px; color: #4da6d9; font-weight: bold;">🏛️ USDA FoodData Central + 🤖 AI Powered</div>
+    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">Uses official USDA nutrition database with AI fallback for maximum accuracy</div>
+  </div>
+
   <label><strong>Original Food</strong></label>
   <input id="originalFood" type="text" placeholder="e.g. 100g cooked chicken breast, 150g dry weight pasta" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #1e1e1e; color: white; border: 1px solid #333; box-sizing: border-box; border-radius: 4px;">
 
@@ -88,19 +94,125 @@ async function swapMacros() {
     return;
   }
 
-  document.getElementById("replacementQty").innerText = "Calculating equivalent... (More specific details = better accuracy)";
+  document.getElementById("replacementQty").innerText = "🔍 Searching USDA food database...";
   document.getElementById("macroTable").style.display = "none";
 
   try {
+    // Try USDA database first for both foods
+    const [originalResult, replacementResult] = await Promise.all([
+      fetch("/api/usda-food-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ foodQuery: extractFoodName(originalFood) })
+      }).then(r => r.json()),
+      
+      fetch("/api/usda-food-search", {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ foodQuery: extractFoodName(replacementFood) })
+      }).then(r => r.json())
+    ]);
+
+    if (originalResult.success && replacementResult.success) {
+      // Both foods found in USDA - use precise data
+      calculateWithUSDAData(originalResult.food, replacementResult.food, originalFood, replacementFood);
+    } else {
+      // Fall back to OpenAI if either food not found in USDA
+      document.getElementById("replacementQty").innerText = "🤖 Using AI for calculation...";
+      await useOpenAICalculation(originalFood, replacementFood);
+    }
+    
+  } catch (error) {
+    console.error('Error:', error);
+    // Fall back to OpenAI on any error
+    await useOpenAICalculation(originalFood, replacementFood);
+  }
+}
+
+function extractFoodName(input) {
+  // Remove quantities and common descriptors to get base food name
+  return input
+    .replace(/\d+\.?\d*\s*(g|grams?|oz|ounces?|cups?|tbsp|tablespoons?|lbs?|pounds?)/gi, '')
+    .replace(/\b(raw|cooked|baked|grilled|fried|steamed|boiled|roasted)\b/gi, '')
+    .replace(/\b(lean|extra lean|93\/7|90\/10|85\/15|80\/20)\b/gi, '')
+    .replace(/\b(dry weight|wet weight)\b/gi, '')
+    .trim();
+}
+
+function parseQuantity(input) {
+  const match = input.match(/(\d+(?:\.\d+)?)\s*(g|grams?|oz|ounces?|cups?|tbsp|lbs?)/i);
+  if (!match) return 100; // default 100g
+  
+  let qty = parseFloat(match[1]);
+  const unit = match[2].toLowerCase();
+  
+  // Convert to grams
+  if (unit.includes('oz')) qty *= 28.35;
+  if (unit.includes('lb')) qty *= 453.59;
+  if (unit.includes('cup')) qty *= 240; // approximate for most foods
+  if (unit.includes('tbsp')) qty *= 15;
+  
+  return qty;
+}
+
+function calculateWithUSDAData(originalFood, replacementFood, originalInput, replacementInput) {
+  const originalQty = parseQuantity(originalInput);
+  
+  // Calculate original macros based on input quantity
+  const originalMacros = {
+    protein: (originalFood.protein * originalQty) / 100,
+    carbs: (originalFood.carbs * originalQty) / 100,
+    fat: (originalFood.fat * originalQty) / 100,
+    calories: (originalFood.calories * originalQty) / 100
+  };
+  
+  // Calculate equivalent quantity based on protein matching
+  const equivalentQty = originalMacros.protein > 0 ? 
+    (originalMacros.protein / replacementFood.protein) * 100 : 100;
+  
+  // Calculate replacement macros
+  const replacementMacros = {
+    protein: (replacementFood.protein * equivalentQty) / 100,
+    carbs: (replacementFood.carbs * equivalentQty) / 100,
+    fat: (replacementFood.fat * equivalentQty) / 100,
+    calories: (replacementFood.calories * equivalentQty) / 100
+  };
+  
+  // Display results with USDA badge
+  document.getElementById("replacementQty").innerHTML = 
+    `<strong>Replacement Quantity:</strong> ${equivalentQty.toFixed(0)}g of ${replacementFood.name}<br>
+    <small style="color: #4da6d9; font-weight: bold;">✅ Precise USDA FoodData Central</small>`;
+  
+  // Create comparison table
+  const tableHTML = `
+    <tr>
+      <td style='padding: 10px; border: 1px solid #333;'>${originalFood.name}</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${originalQty.toFixed(0)}g</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.protein.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.carbs.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.fat.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${originalMacros.calories.toFixed(0)}</td>
+    </tr>
+    <tr>
+      <td style='padding: 10px; border: 1px solid #333;'>${replacementFood.name}</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${equivalentQty.toFixed(0)}g</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.protein.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.carbs.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.fat.toFixed(1)}g</td>
+      <td style='padding: 10px; border: 1px solid #333;'>${replacementMacros.calories.toFixed(0)}</td>
+    </tr>
+  `;
+  
+  document.getElementById("macroTableBody").innerHTML = tableHTML;
+  document.getElementById("macroTable").style.display = "block";
+}
+
+async function useOpenAICalculation(originalFood, replacementFood) {
+  try {
     const res = await fetch("/api/api/macro-swap", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        originalFood: originalFood,
-        replacementFood: replacementFood
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ originalFood, replacementFood })
     });
 
     const data = await res.json();
@@ -114,9 +226,11 @@ async function swapMacros() {
 
     const qtyMatch = reply.match(/Replacement Quantity: ([^\n]+)/);
     if (qtyMatch) {
-      document.getElementById("replacementQty").innerText = `Replacement Quantity: ${qtyMatch[1]}`;
+      document.getElementById("replacementQty").innerHTML = 
+        `<strong>Replacement Quantity:</strong> ${qtyMatch[1]}<br>
+        <small style="color: #ffa500; font-weight: bold;">🤖 AI-Powered Calculation</small>`;
     } else {
-      document.getElementById("replacementQty").innerText = "Replacement Quantity: Not found. Try being more specific with your food descriptions.";
+      document.getElementById("replacementQty").innerText = "Replacement Quantity: Not found. Try being more specific.";
     }
 
     const tableMatch = reply.match(/\| Food \|(.|\n)*?\| Replacement \|(.|\n)*?\|/);
@@ -126,7 +240,7 @@ async function swapMacros() {
       
       const tableHTML = dataRows.map(row => {
         const cols = row.split("|").slice(1, -1);
-        return `<tr>${cols.map(cell => `<td style='padding: 10px; border: 1px solid #333; font-weight: 500;'>${cell.trim()}</td>`).join("")}</tr>`;
+        return `<tr>${cols.map(cell => `<td style='padding: 10px; border: 1px solid #333;'>${cell.trim()}</td>`).join("")}</tr>`;
       }).join("");
       
       document.getElementById("macroTableBody").innerHTML = tableHTML;
@@ -134,8 +248,8 @@ async function swapMacros() {
     }
     
   } catch (error) {
-    console.error('Error:', error);
-    document.getElementById("replacementQty").innerText = "Error connecting to server. Please try again with specific food details.";
+    console.error('OpenAI Error:', error);
+    document.getElementById("replacementQty").innerText = "Error connecting to server. Please try again.";
   }
 }
 </script>
