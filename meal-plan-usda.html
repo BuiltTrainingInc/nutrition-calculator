@@ -344,6 +344,80 @@
             color: #4da6d9;
             font-style: italic;
         }
+
+        .weight-toggle {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+        }
+
+        .weight-toggle label {
+            color: #4da6d9;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            gap: 0;
+            margin-bottom: 8px;
+        }
+
+        .toggle-btn {
+            background: #333;
+            color: #ccc;
+            border: 1px solid #444;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        .toggle-btn:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .toggle-btn:last-child {
+            border-radius: 0 4px 4px 0;
+            border-left: none;
+        }
+
+        .toggle-btn.active {
+            background: #4da6d9;
+            color: white;
+            border-color: #4da6d9;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            background: #444;
+            color: white;
+        }
+
+        .toggle-explanation {
+            color: #999;
+            font-size: 11px;
+            font-style: italic;
+            display: block;
+        }
+
+        .weight-indicator {
+            background: #2ecc71;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .weight-indicator.raw {
+            background: #e74c3c;
+        }
     </style>
 </head>
 <body>
@@ -374,13 +448,21 @@
         </div>
     </div>
 
-    <!-- Food Preferences -->
+            <!-- Food Preferences -->
     <div class="section">
         <div class="section-title">🍽️ Food Preferences</div>
         
         <!-- Proteins -->
         <div class="food-category">
             <div class="category-title">🥩 Protein Sources</div>
+            <div class="weight-toggle">
+                <label>Calculate quantities as:</label>
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" id="proteinCookedToggle" onclick="toggleWeightMode('protein', 'cooked')">Cooked Weight</button>
+                    <button class="toggle-btn" id="proteinRawToggle" onclick="toggleWeightMode('protein', 'raw')">Raw Weight</button>
+                </div>
+                <small class="toggle-explanation">Cooked weight = what you eat | Raw weight = before cooking</small>
+            </div>
             <input type="text" class="food-search-input" id="proteinSearch" placeholder="Search proteins... (chicken, salmon, eggs)" oninput="searchFoods('protein')">
             <div class="food-grid" id="proteinGrid"></div>
             <div class="selected-foods">
@@ -392,6 +474,14 @@
         <!-- Carbs -->
         <div class="food-category">
             <div class="category-title">🍚 Carbohydrate Sources</div>
+            <div class="weight-toggle">
+                <label>Calculate quantities as:</label>
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" id="carbCookedToggle" onclick="toggleWeightMode('carb', 'cooked')">Cooked Weight</button>
+                    <button class="toggle-btn" id="carbRawToggle" onclick="toggleWeightMode('carb', 'raw')">Dry Weight</button>
+                </div>
+                <small class="toggle-explanation">Cooked = ready to eat | Dry = uncooked rice/pasta/oats</small>
+            </div>
             <input type="text" class="food-search-input" id="carbSearch" placeholder="Search carbs... (rice, oats, pasta)" oninput="searchFoods('carb')">
             <div class="food-grid" id="carbGrid"></div>
             <div class="selected-foods">
@@ -403,6 +493,14 @@
         <!-- Fats -->
         <div class="food-category">
             <div class="category-title">🥑 Fat Sources</div>
+            <div class="weight-toggle">
+                <label>Calculate quantities as:</label>
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" id="fatCookedToggle" onclick="toggleWeightMode('fat', 'cooked')">As Served</button>
+                    <button class="toggle-btn" id="fatRawToggle" onclick="toggleWeightMode('fat', 'raw')">Raw Weight</button>
+                </div>
+                <small class="toggle-explanation">As served = ready to eat | Raw = before preparation</small>
+            </div>
             <input type="text" class="food-search-input" id="fatSearch" placeholder="Search fats... (avocado, nuts, oil)" oninput="searchFoods('fat')">
             <div class="food-grid" id="fatGrid"></div>
             <div class="selected-foods">
@@ -414,6 +512,14 @@
         <!-- Fruits & Vegetables -->
         <div class="food-category">
             <div class="category-title">🥬 Fruits & Vegetables</div>
+            <div class="weight-toggle">
+                <label>Calculate quantities as:</label>
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" id="veggieCookedToggle" onclick="toggleWeightMode('veggie', 'cooked')">As Served</button>
+                    <button class="toggle-btn" id="veggieRawToggle" onclick="toggleWeightMode('veggie', 'raw')">Raw Weight</button>
+                </div>
+                <small class="toggle-explanation">As served = ready to eat | Raw = before cooking</small>
+            </div>
             <input type="text" class="food-search-input" id="veggieSearch" placeholder="Search fruits/veggies... (spinach, berries, broccoli)" oninput="searchFoods('veggie')">
             <div class="food-grid" id="veggieGrid"></div>
             <div class="selected-foods">
@@ -481,11 +587,153 @@ let selectedFoods = {
     veggie: []
 };
 
+let weightModes = {
+    protein: 'cooked',
+    carb: 'cooked', 
+    fat: 'cooked',
+    veggie: 'cooked'
+};
+
 let searchTimeout;
 let currentMealPlan = null;
 
+// Preparation factors for cooked/raw conversions
+const preparationFactors = {
+    'rice': { cookedToDry: 0.28, dryToCooked: 3.57 },
+    'pasta': { cookedToDry: 0.31, dryToCooked: 3.23 },
+    'oats': { cookedToDry: 0.33, dryToCooked: 3.03 },
+    'quinoa': { cookedToDry: 0.25, dryToCooked: 4.0 },
+    'lentils': { cookedToDry: 0.4, dryToCooked: 2.5 },
+    'beans': { cookedToDry: 0.45, dryToCooked: 2.22 },
+    'barley': { cookedToDry: 0.3, dryToCooked: 3.33 }
+};
+
+// Toggle weight mode
+function toggleWeightMode(category, mode) {
+    weightModes[category] = mode;
+    
+    // Update button states
+    document.getElementById(`${category}CookedToggle`).classList.toggle('active', mode === 'cooked');
+    document.getElementById(`${category}RawToggle`).classList.toggle('active', mode === 'raw');
+    
+    // Update selected foods display to show new weight indicators
+    updateSelectedFoodsDisplay(category);
+}
+
+// Detect if food needs cooked/raw conversion
+function detectFoodGrainType(food) {
+    const name = food.name.toLowerCase();
+    
+    if (name.includes('rice')) return 'rice';
+    if (name.includes('pasta') || name.includes('noodle')) return 'pasta';
+    if (name.includes('oats') || name.includes('oatmeal')) return 'oats';
+    if (name.includes('quinoa')) return 'quinoa';
+    if (name.includes('lentil')) return 'lentils';
+    if (name.includes('bean')) return 'beans';
+    if (name.includes('barley')) return 'barley';
+    
+    return null;
+}
+
+// Check if USDA food is already in cooked state
+function isUSDAFoodCooked(food) {
+    const name = food.name.toLowerCase();
+    return name.includes('cooked') || name.includes('boiled') || name.includes('prepared');
+}
+
+// Convert between cooked and raw weights
+function convertWeight(food, quantity, fromMode, toMode) {
+    const grainType = detectFoodGrainType(food);
+    
+    if (!grainType || !preparationFactors[grainType]) {
+        return { quantity, explanation: '' };
+    }
+    
+    const isUsdaCooked = isUSDAFoodCooked(food);
+    let convertedQuantity = quantity;
+    let explanation = '';
+    
+    // Conversion logic
+    if (fromMode === 'cooked' && toMode === 'raw') {
+        if (isUsdaCooked) {
+            // USDA is cooked, user wants raw weight
+            convertedQuantity = quantity * preparationFactors[grainType].cookedToDry;
+            explanation = `${quantity}g cooked = ${convertedQuantity.toFixed(0)}g dry weight`;
+        } else {
+            // USDA is already raw
+            explanation = `${quantity}g dry weight (USDA shows raw data)`;
+        }
+    } else if (fromMode === 'raw' && toMode === 'cooked') {
+        if (!isUsdaCooked) {
+            // USDA is raw, user wants cooked weight
+            convertedQuantity = quantity * preparationFactors[grainType].dryToCooked;
+            explanation = `${quantity}g dry = ${convertedQuantity.toFixed(0)}g cooked weight`;
+        } else {
+            // USDA is already cooked
+            explanation = `${quantity}g cooked weight (USDA shows cooked data)`;
+        }
+    }
+    
+    return { quantity: convertedQuantity, explanation };
+}
+
 // Food classification functions
-function getFoodMacroType(food) {
+// Detect if food needs cooked/raw conversion
+function detectFoodGrainType(food) {
+    const name = food.name.toLowerCase();
+    
+    if (name.includes('rice')) return 'rice';
+    if (name.includes('pasta') || name.includes('noodle')) return 'pasta';
+    if (name.includes('oats') || name.includes('oatmeal')) return 'oats';
+    if (name.includes('quinoa')) return 'quinoa';
+    if (name.includes('lentil')) return 'lentils';
+    if (name.includes('bean')) return 'beans';
+    if (name.includes('barley')) return 'barley';
+    
+    return null;
+}
+
+// Check if USDA food is already in cooked state
+function isUSDAFoodCooked(food) {
+    const name = food.name.toLowerCase();
+    return name.includes('cooked') || name.includes('boiled') || name.includes('prepared');
+}
+
+// Convert between cooked and raw weights
+function convertWeight(food, quantity, fromMode, toMode) {
+    const grainType = detectFoodGrainType(food);
+    
+    if (!grainType || !preparationFactors[grainType]) {
+        return { quantity, explanation: '' };
+    }
+    
+    const isUsdaCooked = isUSDAFoodCooked(food);
+    let convertedQuantity = quantity;
+    let explanation = '';
+    
+    // Conversion logic
+    if (fromMode === 'cooked' && toMode === 'raw') {
+        if (isUsdaCooked) {
+            // USDA is cooked, user wants raw weight
+            convertedQuantity = quantity * preparationFactors[grainType].cookedToDry;
+            explanation = `${quantity}g cooked = ${convertedQuantity.toFixed(0)}g dry weight`;
+        } else {
+            // USDA is already raw
+            explanation = `${quantity}g dry weight (USDA shows raw data)`;
+        }
+    } else if (fromMode === 'raw' && toMode === 'cooked') {
+        if (!isUsdaCooked) {
+            // USDA is raw, user wants cooked weight
+            convertedQuantity = quantity * preparationFactors[grainType].dryToCooked;
+            explanation = `${quantity}g dry = ${convertedQuantity.toFixed(0)}g cooked weight`;
+        } else {
+            // USDA is already cooked
+            explanation = `${quantity}g cooked weight (USDA shows cooked data)`;
+        }
+    }
+    
+    return { quantity: convertedQuantity, explanation };
+}
     const protein = food.protein || 0;
     const carbs = food.carbs || 0;
     const fat = food.fat || 0;
@@ -620,6 +868,7 @@ function toggleFood(category, food) {
 // Update selected foods display
 function updateSelectedFoodsDisplay(category) {
     const container = document.getElementById(`selected${category.charAt(0).toUpperCase() + category.slice(1)}s`);
+    const weightMode = weightModes[category];
     
     const tagsHTML = selectedFoods[category].map(food => {
         let displayName = food.name;
@@ -627,9 +876,11 @@ function updateSelectedFoodsDisplay(category) {
             displayName = displayName.substring(0, 25) + '...';
         }
         
+        const weightIndicator = `<span class="weight-indicator ${weightMode === 'raw' ? 'raw' : ''}">${weightMode.toUpperCase()}</span>`;
+        
         return `
             <div class="selected-food-tag" onclick="removeFood('${category}', '${food.id}')" title="Click to remove">
-                ${displayName} ✕
+                ${displayName} ${weightIndicator} ✕
             </div>
         `;
     }).join('');
@@ -723,29 +974,49 @@ async function buildMealPlan(params) {
         // Add protein source
         if (selectedFoods.protein.length > 0) {
             const protein = selectedFoods.protein[i % selectedFoods.protein.length];
-            const quantity = calculateQuantity(protein, 'protein', proteinPerMeal);
-            meal.foods.push({ food: protein, quantity, type: 'protein' });
+            const quantityData = calculateQuantity(protein, 'protein', proteinPerMeal, 'protein');
+            meal.foods.push({ 
+                food: protein, 
+                quantity: quantityData.quantity, 
+                explanation: quantityData.explanation,
+                type: 'protein' 
+            });
         }
         
         // Add carb source
         if (selectedFoods.carb.length > 0) {
             const carb = selectedFoods.carb[i % selectedFoods.carb.length];
-            const quantity = calculateQuantity(carb, 'carbs', carbsPerMeal);
-            meal.foods.push({ food: carb, quantity, type: 'carb' });
+            const quantityData = calculateQuantity(carb, 'carbs', carbsPerMeal, 'carb');
+            meal.foods.push({ 
+                food: carb, 
+                quantity: quantityData.quantity, 
+                explanation: quantityData.explanation,
+                type: 'carb' 
+            });
         }
         
         // Add fat source
         if (selectedFoods.fat.length > 0) {
             const fat = selectedFoods.fat[i % selectedFoods.fat.length];
-            const quantity = calculateQuantity(fat, 'fat', fatPerMeal * 0.7); // Reduce fat slightly as other foods contribute
-            meal.foods.push({ food: fat, quantity, type: 'fat' });
+            const quantityData = calculateQuantity(fat, 'fat', fatPerMeal * 0.7, 'fat'); // Reduce fat slightly as other foods contribute
+            meal.foods.push({ 
+                food: fat, 
+                quantity: quantityData.quantity, 
+                explanation: quantityData.explanation,
+                type: 'fat' 
+            });
         }
         
         // Add vegetable/fruit
         if (selectedFoods.veggie.length > 0) {
             const veggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
             const quantity = 100; // Standard serving
-            meal.foods.push({ food: veggie, quantity, type: 'veggie' });
+            meal.foods.push({ 
+                food: veggie, 
+                quantity: quantity, 
+                explanation: weightModes.veggie === 'cooked' ? 'as served' : 'raw weight',
+                type: 'veggie' 
+            });
         }
         
         // Calculate meal totals
@@ -763,15 +1034,44 @@ async function buildMealPlan(params) {
     return mealPlan;
 }
 
-// Calculate optimal quantity for target macro
-function calculateQuantity(food, macro, target) {
+// Calculate optimal quantity for target macro with weight mode consideration
+function calculateQuantity(food, macro, target, category) {
     const macroValue = food[macro] || 1;
-    if (macroValue === 0) return 100; // Default quantity if no macro content
+    if (macroValue === 0) return { quantity: 100, explanation: '' };
     
-    const quantity = (target / macroValue) * 100;
+    // Calculate base quantity needed for USDA nutrition data
+    let baseQuantity = (target / macroValue) * 100;
     
-    // Keep quantities reasonable (between 50g and 500g)
-    return Math.max(50, Math.min(500, Math.round(quantity)));
+    // Apply weight mode conversion if needed
+    const weightMode = weightModes[category];
+    const grainType = detectFoodGrainType(food);
+    const isUsdaCooked = isUSDAFoodCooked(food);
+    
+    let finalQuantity = baseQuantity;
+    let explanation = '';
+    
+    if (grainType && preparationFactors[grainType]) {
+        if (weightMode === 'raw' && isUsdaCooked) {
+            // User wants raw weight, but USDA data is cooked
+            finalQuantity = baseQuantity * preparationFactors[grainType].cookedToDry;
+            explanation = `${Math.round(finalQuantity)}g dry weight (≈${Math.round(baseQuantity)}g cooked)`;
+        } else if (weightMode === 'cooked' && !isUsdaCooked) {
+            // User wants cooked weight, but USDA data is raw
+            finalQuantity = baseQuantity * preparationFactors[grainType].dryToCooked;
+            explanation = `${Math.round(finalQuantity)}g cooked weight (≈${Math.round(baseQuantity)}g dry)`;
+        } else {
+            // Weight mode matches USDA data state
+            explanation = weightMode === 'cooked' ? 'cooked weight' : 'dry weight';
+        }
+    } else {
+        // No conversion needed for non-grains
+        explanation = weightMode === 'cooked' ? 'as served' : 'raw weight';
+    }
+    
+    // Keep quantities reasonable (between 30g and 600g)
+    finalQuantity = Math.max(30, Math.min(600, Math.round(finalQuantity)));
+    
+    return { quantity: finalQuantity, explanation };
 }
 
 // Display generated meal plan
@@ -795,6 +1095,7 @@ function displayMealPlan(mealPlan) {
                         <div class="food-info">
                             <div style="font-weight: bold;">${item.food.name} ${badge}</div>
                             <div class="food-nutrition">P: ${itemProtein}g | C: ${itemCarbs}g | F: ${itemFat}g | Cal: ${itemCalories}</div>
+                            <div style="font-size: 10px; color: #ffa500; font-style: italic; margin-top: 2px;">📏 ${item.explanation}</div>
                         </div>
                         <div class="food-quantity">${item.quantity}g</div>
                     </div>
