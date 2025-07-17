@@ -448,7 +448,7 @@
         </div>
     </div>
 
-            <!-- Food Preferences -->
+    <!-- Food Preferences -->
     <div class="section">
         <div class="section-title">🍽️ Food Preferences</div>
         
@@ -678,62 +678,7 @@ function convertWeight(food, quantity, fromMode, toMode) {
 }
 
 // Food classification functions
-// Detect if food needs cooked/raw conversion
-function detectFoodGrainType(food) {
-    const name = food.name.toLowerCase();
-    
-    if (name.includes('rice')) return 'rice';
-    if (name.includes('pasta') || name.includes('noodle')) return 'pasta';
-    if (name.includes('oats') || name.includes('oatmeal')) return 'oats';
-    if (name.includes('quinoa')) return 'quinoa';
-    if (name.includes('lentil')) return 'lentils';
-    if (name.includes('bean')) return 'beans';
-    if (name.includes('barley')) return 'barley';
-    
-    return null;
-}
-
-// Check if USDA food is already in cooked state
-function isUSDAFoodCooked(food) {
-    const name = food.name.toLowerCase();
-    return name.includes('cooked') || name.includes('boiled') || name.includes('prepared');
-}
-
-// Convert between cooked and raw weights
-function convertWeight(food, quantity, fromMode, toMode) {
-    const grainType = detectFoodGrainType(food);
-    
-    if (!grainType || !preparationFactors[grainType]) {
-        return { quantity, explanation: '' };
-    }
-    
-    const isUsdaCooked = isUSDAFoodCooked(food);
-    let convertedQuantity = quantity;
-    let explanation = '';
-    
-    // Conversion logic
-    if (fromMode === 'cooked' && toMode === 'raw') {
-        if (isUsdaCooked) {
-            // USDA is cooked, user wants raw weight
-            convertedQuantity = quantity * preparationFactors[grainType].cookedToDry;
-            explanation = `${quantity}g cooked = ${convertedQuantity.toFixed(0)}g dry weight`;
-        } else {
-            // USDA is already raw
-            explanation = `${quantity}g dry weight (USDA shows raw data)`;
-        }
-    } else if (fromMode === 'raw' && toMode === 'cooked') {
-        if (!isUsdaCooked) {
-            // USDA is raw, user wants cooked weight
-            convertedQuantity = quantity * preparationFactors[grainType].dryToCooked;
-            explanation = `${quantity}g dry = ${convertedQuantity.toFixed(0)}g cooked weight`;
-        } else {
-            // USDA is already cooked
-            explanation = `${quantity}g cooked weight (USDA shows cooked data)`;
-        }
-    }
-    
-    return { quantity: convertedQuantity, explanation };
-}
+function getFoodMacroType(food) {
     const protein = food.protein || 0;
     const carbs = food.carbs || 0;
     const fat = food.fat || 0;
@@ -1182,7 +1127,7 @@ function downloadMealPlan() {
         
         meal.foods.forEach(item => {
             const multiplier = item.quantity / 100;
-            content += `• ${item.quantity}g ${item.food.name}\n`;
+            content += `• ${item.quantity}g ${item.food.name} (${item.explanation})\n`;
             content += `  P: ${(item.food.protein * multiplier).toFixed(1)}g | C: ${(item.food.carbs * multiplier).toFixed(1)}g | F: ${(item.food.fat * multiplier).toFixed(1)}g | Cal: ${(item.food.calories * multiplier).toFixed(0)}\n`;
         });
         
@@ -1205,7 +1150,8 @@ function downloadMealPlan() {
     content += `Fat: ${dailyTotals.fat.toFixed(1)}g / ${document.getElementById('targetFat').value}g\n`;
     content += `Calories: ${dailyTotals.calories.toFixed(0)}\n\n`;
     content += '* Generated from USDA FoodData Central database\n';
-    content += '* Quantities automatically calculated to meet your macro targets';
+    content += '* Quantities automatically calculated to meet your macro targets\n';
+    content += '* Weight calculations adjusted for cooked vs dry specifications';
 
     const contentEl = document.createElement("pre");
     contentEl.innerText = content;
