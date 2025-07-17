@@ -5,1058 +5,929 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="frame-ancestors *;">
     <meta http-equiv="X-Frame-Options" content="ALLOWALL">
-    <title>BUILT Meal Plan Generator - USDA Database</title>
+    <title>BUILT Automated Meal Plan Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
-        .food-search-container {
-            position: relative;
-            margin-bottom: 10px;
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #f5f5f5;
+            border-radius: 10px;
         }
-        
-        .food-input {
-            width: 100%;
-            padding: 8px;
+
+        .section {
             background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+
+        .section-title {
+            color: #4da6d9;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #4da6d9;
+            padding-bottom: 5px;
+        }
+
+        .macro-inputs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .macro-input {
+            text-align: center;
+        }
+
+        .macro-input label {
+            display: block;
+            font-size: 14px;
+            color: #4da6d9;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .macro-input input {
+            width: 100%;
+            padding: 10px;
+            background: #1e1e1e;
             color: white;
             border: 1px solid #444;
             border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 12px;
+            text-align: center;
+            font-size: 16px;
         }
-        
-        .food-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-top: none;
-            border-radius: 0 0 4px 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
+
+        .food-category {
+            margin-bottom: 20px;
         }
-        
-        .food-option {
-            padding: 8px;
-            cursor: pointer;
-            border-bottom: 1px solid #333;
-            font-size: 11px;
-        }
-        
-        .food-option:hover {
-            background: #3a3a3a;
-        }
-        
-        .food-name {
-            font-weight: bold;
-            color: #f0f0f0;
-            margin-bottom: 2px;
-        }
-        
-        .food-macros {
-            font-size: 10px;
-            color: #ccc;
-            margin-bottom: 2px;
-        }
-        
-        .food-badges {
-            display: flex;
-            gap: 5px;
-            margin-top: 3px;
-        }
-        
-        .macro-type {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: bold;
-        }
-        
-        .preparation-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: bold;
-            background: #2ecc71;
-            color: white;
-        }
-        
-        .protein-source { background: #e74c3c; color: white; }
-        .carb-source { background: #f39c12; color: white; }
-        .fat-source { background: #9b59b6; color: white; }
-        .mixed-source { background: #34495e; color: white; }
-        
-        .meal-section {
-            background: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #444;
-        }
-        
-        .meal-header {
+
+        .category-title {
             color: #4da6d9;
             font-weight: bold;
             margin-bottom: 10px;
             font-size: 16px;
         }
-        
-        .food-row {
-            display: grid;
-            grid-template-columns: 2fr 100px 80px;
-            gap: 10px;
-            align-items: start;
-            margin-bottom: 10px;
-            padding: 8px;
-            background: #1a1a1a;
+
+        .food-search-input {
+            width: 100%;
+            padding: 10px;
+            background: #1e1e1e;
+            color: white;
+            border: 1px solid #444;
             border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
         }
-        
-        .selected-food-info {
-            display: none;
+
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            background: #1a1a1a;
+        }
+
+        .food-item {
             background: #333;
             padding: 8px;
             border-radius: 4px;
-            margin-top: 5px;
-            font-size: 11px;
-            border-left: 3px solid #4da6d9;
-            grid-column: 1 / -1;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-size: 12px;
         }
-        
-        .selected-food-info.active {
-            display: block;
+
+        .food-item:hover {
+            background: #444;
+            border-color: #4da6d9;
         }
-        
-        .prep-explanation {
-            color: #ffa500;
-            font-style: italic;
+
+        .food-item.selected {
+            background: #4da6d9;
+            color: white;
+            border-color: #4da6d9;
+        }
+
+        .food-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .food-macros {
+            font-size: 10px;
+            color: #ccc;
+        }
+
+        .selected.food-macros {
+            color: white;
+        }
+
+        .food-badges {
+            display: flex;
+            gap: 5px;
             margin-top: 3px;
         }
-        
-        .quantity-input {
-            width: 70px;
-            padding: 5px;
-            background: #1e1e1e;
-            color: white;
-            border: 1px solid #333;
-            border-radius: 3px;
-            text-align: center;
+
+        .macro-badge {
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 8px;
+            font-weight: bold;
         }
-        
-        .remove-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-        
-        .add-food-btn {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        
-        .meal-totals {
+
+        .protein-badge { background: #e74c3c; color: white; }
+        .carb-badge { background: #f39c12; color: white; }
+        .fat-badge { background: #9b59b6; color: white; }
+        .mixed-badge { background: #34495e; color: white; }
+
+        .selected-foods {
+            margin-top: 15px;
+            padding: 10px;
             background: #1a1a1a;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        .selected-foods h4 {
+            color: #4da6d9;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+
+        .selected-food-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .selected-food-tag {
+            background: #4da6d9;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .selected-food-tag:hover {
+            background: #e74c3c;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #4da6d9, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: transform 0.2s ease;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .generate-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .meal-plan-output {
+            display: none;
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #4da6d9;
+            margin-top: 20px;
+        }
+
+        .meal-plan-output.active {
+            display: block;
+        }
+
+        .meal-section {
+            background: #1a4a6b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .meal-header {
+            color: #4da6d9;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #4da6d9;
+            padding-bottom: 5px;
+        }
+
+        .meal-food {
+            background: #2a4a6b;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border-left: 3px solid #4da6d9;
+        }
+
+        .food-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .food-info {
+            flex: 1;
+        }
+
+        .food-quantity {
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .food-nutrition {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 3px;
+        }
+
+        .meal-totals {
+            background: #0a2240;
             padding: 10px;
             border-radius: 4px;
             margin-top: 10px;
             font-size: 13px;
-            border: 1px solid #333;
+            border: 1px solid #4da6d9;
         }
-        
-        .totals-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        
-        .macro-bar {
-            background: #333;
-            height: 6px;
-            border-radius: 3px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-        
-        .macro-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-        
-        .protein-fill { background: #e74c3c; }
-        .carbs-fill { background: #f39c12; }
-        .fat-fill { background: #9b59b6; }
-        .calories-fill { background: #2ecc71; }
-        
+
         .daily-summary {
-            background: #0f3460;
+            background: #0a2240;
             padding: 20px;
             border-radius: 8px;
             margin-top: 20px;
-            border: 2px solid #4da6d9;
+            border: 2px solid #2ecc71;
         }
-        
+
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             text-align: center;
         }
-        
+
         .summary-item {
             background: #1a4a6b;
             padding: 15px;
             border-radius: 6px;
         }
-        
+
         .summary-number {
             font-size: 24px;
             font-weight: bold;
-            color: #4da6d9;
+            color: #2ecc71;
         }
-        
+
         .summary-label {
             font-size: 12px;
             color: #ccc;
             margin-top: 5px;
         }
-        
-        .target-inputs {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .target-input {
-            text-align: center;
-        }
-        
-        .target-input label {
-            display: block;
-            font-size: 12px;
-            color: #4da6d9;
-            margin-bottom: 5px;
-        }
-        
-        .target-input input {
-            width: 100%;
-            padding: 8px;
-            background: #2a2a2a;
-            color: white;
-            border: 1px solid #444;
+
+        .progress-bar {
+            background: #333;
+            height: 8px;
             border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .protein-fill { background: #e74c3c; }
+        .carbs-fill { background: #f39c12; }
+        .fat-fill { background: #9b59b6; }
+        .calories-fill { background: #2ecc71; }
+
+        .download-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        .loading {
             text-align: center;
-        }
-
-        .legend {
-            background: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #444;
-        }
-
-        .legend-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .legend-section h4 {
             color: #4da6d9;
-            margin: 0 0 8px 0;
-            font-size: 14px;
-        }
-
-        .legend-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-<div style="max-width: 900px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #1a1a1a; color: #f5f5f5; border-radius: 10px;">
-  <h2 style="text-align: center; color: #4da6d9;">BUILT Meal Plan Generator</h2>
-  <p style="text-align: center; margin-bottom: 20px;">Create custom meal plans using USDA nutrition database with smart preparation detection</p>
+<div class="container">
+    <h2 style="text-align: center; color: #4da6d9; margin-bottom: 10px;">BUILT Automated Meal Plan Generator</h2>
+    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Set your preferences and get a complete meal plan with calculated quantities</p>
 
-  <!-- USDA Badge -->
-  <div style="background: #0f3460; padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; border: 1px solid #4da6d9;">
-    <div style="font-size: 14px; color: #4da6d9; font-weight: bold;">🏛️ USDA FoodData Central + Smart Detection</div>
-    <div style="font-size: 12px; color: #ccc; margin-top: 4px;">Official nutrition data with automatic cooked/raw detection and food type classification</div>
-  </div>
+    <!-- Macro Targets -->
+    <div class="section">
+        <div class="section-title">📊 Daily Macro Targets</div>
+        <div class="macro-inputs">
+            <div class="macro-input">
+                <label>Protein (g)</label>
+                <input type="number" id="targetProtein" value="150" min="50" max="400">
+            </div>
+            <div class="macro-input">
+                <label>Carbs (g)</label>
+                <input type="number" id="targetCarbs" value="200" min="50" max="600">
+            </div>
+            <div class="macro-input">
+                <label>Fat (g)</label>
+                <input type="number" id="targetFat" value="60" min="20" max="200">
+            </div>
+            <div class="macro-input">
+                <label>Meals</label>
+                <input type="number" id="mealsCount" value="4" min="3" max="6">
+            </div>
+        </div>
+    </div>
 
-  <!-- Legend -->
-  <div class="legend">
-    <div class="legend-grid">
-      <div class="legend-section">
-        <h4>🏷️ Food Type Classifications:</h4>
-        <div class="legend-items">
-          <span class="macro-type protein-source">PROTEIN</span>
-          <span class="macro-type carb-source">CARB</span>
-          <span class="macro-type fat-source">FAT</span>
-          <span class="macro-type mixed-source">MIXED</span>
+    <!-- Food Preferences -->
+    <div class="section">
+        <div class="section-title">🍽️ Food Preferences</div>
+        
+        <!-- Proteins -->
+        <div class="food-category">
+            <div class="category-title">🥩 Protein Sources</div>
+            <input type="text" class="food-search-input" id="proteinSearch" placeholder="Search proteins... (chicken, salmon, eggs)" oninput="searchFoods('protein')">
+            <div class="food-grid" id="proteinGrid"></div>
+            <div class="selected-foods">
+                <h4>Selected Proteins:</h4>
+                <div class="selected-food-tags" id="selectedProteins"></div>
+            </div>
         </div>
-      </div>
-      <div class="legend-section">
-        <h4>🔧 Preparation Detection:</h4>
-        <div class="legend-items">
-          <span class="preparation-badge">COOKED</span>
-          <span class="preparation-badge">GRILLED</span>
-          <span class="preparation-badge">FRIED</span>
-          <span class="preparation-badge">BAKED</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Daily Targets -->
-  <div class="target-inputs">
-    <div class="target-input">
-      <label>Protein (g)</label>
-      <input type="number" id="targetProtein" value="150" min="0" onchange="calculateTotals()">
-    </div>
-    <div class="target-input">
-      <label>Carbs (g)</label>
-      <input type="number" id="targetCarbs" value="200" min="0" onchange="calculateTotals()">
-    </div>
-    <div class="target-input">
-      <label>Fat (g)</label>
-      <input type="number" id="targetFat" value="60" min="0" onchange="calculateTotals()">
-    </div>
-    <div class="target-input">
-      <label>Meals</label>
-      <input type="number" id="mealsCount" value="4" min="1" max="8" onchange="updateMealSections()">
-    </div>
-  </div>
+        <!-- Carbs -->
+        <div class="food-category">
+            <div class="category-title">🍚 Carbohydrate Sources</div>
+            <input type="text" class="food-search-input" id="carbSearch" placeholder="Search carbs... (rice, oats, pasta)" oninput="searchFoods('carb')">
+            <div class="food-grid" id="carbGrid"></div>
+            <div class="selected-foods">
+                <h4>Selected Carbs:</h4>
+                <div class="selected-food-tags" id="selectedCarbs"></div>
+            </div>
+        </div>
 
-  <!-- Meal Sections -->
-  <div id="mealSections"></div>
+        <!-- Fats -->
+        <div class="food-category">
+            <div class="category-title">🥑 Fat Sources</div>
+            <input type="text" class="food-search-input" id="fatSearch" placeholder="Search fats... (avocado, nuts, oil)" oninput="searchFoods('fat')">
+            <div class="food-grid" id="fatGrid"></div>
+            <div class="selected-foods">
+                <h4>Selected Fats:</h4>
+                <div class="selected-food-tags" id="selectedFats"></div>
+            </div>
+        </div>
 
-  <!-- Daily Summary -->
-  <div class="daily-summary">
-    <h3 style="margin: 0 0 15px 0; color: #4da6d9; text-align: center;">Daily Totals vs Targets</h3>
-    <div class="summary-grid">
-      <div class="summary-item">
-        <div class="summary-number" id="totalProtein">0</div>
-        <div class="summary-label">Protein (g)</div>
-        <div class="macro-bar">
-          <div class="macro-fill protein-fill" id="proteinBar"></div>
+        <!-- Fruits & Vegetables -->
+        <div class="food-category">
+            <div class="category-title">🥬 Fruits & Vegetables</div>
+            <input type="text" class="food-search-input" id="veggieSearch" placeholder="Search fruits/veggies... (spinach, berries, broccoli)" oninput="searchFoods('veggie')">
+            <div class="food-grid" id="veggieGrid"></div>
+            <div class="selected-foods">
+                <h4>Selected Fruits & Vegetables:</h4>
+                <div class="selected-food-tags" id="selectedVeggies"></div>
+            </div>
         </div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-number" id="totalCarbs">0</div>
-        <div class="summary-label">Carbs (g)</div>
-        <div class="macro-bar">
-          <div class="macro-fill carbs-fill" id="carbsBar"></div>
-        </div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-number" id="totalFat">0</div>
-        <div class="summary-label">Fat (g)</div>
-        <div class="macro-bar">
-          <div class="macro-fill fat-fill" id="fatBar"></div>
-        </div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-number" id="totalCalories">0</div>
-        <div class="summary-label">Calories</div>
-        <div class="macro-bar">
-          <div class="macro-fill calories-fill" id="caloriesBar"></div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <div style="margin-top: 20px; text-align: center;">
-    <button onclick="downloadMealPlan()" style="padding: 12px 24px; font-size: 16px; background-color: #4da6d9; color: white; border: none; border-radius: 6px; cursor: pointer; margin-right: 10px;">Download as Image</button>
-    <button onclick="resetMealPlan()" style="padding: 12px 24px; font-size: 16px; background-color: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer;">Reset All</button>
-  </div>
+    <button class="generate-btn" onclick="generateMealPlan()" id="generateBtn">
+        🚀 Generate My Meal Plan
+    </button>
+
+    <!-- Meal Plan Output -->
+    <div class="meal-plan-output" id="mealPlanOutput">
+        <h3 style="color: #4da6d9; text-align: center; margin-bottom: 20px;">Your Personalized Meal Plan</h3>
+        <div id="generatedMeals"></div>
+        
+        <div class="daily-summary">
+            <h3 style="color: #2ecc71; text-align: center; margin-bottom: 15px;">Daily Nutrition Summary</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-number" id="totalProtein">0</div>
+                    <div class="summary-label">Protein (g)</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill protein-fill" id="proteinProgress"></div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="totalCarbs">0</div>
+                    <div class="summary-label">Carbs (g)</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill carbs-fill" id="carbsProgress"></div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="totalFat">0</div>
+                    <div class="summary-label">Fat (g)</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill fat-fill" id="fatProgress"></div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="totalCalories">0</div>
+                    <div class="summary-label">Calories</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill calories-fill" id="caloriesProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="download-btn" onclick="downloadMealPlan()">📥 Download Meal Plan</button>
+        </div>
+    </div>
 </div>
 
 <script>
 // Global variables
-let mealPlan = {};
-let searchTimeout;
-
-// Preparation factor system (from macro swapper)
-const preparationFactors = {
-  'cooked': {
-    'rice': 0.28,        
-    'pasta': 0.31,       
-    'oats': 0.33,        
-    'quinoa': 0.25,      
-    'lentils': 0.4,      
-    'beans': 0.45,       
-    'barley': 0.3,       
-    'default': 0.75      
-  },
-  'fried': {
-    'chicken': 1.3,      
-    'fish': 1.25,        
-    'vegetables': 1.4,   
-    'potato': 1.5,       
-    'default': 1.2
-  },
-  'grilled': {
-    'chicken': 0.85,     
-    'beef': 0.8,         
-    'fish': 0.9,         
-    'pork': 0.82,        
-    'default': 0.85
-  },
-  'baked': {
-    'chicken': 0.9,      
-    'fish': 0.85,        
-    'potato': 0.8,       
-    'vegetables': 0.9,   
-    'default': 0.85
-  },
-  'raw': {
-    'default': 1.0       
-  }
+let selectedFoods = {
+    protein: [],
+    carb: [],
+    fat: [],
+    veggie: []
 };
 
-// Detect preparation method
-function detectPreparation(foodName) {
-  const name = foodName.toLowerCase();
-  
-  if (name.includes('cooked') || name.includes('boiled') || name.includes('prepared')) return 'cooked';
-  if (name.includes('fried') || name.includes('deep-fried')) return 'fried';
-  if (name.includes('grilled') || name.includes('barbecued')) return 'grilled';
-  if (name.includes('baked') || name.includes('roasted')) return 'baked';
-  if (name.includes('steamed')) return 'steamed';
-  if (name.includes('raw') || name.includes('fresh') || name.includes('dry')) return 'raw';
-  
-  // Smart defaults for grains
-  if ((name.includes('rice') || name.includes('pasta') || name.includes('quinoa')) && 
-      !name.includes('dry') && !name.includes('uncooked')) {
-    return 'cooked';
-  }
-  
-  return 'raw';
-}
+let searchTimeout;
+let currentMealPlan = null;
 
-// Detect food type for classification
-function detectFoodType(foodName) {
-  const name = foodName.toLowerCase();
-  
-  if (name.includes('rice')) return 'rice';
-  if (name.includes('pasta')) return 'pasta';
-  if (name.includes('oats')) return 'oats';
-  if (name.includes('quinoa')) return 'quinoa';
-  if (name.includes('lentil')) return 'lentils';
-  if (name.includes('bean')) return 'beans';
-  if (name.includes('chicken')) return 'chicken';
-  if (name.includes('beef')) return 'beef';
-  if (name.includes('fish') || name.includes('salmon')) return 'fish';
-  if (name.includes('potato')) return 'potato';
-  
-  return 'default';
-}
-
-// Apply preparation factor adjustments
-function applyPreparationFactor(food, quantity) {
-  const preparation = detectPreparation(food.name);
-  const foodType = detectFoodType(food.name);
-  const usdaName = food.name.toLowerCase();
-  
-  // Check if USDA data already represents the desired state
-  const isAlreadyCooked = usdaName.includes('cooked') || usdaName.includes('boiled') || usdaName.includes('prepared');
-  const isAlreadyRaw = usdaName.includes('raw') || usdaName.includes('dry') || usdaName.includes('uncooked');
-  
-  const factors = preparationFactors[preparation] || {};
-  const factor = factors[foodType] || factors['default'] || 1.0;
-  
-  let adjustedFood = { ...food };
-  let explanation = '';
-  
-  // Handle grain conversions carefully
-  if (['rice', 'pasta', 'oats', 'quinoa', 'lentils', 'beans'].includes(foodType)) {
-    if (isAlreadyCooked && preparation === 'cooked') {
-      explanation = 'USDA data already shows cooked values';
-      return {
-        adjustedQuantity: quantity,
-        adjustedFood: adjustedFood,
-        factor: 1.0,
-        explanation: explanation,
-        preparation: preparation
-      };
-    } else if (isAlreadyRaw && preparation === 'cooked') {
-      const dryEquivalent = quantity * factor;
-      explanation = `${quantity}g cooked ≈ ${dryEquivalent.toFixed(0)}g dry weight`;
-      return {
-        adjustedQuantity: dryEquivalent,
-        adjustedFood: adjustedFood,
-        factor: factor,
-        explanation: explanation,
-        preparation: preparation
-      };
-    }
-  }
-  
-  // Handle fried foods
-  if (preparation === 'fried' && !usdaName.includes('fried')) {
-    adjustedFood.fat *= factor;
-    adjustedFood.calories *= factor;
-    explanation = `+${((factor - 1) * 100).toFixed(0)}% calories from oil`;
-    return {
-      adjustedQuantity: quantity,
-      adjustedFood: adjustedFood,
-      factor: factor,
-      explanation: explanation,
-      preparation: preparation
-    };
-  }
-  
-  // Handle grilled/baked foods
-  if (['grilled', 'baked'].includes(preparation) && !usdaName.includes(preparation)) {
-    adjustedFood.fat *= factor;
-    adjustedFood.calories = adjustedFood.protein * 4 + adjustedFood.carbs * 4 + adjustedFood.fat * 9;
-    explanation = `${preparation}: ${((1 - factor) * 100).toFixed(0)}% fat reduction`;
-    return {
-      adjustedQuantity: quantity,
-      adjustedFood: adjustedFood,
-      factor: factor,
-      explanation: explanation,
-      preparation: preparation
-    };
-  }
-  
-  // No adjustment needed
-  return {
-    adjustedQuantity: quantity,
-    adjustedFood: adjustedFood,
-    factor: 1.0,
-    explanation: isAlreadyCooked ? 'USDA data already prepared' : '',
-    preparation: preparation
-  };
-}
-
-// Get food macro type classification
+// Food classification functions
 function getFoodMacroType(food) {
-  const protein = food.protein || 0;
-  const carbs = food.carbs || 0;
-  const fat = food.fat || 0;
-  
-  const totalMacros = protein * 4 + carbs * 4 + fat * 9;
-  if (totalMacros === 0) return 'mixed';
-  
-  const proteinPercent = (protein * 4 / totalMacros) * 100;
-  const carbPercent = (carbs * 4 / totalMacros) * 100;
-  const fatPercent = (fat * 9 / totalMacros) * 100;
-  
-  if (proteinPercent >= 40) return 'protein';
-  if (carbPercent >= 50) return 'carb';
-  if (fatPercent >= 50) return 'fat';
-  return 'mixed';
-}
-
-// Get food type label
-function getFoodTypeLabel(type) {
-  const labels = {
-    'protein': '<span class="macro-type protein-source">PROTEIN</span>',
-    'carb': '<span class="macro-type carb-source">CARB</span>',
-    'fat': '<span class="macro-type fat-source">FAT</span>',
-    'mixed': '<span class="macro-type mixed-source">MIXED</span>'
-  };
-  return labels[type] || '';
-}
-
-// Get preparation badge
-function getPreparationBadge(preparation) {
-  if (preparation === 'raw') return '';
-  return `<span class="preparation-badge">${preparation.toUpperCase()}</span>`;
-}
-
-// Initialize meal plan
-function initializeMealPlan() {
-  const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
-  
-  for (let i = 1; i <= mealsCount; i++) {
-    if (!mealPlan[`meal${i}`]) {
-      mealPlan[`meal${i}`] = [];
-    }
-  }
-  
-  updateMealSections();
-  calculateTotals();
-}
-
-// Update meal sections based on meals count
-function updateMealSections() {
-  const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
-  const container = document.getElementById('mealSections');
-  
-  // Clear existing sections
-  container.innerHTML = '';
-  
-  // Create meal sections
-  for (let i = 1; i <= mealsCount; i++) {
-    if (!mealPlan[`meal${i}`]) {
-      mealPlan[`meal${i}`] = [];
-    }
+    const protein = food.protein || 0;
+    const carbs = food.carbs || 0;
+    const fat = food.fat || 0;
     
-    const mealSection = createMealSection(i);
-    container.appendChild(mealSection);
-  }
-  
-  calculateTotals();
-}
-
-// Create meal section HTML
-function createMealSection(mealNumber) {
-  const section = document.createElement('div');
-  section.className = 'meal-section';
-  section.id = `meal${mealNumber}`;
-  
-  const mealNames = {
-    1: 'Breakfast',
-    2: 'Lunch', 
-    3: 'Dinner',
-    4: 'Snack',
-    5: 'Pre-Workout',
-    6: 'Post-Workout',
-    7: 'Evening Snack',
-    8: 'Late Night'
-  };
-  
-  section.innerHTML = `
-    <div class="meal-header">Meal ${mealNumber}: ${mealNames[mealNumber] || 'Meal'}</div>
-    <div id="foodRows${mealNumber}"></div>
-    <button class="add-food-btn" onclick="addFoodRow(${mealNumber})">+ Add Food</button>
-    <div class="meal-totals" id="mealTotals${mealNumber}">
-      <div class="totals-row">
-        <span>Protein: <span id="mealProtein${mealNumber}">0</span>g</span>
-        <span>Carbs: <span id="mealCarbs${mealNumber}">0</span>g</span>
-        <span>Fat: <span id="mealFat${mealNumber}">0</span>g</span>
-        <span>Calories: <span id="mealCalories${mealNumber}">0</span></span>
-      </div>
-    </div>
-  `;
-  
-  return section;
-}
-
-// Add food row to meal
-function addFoodRow(mealNumber) {
-  const container = document.getElementById(`foodRows${mealNumber}`);
-  const rowIndex = mealPlan[`meal${mealNumber}`].length;
-  
-  const foodRow = document.createElement('div');
-  foodRow.className = 'food-row';
-  foodRow.id = `foodRow${mealNumber}_${rowIndex}`;
-  
-  foodRow.innerHTML = `
-    <div class="food-search-container">
-      <input type="text" class="food-input" placeholder="Search USDA foods..." 
-             oninput="searchFood(${mealNumber}, ${rowIndex})" 
-             onfocus="searchFood(${mealNumber}, ${rowIndex})"
-             id="foodInput${mealNumber}_${rowIndex}">
-      <div class="food-dropdown" id="foodDropdown${mealNumber}_${rowIndex}"></div>
-    </div>
-    <input type="number" class="quantity-input" placeholder="100" value="100" 
-           onchange="updateQuantity(${mealNumber}, ${rowIndex})" 
-           id="quantity${mealNumber}_${rowIndex}">
-    <button class="remove-btn" onclick="removeFoodRow(${mealNumber}, ${rowIndex})">Remove</button>
-    <div class="selected-food-info" id="foodInfo${mealNumber}_${rowIndex}">
-      <div id="foodDetails${mealNumber}_${rowIndex}"></div>
-      <div class="prep-explanation" id="prepExplanation${mealNumber}_${rowIndex}"></div>
-    </div>
-  `;
-  
-  container.appendChild(foodRow);
-  
-  // Add to meal plan data
-  mealPlan[`meal${mealNumber}`].push({
-    food: null,
-    quantity: 100,
-    adjustedFood: null,
-    explanation: ''
-  });
-}
-
-// Search USDA foods
-async function searchFood(mealNumber, rowIndex) {
-  const input = document.getElementById(`foodInput${mealNumber}_${rowIndex}`);
-  const dropdown = document.getElementById(`foodDropdown${mealNumber}_${rowIndex}`);
-  const searchTerm = input.value.trim();
-
-  if (searchTerm.length < 2) {
-    dropdown.style.display = 'none';
-    return;
-  }
-
-  dropdown.innerHTML = '<div class="food-option" style="color: #4da6d9;">🔍 Searching USDA...</div>';
-  dropdown.style.display = 'block';
-
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(async () => {
-    try {
-      const response = await fetch('/api/usda-search-dropdown', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ searchTerm })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.foods && data.foods.length > 0) {
-        displayFoodOptions(mealNumber, rowIndex, data.foods);
-      } else {
-        dropdown.innerHTML = '<div class="food-option" style="color: #ccc;">No foods found</div>';
-      }
-    } catch (error) {
-      dropdown.innerHTML = '<div class="food-option" style="color: #e74c3c;">Search failed</div>';
-    }
-  }, 300);
-}
-
-// Display food search results with classification
-function displayFoodOptions(mealNumber, rowIndex, foods) {
-  const dropdown = document.getElementById(`foodDropdown${mealNumber}_${rowIndex}`);
-  
-  const foodsHTML = foods.slice(0, 8).map(food => {
-    const foodType = getFoodMacroType(food);
-    const typeLabel = getFoodTypeLabel(foodType);
-    const preparation = detectPreparation(food.name);
-    const prepBadge = getPreparationBadge(preparation);
+    const totalMacros = protein * 4 + carbs * 4 + fat * 9;
+    if (totalMacros === 0) return 'mixed';
     
-    let displayName = food.name;
-    if (displayName.length > 50) {
-      displayName = displayName.substring(0, 50) + '...';
-    }
+    const proteinPercent = (protein * 4 / totalMacros) * 100;
+    const carbPercent = (carbs * 4 / totalMacros) * 100;
+    const fatPercent = (fat * 9 / totalMacros) * 100;
     
-    return `
-      <div class="food-option" onclick="selectFood(${mealNumber}, ${rowIndex}, ${JSON.stringify(food).replace(/"/g, '&quot;')})">
-        <div class="food-name">${displayName}</div>
-        <div class="food-macros">
-          P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g | Cal: ${food.calories.toFixed(0)}
-        </div>
-        <div class="food-badges">
-          ${typeLabel}
-          ${prepBadge}
-        </div>
-      </div>
-    `;
-  }).join('');
-  
-  dropdown.innerHTML = foodsHTML;
-  dropdown.style.display = 'block';
+    if (proteinPercent >= 40) return 'protein';
+    if (carbPercent >= 50) return 'carb';
+    if (fatPercent >= 50) return 'fat';
+    return 'mixed';
 }
 
-// Select food from dropdown
-function selectFood(mealNumber, rowIndex, food) {
-  const input = document.getElementById(`foodInput${mealNumber}_${rowIndex}`);
-  const dropdown = document.getElementById(`foodDropdown${mealNumber}_${rowIndex}`);
-  const quantity = parseFloat(document.getElementById(`quantity${mealNumber}_${rowIndex}`).value) || 100;
-  
-  input.value = food.name;
-  dropdown.style.display = 'none';
-  
-  // Apply preparation adjustments
-  const prepData = applyPreparationFactor(food, quantity);
-  
-  // Update meal plan data
-  mealPlan[`meal${mealNumber}`][rowIndex] = {
-    food: food,
-    quantity: quantity,
-    adjustedFood: prepData.adjustedFood,
-    explanation: prepData.explanation,
-    preparation: prepData.preparation
-  };
-  
-  // Show food info
-  showFoodInfo(mealNumber, rowIndex, food, prepData);
-  
-  calculateTotals();
+function isVegetableOrFruit(food) {
+    const name = food.name.toLowerCase();
+    const keywords = ['vegetable', 'fruit', 'berry', 'green', 'spinach', 'lettuce', 'broccoli', 'carrot', 'tomato', 'apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberry'];
+    return keywords.some(keyword => name.includes(keyword)) || (food.carbs > 0 && food.carbs < 20 && food.protein < 5);
 }
 
-// Show detailed food information
-function showFoodInfo(mealNumber, rowIndex, food, prepData) {
-  const infoDiv = document.getElementById(`foodInfo${mealNumber}_${rowIndex}`);
-  const detailsDiv = document.getElementById(`foodDetails${mealNumber}_${rowIndex}`);
-  const explanationDiv = document.getElementById(`prepExplanation${mealNumber}_${rowIndex}`);
-  
-  const foodType = getFoodMacroType(food);
-  const typeLabel = getFoodTypeLabel(foodType);
-  const prepBadge = getPreparationBadge(prepData.preparation);
-  
-  detailsDiv.innerHTML = `
-    <strong>${food.name}</strong> ${typeLabel} ${prepBadge}<br>
-    <small>USDA ${food.dataType} | Per 100g: P:${food.protein.toFixed(1)}g C:${food.carbs.toFixed(1)}g F:${food.fat.toFixed(1)}g</small>
-  `;
-  
-  if (prepData.explanation) {
-    explanationDiv.innerHTML = `🔧 ${prepData.explanation}`;
-    explanationDiv.style.display = 'block';
-  } else {
-    explanationDiv.style.display = 'none';
-  }
-  
-  infoDiv.classList.add('active');
-}
-
-// Update quantity
-function updateQuantity(mealNumber, rowIndex) {
-  const quantity = parseFloat(document.getElementById(`quantity${mealNumber}_${rowIndex}`).value) || 0;
-  
-  if (mealPlan[`meal${mealNumber}`][rowIndex].food) {
-    const food = mealPlan[`meal${mealNumber}`][rowIndex].food;
-    const prepData = applyPreparationFactor(food, quantity);
-    
-    mealPlan[`meal${mealNumber}`][rowIndex] = {
-      food: food,
-      quantity: quantity,
-      adjustedFood: prepData.adjustedFood,
-      explanation: prepData.explanation,
-      preparation: prepData.preparation
+function getMacroBadge(type) {
+    const badges = {
+        'protein': '<span class="macro-badge protein-badge">PROTEIN</span>',
+        'carb': '<span class="macro-badge carb-badge">CARB</span>',
+        'fat': '<span class="macro-badge fat-badge">FAT</span>',
+        'mixed': '<span class="macro-badge mixed-badge">MIXED</span>'
     };
-  } else {
-    mealPlan[`meal${mealNumber}`][rowIndex].quantity = quantity;
-  }
-  
-  calculateTotals();
+    return badges[type] || '';
 }
 
-// Remove food row
-function removeFoodRow(mealNumber, rowIndex) {
-  const row = document.getElementById(`foodRow${mealNumber}_${rowIndex}`);
-  row.remove();
-  
-  // Remove from meal plan data
-  mealPlan[`meal${mealNumber}`].splice(rowIndex, 1);
-  
-  // Re-render meal section to fix indices
-  renderMealSection(mealNumber);
-  calculateTotals();
-}
+// Search foods by category
+async function searchFoods(category) {
+    const searchInput = document.getElementById(`${category}Search`);
+    const grid = document.getElementById(`${category}Grid`);
+    const searchTerm = searchInput.value.trim();
 
-// Re-render meal section
-function renderMealSection(mealNumber) {
-  const container = document.getElementById(`foodRows${mealNumber}`);
-  container.innerHTML = '';
-  
-  mealPlan[`meal${mealNumber}`].forEach((item, index) => {
-    const foodRow = document.createElement('div');
-    foodRow.className = 'food-row';
-    foodRow.id = `foodRow${mealNumber}_${index}`;
-    
-    foodRow.innerHTML = `
-      <div class="food-search-container">
-        <input type="text" class="food-input" placeholder="Search USDA foods..." 
-               value="${item.food ? item.food.name : ''}"
-               oninput="searchFood(${mealNumber}, ${index})" 
-               onfocus="searchFood(${mealNumber}, ${index})"
-               id="foodInput${mealNumber}_${index}">
-        <div class="food-dropdown" id="foodDropdown${mealNumber}_${index}"></div>
-      </div>
-      <input type="number" class="quantity-input" placeholder="100" value="${item.quantity}" 
-             onchange="updateQuantity(${mealNumber}, ${index})" 
-             id="quantity${mealNumber}_${index}">
-      <button class="remove-btn" onclick="removeFoodRow(${mealNumber}, ${index})">Remove</button>
-      <div class="selected-food-info ${item.food ? 'active' : ''}" id="foodInfo${mealNumber}_${index}">
-        <div id="foodDetails${mealNumber}_${index}"></div>
-        <div class="prep-explanation" id="prepExplanation${mealNumber}_${index}"></div>
-      </div>
-    `;
-    
-    container.appendChild(foodRow);
-    
-    // Restore food info if exists
-    if (item.food) {
-      showFoodInfo(mealNumber, index, item.food, {
-        explanation: item.explanation,
-        preparation: item.preparation
-      });
+    if (searchTerm.length < 2) {
+        grid.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Type 2+ characters to search...</div>';
+        return;
     }
-  });
-}
 
-// Calculate all totals with preparation adjustments
-function calculateTotals() {
-  let dailyProtein = 0, dailyCarbs = 0, dailyFat = 0, dailyCalories = 0;
-  
-  // Calculate each meal
-  Object.keys(mealPlan).forEach(mealKey => {
-    const mealNumber = mealKey.replace('meal', '');
-    let mealProtein = 0, mealCarbs = 0, mealFat = 0, mealCalories = 0;
-    
-    mealPlan[mealKey].forEach(item => {
-      if (item.adjustedFood && item.quantity > 0) {
-        const multiplier = item.quantity / 100;
-        mealProtein += item.adjustedFood.protein * multiplier;
-        mealCarbs += item.adjustedFood.carbs * multiplier;
-        mealFat += item.adjustedFood.fat * multiplier;
-        mealCalories += item.adjustedFood.calories * multiplier;
-      } else if (item.food && item.quantity > 0) {
-        const multiplier = item.quantity / 100;
-        mealProtein += item.food.protein * multiplier;
-        mealCarbs += item.food.carbs * multiplier;
-        mealFat += item.food.fat * multiplier;
-        mealCalories += item.food.calories * multiplier;
-      }
-    });
-    
-    // Update meal totals
-    const mealProteinEl = document.getElementById(`mealProtein${mealNumber}`);
-    const mealCarbsEl = document.getElementById(`mealCarbs${mealNumber}`);
-    const mealFatEl = document.getElementById(`mealFat${mealNumber}`);
-    const mealCaloriesEl = document.getElementById(`mealCalories${mealNumber}`);
-    
-    if (mealProteinEl) mealProteinEl.textContent = mealProtein.toFixed(1);
-    if (mealCarbsEl) mealCarbsEl.textContent = mealCarbs.toFixed(1);
-    if (mealFatEl) mealFatEl.textContent = mealFat.toFixed(1);
-    if (mealCaloriesEl) mealCaloriesEl.textContent = mealCalories.toFixed(0);
-    
-    // Add to daily totals
-    dailyProtein += mealProtein;
-    dailyCarbs += mealCarbs;
-    dailyFat += mealFat;
-    dailyCalories += mealCalories;
-  });
-  
-  // Update daily totals
-  document.getElementById('totalProtein').textContent = dailyProtein.toFixed(1);
-  document.getElementById('totalCarbs').textContent = dailyCarbs.toFixed(1);
-  document.getElementById('totalFat').textContent = dailyFat.toFixed(1);
-  document.getElementById('totalCalories').textContent = dailyCalories.toFixed(0);
-  
-  // Update progress bars
-  const targetProtein = parseFloat(document.getElementById('targetProtein').value) || 1;
-  const targetCarbs = parseFloat(document.getElementById('targetCarbs').value) || 1;
-  const targetFat = parseFloat(document.getElementById('targetFat').value) || 1;
-  const targetCalories = targetProtein * 4 + targetCarbs * 4 + targetFat * 9;
-  
-  document.getElementById('proteinBar').style.width = Math.min(100, (dailyProtein / targetProtein) * 100) + '%';
-  document.getElementById('carbsBar').style.width = Math.min(100, (dailyCarbs / targetCarbs) * 100) + '%';
-  document.getElementById('fatBar').style.width = Math.min(100, (dailyFat / targetFat) * 100) + '%';
-  document.getElementById('caloriesBar').style.width = Math.min(100, (dailyCalories / targetCalories) * 100) + '%';
-}
+    grid.innerHTML = '<div class="loading">🔍 Searching USDA database...</div>';
 
-// Reset meal plan
-function resetMealPlan() {
-  if (confirm('Are you sure you want to reset the entire meal plan?')) {
-    mealPlan = {};
-    initializeMealPlan();
-  }
-}
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch('/api/usda-search-dropdown', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ searchTerm })
+            });
 
-// Download meal plan as image
-function downloadMealPlan() {
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString("en-CA");
-  
-  // Create printable version
-  const wrapper = document.createElement("div");
-  wrapper.style.background = "#fff";
-  wrapper.style.color = "#000";
-  wrapper.style.padding = "40px";
-  wrapper.style.fontFamily = "Arial, sans-serif";
-  wrapper.style.maxWidth = "800px";
-  wrapper.style.lineHeight = "1.6";
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
 
-  const title = document.createElement("h2");
-  title.innerText = `BUILT MEAL PLAN – ${formattedDate}`;
-  title.style.textAlign = "center";
-  title.style.marginBottom = "30px";
-  title.style.color = "#000";
+            const data = await response.json();
+            
+            if (data.foods && data.foods.length > 0) {
+                // Filter foods by category
+                let filteredFoods = data.foods.filter(food => {
+                    const macroType = getFoodMacroType(food);
+                    
+                    if (category === 'protein') return macroType === 'protein';
+                    if (category === 'carb') return macroType === 'carb';
+                    if (category === 'fat') return macroType === 'fat';
+                    if (category === 'veggie') return isVegetableOrFruit(food);
+                    
+                    return false;
+                });
 
-  // Add meal plan content
-  let content = '';
-  const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
-  const mealNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout', 'Evening Snack', 'Late Night'];
-  
-  for (let i = 1; i <= mealsCount; i++) {
-    content += `\nMEAL ${i}: ${mealNames[i-1] || 'Meal'}\n`;
-    content += '─'.repeat(40) + '\n';
-    
-    const meal = mealPlan[`meal${i}`] || [];
-    meal.forEach(item => {
-      if (item.food) {
-        const foodType = getFoodMacroType(item.food);
-        const typeText = foodType.toUpperCase();
-        const prepText = item.preparation && item.preparation !== 'raw' ? ` (${item.preparation.toUpperCase()})` : '';
-        
-        content += `• ${item.quantity}g ${item.food.name} [${typeText}${prepText}]\n`;
-        
-        // Use adjusted food if available
-        const foodData = item.adjustedFood || item.food;
-        const multiplier = item.quantity / 100;
-        content += `  P: ${(foodData.protein * multiplier).toFixed(1)}g | C: ${(foodData.carbs * multiplier).toFixed(1)}g | F: ${(foodData.fat * multiplier).toFixed(1)}g | Cal: ${(foodData.calories * multiplier).toFixed(0)}\n`;
-        
-        if (item.explanation) {
-          content += `  ⚡ ${item.explanation}\n`;
+                // If no exact matches, show mixed foods too
+                if (filteredFoods.length === 0) {
+                    filteredFoods = data.foods.slice(0, 12);
+                }
+
+                displayFoods(category, filteredFoods.slice(0, 12));
+            } else {
+                grid.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">No foods found. Try different keywords.</div>';
+            }
+        } catch (error) {
+            grid.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 20px;">Search failed. Please try again.</div>';
         }
-      }
-    });
-    
-    content += `\nMeal Totals: P: ${document.getElementById(`mealProtein${i}`).textContent}g | `;
-    content += `C: ${document.getElementById(`mealCarbs${i}`).textContent}g | `;
-    content += `F: ${document.getElementById(`mealFat${i}`).textContent}g | `;
-    content += `Cal: ${document.getElementById(`mealCalories${i}`).textContent}\n\n`;
-  }
-  
-  content += '\n' + '═'.repeat(50) + '\n';
-  content += 'DAILY TOTALS vs TARGETS:\n';
-  content += `Protein: ${document.getElementById('totalProtein').textContent}g / ${document.getElementById('targetProtein').value}g\n`;
-  content += `Carbs: ${document.getElementById('totalCarbs').textContent}g / ${document.getElementById('targetCarbs').value}g\n`;
-  content += `Fat: ${document.getElementById('totalFat').textContent}g / ${document.getElementById('targetFat').value}g\n`;
-  content += `Calories: ${document.getElementById('totalCalories').textContent} / ${(parseFloat(document.getElementById('targetProtein').value) * 4 + parseFloat(document.getElementById('targetCarbs').value) * 4 + parseFloat(document.getElementById('targetFat').value) * 9).toFixed(0)}\n`;
-  content += '\n* All nutrition values adjusted for preparation method\n';
-  content += '* Generated from USDA FoodData Central database';
-
-  const contentEl = document.createElement("pre");
-  contentEl.innerText = content;
-  contentEl.style.whiteSpace = "pre-wrap";
-  contentEl.style.fontSize = "11px";
-  contentEl.style.color = "#000";
-
-  wrapper.appendChild(title);
-  wrapper.appendChild(contentEl);
-  document.body.appendChild(wrapper);
-
-  html2canvas(wrapper, { scale: 2 }).then(canvas => {
-    const link = document.createElement("a");
-    link.download = `BUILT_Meal_Plan_${formattedDate.replace(/\s/g, "_")}.png`;
-    link.href = canvas.toDataURL();
-    link.click();
-    document.body.removeChild(wrapper);
-  });
+    }, 500);
 }
 
-// Hide dropdowns when clicking outside
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.food-search-container')) {
-    document.querySelectorAll('.food-dropdown').forEach(dropdown => {
-      dropdown.style.display = 'none';
+// Display foods in grid
+function displayFoods(category, foods) {
+    const grid = document.getElementById(`${category}Grid`);
+    
+    const foodsHTML = foods.map(food => {
+        const macroType = getFoodMacroType(food);
+        const badge = getMacroBadge(macroType);
+        const isSelected = selectedFoods[category].some(f => f.id === food.id);
+        
+        let displayName = food.name;
+        if (displayName.length > 30) {
+            displayName = displayName.substring(0, 30) + '...';
+        }
+        
+        return `
+            <div class="food-item ${isSelected ? 'selected' : ''}" onclick="toggleFood('${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
+                <div class="food-name">${displayName}</div>
+                <div class="food-macros ${isSelected ? 'selected' : ''}">
+                    P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
+                </div>
+                <div class="food-badges">${badge}</div>
+            </div>
+        `;
+    }).join('');
+    
+    grid.innerHTML = foodsHTML;
+}
+
+// Toggle food selection
+function toggleFood(category, food) {
+    const existingIndex = selectedFoods[category].findIndex(f => f.id === food.id);
+    
+    if (existingIndex >= 0) {
+        selectedFoods[category].splice(existingIndex, 1);
+    } else {
+        selectedFoods[category].push(food);
+    }
+    
+    updateSelectedFoodsDisplay(category);
+    updateGenerateButton();
+}
+
+// Update selected foods display
+function updateSelectedFoodsDisplay(category) {
+    const container = document.getElementById(`selected${category.charAt(0).toUpperCase() + category.slice(1)}s`);
+    
+    const tagsHTML = selectedFoods[category].map(food => {
+        let displayName = food.name;
+        if (displayName.length > 25) {
+            displayName = displayName.substring(0, 25) + '...';
+        }
+        
+        return `
+            <div class="selected-food-tag" onclick="removeFood('${category}', '${food.id}')" title="Click to remove">
+                ${displayName} ✕
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = tagsHTML || '<span style="color: #666;">None selected</span>';
+}
+
+// Remove food from selection
+function removeFood(category, foodId) {
+    selectedFoods[category] = selectedFoods[category].filter(f => f.id !== foodId);
+    updateSelectedFoodsDisplay(category);
+    updateGenerateButton();
+    
+    // Update the grid display
+    const searchInput = document.getElementById(`${category}Search`);
+    if (searchInput.value.trim().length >= 2) {
+        searchFoods(category);
+    }
+}
+
+// Update generate button state
+function updateGenerateButton() {
+    const btn = document.getElementById('generateBtn');
+    const hasSelections = Object.values(selectedFoods).some(arr => arr.length > 0);
+    
+    btn.disabled = !hasSelections;
+    btn.innerHTML = hasSelections ? '🚀 Generate My Meal Plan' : '⚠️ Please select some foods first';
+}
+
+// Generate meal plan
+async function generateMealPlan() {
+    const btn = document.getElementById('generateBtn');
+    const output = document.getElementById('mealPlanOutput');
+    
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Generating your meal plan...';
+    
+    // Get targets
+    const targetProtein = parseFloat(document.getElementById('targetProtein').value) || 150;
+    const targetCarbs = parseFloat(document.getElementById('targetCarbs').value) || 200;
+    const targetFat = parseFloat(document.getElementById('targetFat').value) || 60;
+    const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
+    
+    // Calculate per-meal targets
+    const proteinPerMeal = targetProtein / mealsCount;
+    const carbsPerMeal = targetCarbs / mealsCount;
+    const fatPerMeal = targetFat / mealsCount;
+    
+    try {
+        // Generate meal plan
+        const mealPlan = await buildMealPlan({
+            targetProtein,
+            targetCarbs,
+            targetFat,
+            mealsCount,
+            proteinPerMeal,
+            carbsPerMeal,
+            fatPerMeal,
+            selectedFoods
+        });
+        
+        currentMealPlan = mealPlan;
+        displayMealPlan(mealPlan);
+        
+        output.classList.add('active');
+        output.scrollIntoView({ behavior: 'smooth' });
+        
+    } catch (error) {
+        alert('Error generating meal plan. Please try again.');
+        console.error(error);
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = '🚀 Generate My Meal Plan';
+}
+
+// Build meal plan algorithm
+async function buildMealPlan(params) {
+    const { mealsCount, proteinPerMeal, carbsPerMeal, fatPerMeal, selectedFoods } = params;
+    const mealPlan = [];
+    
+    const mealNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout'];
+    
+    for (let i = 0; i < mealsCount; i++) {
+        const meal = {
+            name: mealNames[i] || `Meal ${i + 1}`,
+            foods: [],
+            totals: { protein: 0, carbs: 0, fat: 0, calories: 0 }
+        };
+        
+        // Add protein source
+        if (selectedFoods.protein.length > 0) {
+            const protein = selectedFoods.protein[i % selectedFoods.protein.length];
+            const quantity = calculateQuantity(protein, 'protein', proteinPerMeal);
+            meal.foods.push({ food: protein, quantity, type: 'protein' });
+        }
+        
+        // Add carb source
+        if (selectedFoods.carb.length > 0) {
+            const carb = selectedFoods.carb[i % selectedFoods.carb.length];
+            const quantity = calculateQuantity(carb, 'carbs', carbsPerMeal);
+            meal.foods.push({ food: carb, quantity, type: 'carb' });
+        }
+        
+        // Add fat source
+        if (selectedFoods.fat.length > 0) {
+            const fat = selectedFoods.fat[i % selectedFoods.fat.length];
+            const quantity = calculateQuantity(fat, 'fat', fatPerMeal * 0.7); // Reduce fat slightly as other foods contribute
+            meal.foods.push({ food: fat, quantity, type: 'fat' });
+        }
+        
+        // Add vegetable/fruit
+        if (selectedFoods.veggie.length > 0) {
+            const veggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
+            const quantity = 100; // Standard serving
+            meal.foods.push({ food: veggie, quantity, type: 'veggie' });
+        }
+        
+        // Calculate meal totals
+        meal.foods.forEach(item => {
+            const multiplier = item.quantity / 100;
+            meal.totals.protein += item.food.protein * multiplier;
+            meal.totals.carbs += item.food.carbs * multiplier;
+            meal.totals.fat += item.food.fat * multiplier;
+            meal.totals.calories += item.food.calories * multiplier;
+        });
+        
+        mealPlan.push(meal);
+    }
+    
+    return mealPlan;
+}
+
+// Calculate optimal quantity for target macro
+function calculateQuantity(food, macro, target) {
+    const macroValue = food[macro] || 1;
+    if (macroValue === 0) return 100; // Default quantity if no macro content
+    
+    const quantity = (target / macroValue) * 100;
+    
+    // Keep quantities reasonable (between 50g and 500g)
+    return Math.max(50, Math.min(500, Math.round(quantity)));
+}
+
+// Display generated meal plan
+function displayMealPlan(mealPlan) {
+    const container = document.getElementById('generatedMeals');
+    
+    const mealsHTML = mealPlan.map((meal, index) => {
+        const foodsHTML = meal.foods.map(item => {
+            const macroType = getFoodMacroType(item.food);
+            const badge = getMacroBadge(macroType);
+            
+            const multiplier = item.quantity / 100;
+            const itemProtein = (item.food.protein * multiplier).toFixed(1);
+            const itemCarbs = (item.food.carbs * multiplier).toFixed(1);
+            const itemFat = (item.food.fat * multiplier).toFixed(1);
+            const itemCalories = (item.food.calories * multiplier).toFixed(0);
+            
+            return `
+                <div class="meal-food">
+                    <div class="food-details">
+                        <div class="food-info">
+                            <div style="font-weight: bold;">${item.food.name} ${badge}</div>
+                            <div class="food-nutrition">P: ${itemProtein}g | C: ${itemCarbs}g | F: ${itemFat}g | Cal: ${itemCalories}</div>
+                        </div>
+                        <div class="food-quantity">${item.quantity}g</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        return `
+            <div class="meal-section">
+                <div class="meal-header">Meal ${index + 1}: ${meal.name}</div>
+                ${foodsHTML}
+                <div class="meal-totals">
+                    <strong>Meal Totals:</strong> 
+                    P: ${meal.totals.protein.toFixed(1)}g | 
+                    C: ${meal.totals.carbs.toFixed(1)}g | 
+                    F: ${meal.totals.fat.toFixed(1)}g | 
+                    Cal: ${meal.totals.calories.toFixed(0)}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = mealsHTML;
+    
+    // Update daily summary
+    updateDailySummary(mealPlan);
+}
+
+// Update daily summary
+function updateDailySummary(mealPlan) {
+    const dailyTotals = mealPlan.reduce((totals, meal) => {
+        totals.protein += meal.totals.protein;
+        totals.carbs += meal.totals.carbs;
+        totals.fat += meal.totals.fat;
+        totals.calories += meal.totals.calories;
+        return totals;
+    }, { protein: 0, carbs: 0, fat: 0, calories: 0 });
+    
+    // Update display
+    document.getElementById('totalProtein').textContent = dailyTotals.protein.toFixed(1);
+    document.getElementById('totalCarbs').textContent = dailyTotals.carbs.toFixed(1);
+    document.getElementById('totalFat').textContent = dailyTotals.fat.toFixed(1);
+    document.getElementById('totalCalories').textContent = dailyTotals.calories.toFixed(0);
+    
+    // Update progress bars
+    const targetProtein = parseFloat(document.getElementById('targetProtein').value) || 1;
+    const targetCarbs = parseFloat(document.getElementById('targetCarbs').value) || 1;
+    const targetFat = parseFloat(document.getElementById('targetFat').value) || 1;
+    const targetCalories = targetProtein * 4 + targetCarbs * 4 + targetFat * 9;
+    
+    document.getElementById('proteinProgress').style.width = Math.min(100, (dailyTotals.protein / targetProtein) * 100) + '%';
+    document.getElementById('carbsProgress').style.width = Math.min(100, (dailyTotals.carbs / targetCarbs) * 100) + '%';
+    document.getElementById('fatProgress').style.width = Math.min(100, (dailyTotals.fat / targetFat) * 100) + '%';
+    document.getElementById('caloriesProgress').style.width = Math.min(100, (dailyTotals.calories / targetCalories) * 100) + '%';
+}
+
+// Download meal plan
+function downloadMealPlan() {
+    if (!currentMealPlan) return;
+    
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-CA");
+    
+    const wrapper = document.createElement("div");
+    wrapper.style.background = "#fff";
+    wrapper.style.color = "#000";
+    wrapper.style.padding = "40px";
+    wrapper.style.fontFamily = "Arial, sans-serif";
+    wrapper.style.maxWidth = "800px";
+    wrapper.style.lineHeight = "1.6";
+
+    const title = document.createElement("h2");
+    title.innerText = `BUILT AUTOMATED MEAL PLAN – ${formattedDate}`;
+    title.style.textAlign = "center";
+    title.style.marginBottom = "30px";
+    title.style.color = "#000";
+
+    let content = '';
+    
+    // Add meal plan content
+    currentMealPlan.forEach((meal, index) => {
+        content += `\nMEAL ${index + 1}: ${meal.name.toUpperCase()}\n`;
+        content += '─'.repeat(50) + '\n';
+        
+        meal.foods.forEach(item => {
+            const multiplier = item.quantity / 100;
+            content += `• ${item.quantity}g ${item.food.name}\n`;
+            content += `  P: ${(item.food.protein * multiplier).toFixed(1)}g | C: ${(item.food.carbs * multiplier).toFixed(1)}g | F: ${(item.food.fat * multiplier).toFixed(1)}g | Cal: ${(item.food.calories * multiplier).toFixed(0)}\n`;
+        });
+        
+        content += `\nMeal Totals: P: ${meal.totals.protein.toFixed(1)}g | C: ${meal.totals.carbs.toFixed(1)}g | F: ${meal.totals.fat.toFixed(1)}g | Cal: ${meal.totals.calories.toFixed(0)}\n\n`;
     });
-  }
-});
+    
+    // Add daily totals
+    const dailyTotals = currentMealPlan.reduce((totals, meal) => {
+        totals.protein += meal.totals.protein;
+        totals.carbs += meal.totals.carbs;
+        totals.fat += meal.totals.fat;
+        totals.calories += meal.totals.calories;
+        return totals;
+    }, { protein: 0, carbs: 0, fat: 0, calories: 0 });
+    
+    content += '\n' + '═'.repeat(60) + '\n';
+    content += 'DAILY TOTALS:\n';
+    content += `Protein: ${dailyTotals.protein.toFixed(1)}g / ${document.getElementById('targetProtein').value}g\n`;
+    content += `Carbs: ${dailyTotals.carbs.toFixed(1)}g / ${document.getElementById('targetCarbs').value}g\n`;
+    content += `Fat: ${dailyTotals.fat.toFixed(1)}g / ${document.getElementById('targetFat').value}g\n`;
+    content += `Calories: ${dailyTotals.calories.toFixed(0)}\n\n`;
+    content += '* Generated from USDA FoodData Central database\n';
+    content += '* Quantities automatically calculated to meet your macro targets';
+
+    const contentEl = document.createElement("pre");
+    contentEl.innerText = content;
+    contentEl.style.whiteSpace = "pre-wrap";
+    contentEl.style.fontSize = "11px";
+    contentEl.style.color = "#000";
+
+    wrapper.appendChild(title);
+    wrapper.appendChild(contentEl);
+    document.body.appendChild(wrapper);
+
+    html2canvas(wrapper, { scale: 2 }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = `BUILT_Automated_Meal_Plan_${formattedDate.replace(/\s/g, "_")}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        document.body.removeChild(wrapper);
+    });
+}
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-  initializeMealPlan();
+    updateGenerateButton();
 });
 </script>
 </body>
