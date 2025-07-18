@@ -982,7 +982,7 @@ async function buildMealPlan(params) {
 // Calculate optimal quantity for target macro with weight mode consideration
 function calculateQuantity(food, macro, target, category) {
     const macroValue = food[macro] || 1;
-    if (macroValue === 0) return { quantity: 100, explanation: '' };
+    if (macroValue === 0) return { quantity: 100, explanation: '', nutritionMultiplier: 1 };
     
     // Calculate base quantity needed for USDA nutrition data
     let baseQuantity = (target / macroValue) * 100;
@@ -994,29 +994,40 @@ function calculateQuantity(food, macro, target, category) {
     
     let finalQuantity = baseQuantity;
     let explanation = '';
+    let nutritionMultiplier = baseQuantity / 100; // This is what we use for nutrition calculations
     
     if (grainType && preparationFactors[grainType]) {
         if (weightMode === 'raw' && isUsdaCooked) {
             // User wants raw weight, but USDA data is cooked
             finalQuantity = baseQuantity * preparationFactors[grainType].cookedToDry;
             explanation = `${Math.round(finalQuantity)}g dry weight (≈${Math.round(baseQuantity)}g cooked)`;
+            // Keep nutrition multiplier as baseQuantity since USDA data is cooked
+            nutritionMultiplier = baseQuantity / 100;
         } else if (weightMode === 'cooked' && !isUsdaCooked) {
             // User wants cooked weight, but USDA data is raw
             finalQuantity = baseQuantity * preparationFactors[grainType].dryToCooked;
             explanation = `${Math.round(finalQuantity)}g cooked weight (≈${Math.round(baseQuantity)}g dry)`;
+            // Keep nutrition multiplier as baseQuantity since USDA data is raw
+            nutritionMultiplier = baseQuantity / 100;
         } else {
             // Weight mode matches USDA data state
             explanation = weightMode === 'cooked' ? 'cooked weight' : 'dry weight';
+            nutritionMultiplier = finalQuantity / 100;
         }
     } else {
         // No conversion needed for non-grains
         explanation = weightMode === 'cooked' ? 'as served' : 'raw weight';
+        nutritionMultiplier = finalQuantity / 100;
     }
     
-    // Keep quantities reasonable (between 30g and 600g)
+    // Keep display quantities reasonable (between 30g and 600g)
     finalQuantity = Math.max(30, Math.min(600, Math.round(finalQuantity)));
     
-    return { quantity: finalQuantity, explanation };
+    return { 
+        quantity: finalQuantity, 
+        explanation,
+        nutritionMultiplier: nutritionMultiplier
+    };
 }
 
 // Display generated meal plan
