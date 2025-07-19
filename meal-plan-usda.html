@@ -1014,45 +1014,79 @@ function balanceMacros(availableFoods, targets) {
     // Initialize with small quantities
     let currentQuantities = availableFoods.map(item => ({
         ...item,
-        quantity: item.type === 'veggie' ? 50 : 50, // Start with 50g each
-        nutritionMultiplier: item.type === 'veggie' ? 0.5 : 0.5
+        quantity: item.type === 'veggie' ? 30 : 30, // Start smaller
+        nutritionMultiplier: item.type === 'veggie' ? 0.3 : 0.3
     }));
     
     // Calculate initial totals
     let currentTotals = calculateTotals(currentQuantities);
     console.log(`Starting totals: ${currentTotals.protein.toFixed(1)}p ${currentTotals.carbs.toFixed(1)}c ${currentTotals.fat.toFixed(1)}f`);
     
-    // Iterative optimization (max 10 iterations)
-    for (let iteration = 0; iteration < 10; iteration++) {
+    let bestAccuracy = 0;
+    let bestQuantities = [...currentQuantities];
+    
+    // More aggressive iterative optimization (20 iterations)
+    for (let iteration = 0; iteration < 20; iteration++) {
         console.log(`\nIteration ${iteration + 1}:`);
         
-        // Calculate how far we are from targets
-        const proteinRatio = currentTotals.protein > 0 ? targets.protein / currentTotals.protein : 1;
-        const carbsRatio = currentTotals.carbs > 0 ? targets.carbs / currentTotals.carbs : 1;
-        const fatRatio = currentTotals.fat > 0 ? targets.fat / currentTotals.fat : 1;
+        // Calculate accuracy of current solution
+        const proteinAccuracy = currentTotals.protein > 0 ? Math.min(targets.protein / currentTotals.protein, currentTotals.protein / targets.protein) : 0;
+        const carbsAccuracy = currentTotals.carbs > 0 ? Math.min(targets.carbs / currentTotals.carbs, currentTotals.carbs / targets.carbs) : 0;
+        const fatAccuracy = currentTotals.fat > 0 ? Math.min(targets.fat / currentTotals.fat, currentTotals.fat / targets.fat) : 0;
+        const overallAccuracy = (proteinAccuracy + carbsAccuracy + fatAccuracy) / 3;
+        
+        if (overallAccuracy > bestAccuracy) {
+            bestAccuracy = overallAccuracy;
+            bestQuantities = [...currentQuantities];
+        }
+        
+        // Calculate ratios more aggressively
+        const proteinRatio = targets.protein / Math.max(currentTotals.protein, 1);
+        const carbsRatio = targets.carbs / Math.max(currentTotals.carbs, 1);
+        const fatRatio = targets.fat / Math.max(currentTotals.fat, 1);
         
         console.log(`Ratios needed: ${proteinRatio.toFixed(2)}x protein, ${carbsRatio.toFixed(2)}x carbs, ${fatRatio.toFixed(2)}x fat`);
+        console.log(`Current accuracy: ${(overallAccuracy * 100).toFixed(1)}%`);
         
-        // Adjust quantities based on priority macro and overall ratios
+        // More aggressive adjustments with priority weighting
         currentQuantities = currentQuantities.map(item => {
             let adjustmentFactor = 1;
             
-            // Each food type gets adjusted based on its priority macro and overall balance
             if (item.priority === 'protein') {
-                adjustmentFactor = proteinRatio * 0.7 + (carbsRatio + fatRatio) * 0.15; // 70% protein focus, 30% overall
+                // Protein sources: focus 90% on protein, 5% each on carbs/fat
+                adjustmentFactor = proteinRatio * 0.9 + carbsRatio * 0.05 + fatRatio * 0.05;
             } else if (item.priority === 'carbs') {
-                adjustmentFactor = carbsRatio * 0.7 + (proteinRatio + fatRatio) * 0.15;
+                // Carb sources: focus 90% on carbs, 5% each on protein/fat  
+                adjustmentFactor = carbsRatio * 0.9 + proteinRatio * 0.05 + fatRatio * 0.05;
             } else if (item.priority === 'fat') {
-                adjustmentFactor = fatRatio * 0.7 + (proteinRatio + carbsRatio) * 0.15;
+                // Fat sources: focus 95% on fat (fat is usually the limiting factor)
+                adjustmentFactor = fatRatio * 0.95 + (proteinRatio + carbsRatio) * 0.025;
             } else {
-                adjustmentFactor = 0.8; // Veggies stay relatively stable
+                // Veggies: minimal adjustment, keep stable
+                adjustmentFactor = 1.0;
             }
             
-            // Apply conservative adjustment (max 20% change per iteration)
-            adjustmentFactor = Math.max(0.8, Math.min(1.2, adjustmentFactor));
+            // Apply more aggressive adjustment for early iterations
+            const aggressiveness = Math.max(0.3, 1 - (iteration / 10)); // Start aggressive, become conservative
+            const maxChange = 0.3 + aggressiveness * 0.4; // 30-70% max change per iteration
+            adjustmentFactor = Math.max(1 - maxChange, Math.min(1 + maxChange, adjustmentFactor));
             
             const newQuantity = Math.round(item.quantity * adjustmentFactor);
-            const clampedQuantity = Math.max(10, Math.min(500, newQuantity)); // Keep reasonable bounds
+            const clampedQuantity = Math.max(5, Math.min(400, newQuantity)); // Tighter bounds
+            
+            // Special handling for fat sources - be more conservative if fat is too high
+            if (item.priority === 'fat' && currentTotals.fat > targets.fat * 1.1) {
+                const fatReduction = Math.max(0.5, targets.fat / currentTotals.fat);
+                const conservativeQuantity = Math.round(item.quantity * fatReduction);
+                const finalQuantity = Math.max(5, Math.min(clampedQuantity, conservativeQuantity));
+                console.log(`${item.food.name} (FAT - reducing): ${item.quantity}g → ${finalQuantity}g (fat too high)`);
+                return {
+                    ...item,
+                    quantity: finalQuantity,
+                    nutritionMultiplier: finalQuantity / 100,
+                    explanation: getWeightExplanation(item.food, finalQuantity, item.type)
+                };
+            }
             
             console.log(`${item.food.name}: ${item.quantity}g → ${clampedQuantity}g (${adjustmentFactor.toFixed(2)}x)`);
             
@@ -1068,22 +1102,34 @@ function balanceMacros(availableFoods, targets) {
         const newTotals = calculateTotals(currentQuantities);
         console.log(`New totals: ${newTotals.protein.toFixed(1)}p ${newTotals.carbs.toFixed(1)}c ${newTotals.fat.toFixed(1)}f`);
         
-        // Check if we're close enough (within 15% of targets)
-        const proteinAccuracy = newTotals.protein / targets.protein;
-        const carbsAccuracy = newTotals.carbs / targets.carbs;
-        const fatAccuracy = newTotals.fat / targets.fat;
+        // Check if we're close enough (within 10% of targets)
+        const newProteinAccuracy = newTotals.protein / targets.protein;
+        const newCarbsAccuracy = newTotals.carbs / targets.carbs;
+        const newFatAccuracy = newTotals.fat / targets.fat;
         
-        if (proteinAccuracy >= 0.85 && proteinAccuracy <= 1.15 &&
-            carbsAccuracy >= 0.85 && carbsAccuracy <= 1.15 &&
-            fatAccuracy >= 0.85 && fatAccuracy <= 1.15) {
-            console.log(`✅ Converged! All macros within 15% of targets.`);
+        if (newProteinAccuracy >= 0.9 && newProteinAccuracy <= 1.1 &&
+            newCarbsAccuracy >= 0.9 && newCarbsAccuracy <= 1.1 &&
+            newFatAccuracy >= 0.9 && newFatAccuracy <= 1.1) {
+            console.log(`✅ Converged! All macros within 10% of targets.`);
+            bestQuantities = [...currentQuantities];
+            break;
+        }
+        
+        // If we're getting worse, use best solution so far
+        if (iteration > 5 && overallAccuracy < bestAccuracy * 0.95) {
+            console.log(`📉 Accuracy declining, reverting to best solution (${(bestAccuracy * 100).toFixed(1)}%)`);
+            currentQuantities = [...bestQuantities];
             break;
         }
         
         currentTotals = newTotals;
     }
     
-    console.log(`🎯 Final balanced quantities:`);
+    // Use best solution found
+    currentQuantities = bestQuantities;
+    const finalTotals = calculateTotals(currentQuantities);
+    
+    console.log(`🎯 Final balanced quantities (${(bestAccuracy * 100).toFixed(1)}% accuracy):`);
     currentQuantities.forEach(item => {
         const macros = {
             protein: item.food.protein * item.nutritionMultiplier,
@@ -1092,6 +1138,8 @@ function balanceMacros(availableFoods, targets) {
         };
         console.log(`${item.food.name}: ${item.quantity}g → ${macros.protein.toFixed(1)}p ${macros.carbs.toFixed(1)}c ${macros.fat.toFixed(1)}f`);
     });
+    
+    console.log(`Final totals: ${finalTotals.protein.toFixed(1)}p ${finalTotals.carbs.toFixed(1)}c ${finalTotals.fat.toFixed(1)}f`);
     
     return currentQuantities;
 }
