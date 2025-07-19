@@ -902,7 +902,7 @@ async function generateMealPlan() {
     btn.innerHTML = '🚀 Generate My Meal Plan';
 }
 
-// Build meal plan algorithm
+// Build meal plan algorithm with proper macro balancing
 async function buildMealPlan(params) {
     const { mealsCount, proteinPerMeal, carbsPerMeal, fatPerMeal, selectedFoods } = params;
     const mealPlan = [];
@@ -919,73 +919,68 @@ async function buildMealPlan(params) {
             totals: { protein: 0, carbs: 0, fat: 0, calories: 0 }
         };
         
-        console.log(`\n--- Building ${meal.name} ---`);
+        console.log(`\n--- Building ${meal.name} with macro balancing ---`);
         
-        // Add protein source
+        // Get available foods for this meal
+        const availableFoods = [];
+        
         if (selectedFoods.protein.length > 0) {
-            const protein = selectedFoods.protein[i % selectedFoods.protein.length];
-            const quantityData = calculateQuantity(protein, 'protein', proteinPerMeal, 'protein');
-            meal.foods.push({ 
-                food: protein, 
-                quantity: quantityData.quantity, 
-                explanation: quantityData.explanation,
-                nutritionMultiplier: quantityData.nutritionMultiplier,
-                type: 'protein' 
+            availableFoods.push({
+                food: selectedFoods.protein[i % selectedFoods.protein.length],
+                type: 'protein',
+                priority: 'protein'
             });
         }
         
-        // Add carb source
         if (selectedFoods.carb.length > 0) {
-            const carb = selectedFoods.carb[i % selectedFoods.carb.length];
-            const quantityData = calculateQuantity(carb, 'carbs', carbsPerMeal, 'carb');
-            meal.foods.push({ 
-                food: carb, 
-                quantity: quantityData.quantity, 
-                explanation: quantityData.explanation,
-                nutritionMultiplier: quantityData.nutritionMultiplier,
-                type: 'carb' 
+            availableFoods.push({
+                food: selectedFoods.carb[i % selectedFoods.carb.length],
+                type: 'carb', 
+                priority: 'carbs'
             });
         }
         
-        // Add fat source
         if (selectedFoods.fat.length > 0) {
-            const fat = selectedFoods.fat[i % selectedFoods.fat.length];
-            const quantityData = calculateQuantity(fat, 'fat', fatPerMeal, 'fat'); // Use full fat target, not reduced
-            meal.foods.push({ 
-                food: fat, 
-                quantity: quantityData.quantity, 
-                explanation: quantityData.explanation,
-                nutritionMultiplier: quantityData.nutritionMultiplier,
-                type: 'fat' 
+            availableFoods.push({
+                food: selectedFoods.fat[i % selectedFoods.fat.length],
+                type: 'fat',
+                priority: 'fat'
             });
         }
         
-        // Add vegetable/fruit (minimal amount to not throw off macros)
         if (selectedFoods.veggie.length > 0) {
-            const veggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
-            const quantity = 50; // Reduced serving to minimize macro impact
-            meal.foods.push({ 
-                food: veggie, 
-                quantity: quantity, 
-                explanation: weightModes.veggie === 'cooked' ? 'as served' : 'raw weight',
-                nutritionMultiplier: 0.5, // 50g = 0.5 multiplier
-                type: 'veggie' 
+            availableFoods.push({
+                food: selectedFoods.veggie[i % selectedFoods.veggie.length],
+                type: 'veggie',
+                priority: 'none' // veggies are just for health, minimal macro impact
             });
         }
         
-        // Calculate meal totals using correct nutrition multiplier
-        meal.foods.forEach(item => {
-            const protein = item.food.protein * item.nutritionMultiplier;
-            const carbs = item.food.carbs * item.nutritionMultiplier;
-            const fat = item.food.fat * item.nutritionMultiplier;
-            const calories = item.food.calories * item.nutritionMultiplier;
-            
-            console.log(`${item.food.name}: ${protein.toFixed(1)}p ${carbs.toFixed(1)}c ${fat.toFixed(1)}f ${calories.toFixed(0)}cal (${item.nutritionMultiplier.toFixed(3)}x multiplier)`);
-            
-            meal.totals.protein += protein;
-            meal.totals.carbs += carbs;
-            meal.totals.fat += fat;
-            meal.totals.calories += calories;
+        // Use macro balancing algorithm to find optimal quantities
+        const balancedFoods = balanceMacros(availableFoods, {
+            protein: proteinPerMeal,
+            carbs: carbsPerMeal, 
+            fat: fatPerMeal
+        });
+        
+        // Add balanced foods to meal
+        balancedFoods.forEach(item => {
+            if (item.quantity > 10) { // Only include if meaningful quantity
+                meal.foods.push(item);
+                
+                // Calculate totals
+                const protein = item.food.protein * item.nutritionMultiplier;
+                const carbs = item.food.carbs * item.nutritionMultiplier;
+                const fat = item.food.fat * item.nutritionMultiplier;
+                const calories = item.food.calories * item.nutritionMultiplier;
+                
+                console.log(`${item.food.name} (${item.type}): ${protein.toFixed(1)}p ${carbs.toFixed(1)}c ${fat.toFixed(1)}f ${calories.toFixed(0)}cal`);
+                
+                meal.totals.protein += protein;
+                meal.totals.carbs += carbs;
+                meal.totals.fat += fat;
+                meal.totals.calories += calories;
+            }
         });
         
         console.log(`${meal.name} TOTALS: ${meal.totals.protein.toFixed(1)}p ${meal.totals.carbs.toFixed(1)}c ${meal.totals.fat.toFixed(1)}f ${meal.totals.calories.toFixed(0)}cal`);
@@ -1009,6 +1004,126 @@ async function buildMealPlan(params) {
     console.log(`Accuracy: ${((totalActual.protein/params.targetProtein)*100).toFixed(0)}% protein, ${((totalActual.carbs/params.targetCarbs)*100).toFixed(0)}% carbs, ${((totalActual.fat/params.targetFat)*100).toFixed(0)}% fat`);
     
     return mealPlan;
+}
+
+// Advanced macro balancing algorithm
+function balanceMacros(availableFoods, targets) {
+    console.log(`\n🧮 MACRO BALANCING ALGORITHM`);
+    console.log(`Targets: ${targets.protein}p ${targets.carbs}c ${targets.fat}f`);
+    
+    // Initialize with small quantities
+    let currentQuantities = availableFoods.map(item => ({
+        ...item,
+        quantity: item.type === 'veggie' ? 50 : 50, // Start with 50g each
+        nutritionMultiplier: item.type === 'veggie' ? 0.5 : 0.5
+    }));
+    
+    // Calculate initial totals
+    let currentTotals = calculateTotals(currentQuantities);
+    console.log(`Starting totals: ${currentTotals.protein.toFixed(1)}p ${currentTotals.carbs.toFixed(1)}c ${currentTotals.fat.toFixed(1)}f`);
+    
+    // Iterative optimization (max 10 iterations)
+    for (let iteration = 0; iteration < 10; iteration++) {
+        console.log(`\nIteration ${iteration + 1}:`);
+        
+        // Calculate how far we are from targets
+        const proteinRatio = currentTotals.protein > 0 ? targets.protein / currentTotals.protein : 1;
+        const carbsRatio = currentTotals.carbs > 0 ? targets.carbs / currentTotals.carbs : 1;
+        const fatRatio = currentTotals.fat > 0 ? targets.fat / currentTotals.fat : 1;
+        
+        console.log(`Ratios needed: ${proteinRatio.toFixed(2)}x protein, ${carbsRatio.toFixed(2)}x carbs, ${fatRatio.toFixed(2)}x fat`);
+        
+        // Adjust quantities based on priority macro and overall ratios
+        currentQuantities = currentQuantities.map(item => {
+            let adjustmentFactor = 1;
+            
+            // Each food type gets adjusted based on its priority macro and overall balance
+            if (item.priority === 'protein') {
+                adjustmentFactor = proteinRatio * 0.7 + (carbsRatio + fatRatio) * 0.15; // 70% protein focus, 30% overall
+            } else if (item.priority === 'carbs') {
+                adjustmentFactor = carbsRatio * 0.7 + (proteinRatio + fatRatio) * 0.15;
+            } else if (item.priority === 'fat') {
+                adjustmentFactor = fatRatio * 0.7 + (proteinRatio + carbsRatio) * 0.15;
+            } else {
+                adjustmentFactor = 0.8; // Veggies stay relatively stable
+            }
+            
+            // Apply conservative adjustment (max 20% change per iteration)
+            adjustmentFactor = Math.max(0.8, Math.min(1.2, adjustmentFactor));
+            
+            const newQuantity = Math.round(item.quantity * adjustmentFactor);
+            const clampedQuantity = Math.max(10, Math.min(500, newQuantity)); // Keep reasonable bounds
+            
+            console.log(`${item.food.name}: ${item.quantity}g → ${clampedQuantity}g (${adjustmentFactor.toFixed(2)}x)`);
+            
+            return {
+                ...item,
+                quantity: clampedQuantity,
+                nutritionMultiplier: clampedQuantity / 100,
+                explanation: getWeightExplanation(item.food, clampedQuantity, item.type)
+            };
+        });
+        
+        // Recalculate totals
+        const newTotals = calculateTotals(currentQuantities);
+        console.log(`New totals: ${newTotals.protein.toFixed(1)}p ${newTotals.carbs.toFixed(1)}c ${newTotals.fat.toFixed(1)}f`);
+        
+        // Check if we're close enough (within 15% of targets)
+        const proteinAccuracy = newTotals.protein / targets.protein;
+        const carbsAccuracy = newTotals.carbs / targets.carbs;
+        const fatAccuracy = newTotals.fat / targets.fat;
+        
+        if (proteinAccuracy >= 0.85 && proteinAccuracy <= 1.15 &&
+            carbsAccuracy >= 0.85 && carbsAccuracy <= 1.15 &&
+            fatAccuracy >= 0.85 && fatAccuracy <= 1.15) {
+            console.log(`✅ Converged! All macros within 15% of targets.`);
+            break;
+        }
+        
+        currentTotals = newTotals;
+    }
+    
+    console.log(`🎯 Final balanced quantities:`);
+    currentQuantities.forEach(item => {
+        const macros = {
+            protein: item.food.protein * item.nutritionMultiplier,
+            carbs: item.food.carbs * item.nutritionMultiplier,
+            fat: item.food.fat * item.nutritionMultiplier
+        };
+        console.log(`${item.food.name}: ${item.quantity}g → ${macros.protein.toFixed(1)}p ${macros.carbs.toFixed(1)}c ${macros.fat.toFixed(1)}f`);
+    });
+    
+    return currentQuantities;
+}
+
+// Helper function to calculate totals from food quantities
+function calculateTotals(foodItems) {
+    return foodItems.reduce((totals, item) => {
+        totals.protein += item.food.protein * item.nutritionMultiplier;
+        totals.carbs += item.food.carbs * item.nutritionMultiplier;
+        totals.fat += item.food.fat * item.nutritionMultiplier;
+        totals.calories += item.food.calories * item.nutritionMultiplier;
+        return totals;
+    }, { protein: 0, carbs: 0, fat: 0, calories: 0 });
+}
+
+// Helper function to get weight explanation
+function getWeightExplanation(food, quantity, category) {
+    const weightMode = weightModes[category];
+    const grainType = detectFoodGrainType(food);
+    const isUsdaCooked = isUSDAFoodCooked(food);
+    
+    if (grainType && preparationFactors[grainType]) {
+        if (weightMode === 'raw' && isUsdaCooked) {
+            const dryWeight = quantity * preparationFactors[grainType].cookedToDry;
+            return `${Math.round(dryWeight)}g dry weight (≈${quantity}g cooked)`;
+        } else if (weightMode === 'cooked' && !isUsdaCooked) {
+            const cookedWeight = quantity * preparationFactors[grainType].dryToCooked;
+            return `${Math.round(cookedWeight)}g cooked weight (≈${quantity}g dry)`;
+        }
+    }
+    
+    return weightMode === 'cooked' ? 'as served' : 'raw weight';
 }
 
 // Calculate optimal quantity for target macro with weight mode consideration
