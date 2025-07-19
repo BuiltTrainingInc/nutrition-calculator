@@ -907,6 +907,9 @@ async function buildMealPlan(params) {
     const { mealsCount, proteinPerMeal, carbsPerMeal, fatPerMeal, selectedFoods } = params;
     const mealPlan = [];
     
+    console.log(`Building meal plan: ${mealsCount} meals`);
+    console.log(`Per meal targets: ${proteinPerMeal.toFixed(1)}g protein, ${carbsPerMeal.toFixed(1)}g carbs, ${fatPerMeal.toFixed(1)}g fat`);
+    
     const mealNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout'];
     
     for (let i = 0; i < mealsCount; i++) {
@@ -915,6 +918,8 @@ async function buildMealPlan(params) {
             foods: [],
             totals: { protein: 0, carbs: 0, fat: 0, calories: 0 }
         };
+        
+        console.log(`\n--- Building ${meal.name} ---`);
         
         // Add protein source
         if (selectedFoods.protein.length > 0) {
@@ -945,7 +950,7 @@ async function buildMealPlan(params) {
         // Add fat source
         if (selectedFoods.fat.length > 0) {
             const fat = selectedFoods.fat[i % selectedFoods.fat.length];
-            const quantityData = calculateQuantity(fat, 'fat', fatPerMeal * 0.7, 'fat'); // Reduce fat slightly as other foods contribute
+            const quantityData = calculateQuantity(fat, 'fat', fatPerMeal, 'fat'); // Use full fat target, not reduced
             meal.foods.push({ 
                 food: fat, 
                 quantity: quantityData.quantity, 
@@ -955,29 +960,53 @@ async function buildMealPlan(params) {
             });
         }
         
-        // Add vegetable/fruit
+        // Add vegetable/fruit (minimal amount to not throw off macros)
         if (selectedFoods.veggie.length > 0) {
             const veggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
-            const quantity = 100; // Standard serving
+            const quantity = 50; // Reduced serving to minimize macro impact
             meal.foods.push({ 
                 food: veggie, 
                 quantity: quantity, 
                 explanation: weightModes.veggie === 'cooked' ? 'as served' : 'raw weight',
-                nutritionMultiplier: 1.0, // 100g = 1.0 multiplier
+                nutritionMultiplier: 0.5, // 50g = 0.5 multiplier
                 type: 'veggie' 
             });
         }
         
         // Calculate meal totals using correct nutrition multiplier
         meal.foods.forEach(item => {
-            meal.totals.protein += item.food.protein * item.nutritionMultiplier;
-            meal.totals.carbs += item.food.carbs * item.nutritionMultiplier;
-            meal.totals.fat += item.food.fat * item.nutritionMultiplier;
-            meal.totals.calories += item.food.calories * item.nutritionMultiplier;
+            const protein = item.food.protein * item.nutritionMultiplier;
+            const carbs = item.food.carbs * item.nutritionMultiplier;
+            const fat = item.food.fat * item.nutritionMultiplier;
+            const calories = item.food.calories * item.nutritionMultiplier;
+            
+            console.log(`${item.food.name}: ${protein.toFixed(1)}p ${carbs.toFixed(1)}c ${fat.toFixed(1)}f ${calories.toFixed(0)}cal (${item.nutritionMultiplier.toFixed(3)}x multiplier)`);
+            
+            meal.totals.protein += protein;
+            meal.totals.carbs += carbs;
+            meal.totals.fat += fat;
+            meal.totals.calories += calories;
         });
+        
+        console.log(`${meal.name} TOTALS: ${meal.totals.protein.toFixed(1)}p ${meal.totals.carbs.toFixed(1)}c ${meal.totals.fat.toFixed(1)}f ${meal.totals.calories.toFixed(0)}cal`);
+        console.log(`TARGETS were: ${proteinPerMeal.toFixed(1)}p ${carbsPerMeal.toFixed(1)}c ${fatPerMeal.toFixed(1)}f`);
+        console.log(`ACCURACY: ${((meal.totals.protein/proteinPerMeal)*100).toFixed(0)}% protein, ${((meal.totals.carbs/carbsPerMeal)*100).toFixed(0)}% carbs, ${((meal.totals.fat/fatPerMeal)*100).toFixed(0)}% fat`);
+        console.log(`---`);
         
         mealPlan.push(meal);
     }
+    
+    // Calculate and log total plan accuracy
+    const totalActual = mealPlan.reduce((sum, meal) => ({
+        protein: sum.protein + meal.totals.protein,
+        carbs: sum.carbs + meal.totals.carbs,
+        fat: sum.fat + meal.totals.fat
+    }), {protein: 0, carbs: 0, fat: 0});
+    
+    console.log(`\n🎯 FINAL ACCURACY CHECK:`);
+    console.log(`Target: ${params.targetProtein}p ${params.targetCarbs}c ${params.targetFat}f`);
+    console.log(`Actual: ${totalActual.protein.toFixed(1)}p ${totalActual.carbs.toFixed(1)}c ${totalActual.fat.toFixed(1)}f`);
+    console.log(`Accuracy: ${((totalActual.protein/params.targetProtein)*100).toFixed(0)}% protein, ${((totalActual.carbs/params.targetCarbs)*100).toFixed(0)}% carbs, ${((totalActual.fat/params.targetFat)*100).toFixed(0)}% fat`);
     
     return mealPlan;
 }
@@ -987,44 +1016,51 @@ function calculateQuantity(food, macro, target, category) {
     const macroValue = food[macro] || 1;
     if (macroValue === 0) return { quantity: 100, explanation: '', nutritionMultiplier: 1 };
     
-    // Calculate base quantity needed for USDA nutrition data (this is the "nutrition quantity")
-    let nutritionQuantity = (target / macroValue) * 100;
+    console.log(`\n=== Calculating ${food.name} for ${target}g ${macro} ===`);
+    console.log(`USDA data: ${macroValue}g ${macro} per 100g`);
     
-    // Apply weight mode conversion for DISPLAY only
+    // Step 1: Calculate how much of the USDA food we need (this is always based on USDA data)
+    const usdaQuantityNeeded = (target / macroValue) * 100;
+    console.log(`Need ${usdaQuantityNeeded.toFixed(1)}g of USDA food for ${target}g ${macro}`);
+    
+    // Step 2: Check if we need weight conversion for display
     const weightMode = weightModes[category];
     const grainType = detectFoodGrainType(food);
     const isUsdaCooked = isUSDAFoodCooked(food);
     
-    let displayQuantity = nutritionQuantity; // What we show to user
+    let displayQuantity = usdaQuantityNeeded;
     let explanation = '';
-    let nutritionMultiplier = nutritionQuantity / 100; // Always based on what nutrition calculation needs
     
     if (grainType && preparationFactors[grainType]) {
         if (weightMode === 'raw' && isUsdaCooked) {
-            // User wants raw weight display, but USDA data is cooked
-            // Convert the display quantity to raw weight
-            displayQuantity = nutritionQuantity * preparationFactors[grainType].cookedToDry;
-            explanation = `${Math.round(displayQuantity)}g dry weight (≈${Math.round(nutritionQuantity)}g cooked)`;
-            // Nutrition multiplier stays the same because USDA data is cooked
+            // User wants to see dry weight, but USDA data is for cooked
+            // Convert cooked quantity to dry weight for display
+            displayQuantity = usdaQuantityNeeded * preparationFactors[grainType].cookedToDry;
+            explanation = `${Math.round(displayQuantity)}g dry weight (≈${Math.round(usdaQuantityNeeded)}g cooked)`;
+            console.log(`Converting display: ${usdaQuantityNeeded.toFixed(1)}g cooked → ${displayQuantity.toFixed(1)}g dry`);
         } else if (weightMode === 'cooked' && !isUsdaCooked) {
-            // User wants cooked weight display, but USDA data is raw
-            // Convert the display quantity to cooked weight  
-            displayQuantity = nutritionQuantity * preparationFactors[grainType].dryToCooked;
-            explanation = `${Math.round(displayQuantity)}g cooked weight (≈${Math.round(nutritionQuantity)}g dry)`;
-            // Nutrition multiplier stays the same because USDA data is raw
+            // User wants to see cooked weight, but USDA data is for dry
+            // Convert dry quantity to cooked weight for display
+            displayQuantity = usdaQuantityNeeded * preparationFactors[grainType].dryToCooked;
+            explanation = `${Math.round(displayQuantity)}g cooked weight (≈${Math.round(usdaQuantityNeeded)}g dry)`;
+            console.log(`Converting display: ${usdaQuantityNeeded.toFixed(1)}g dry → ${displayQuantity.toFixed(1)}g cooked`);
         } else {
-            // Weight mode matches USDA data state - no conversion needed
+            // No conversion needed
             explanation = weightMode === 'cooked' ? 'cooked weight' : 'dry weight';
+            console.log(`No conversion needed - ${explanation}`);
         }
     } else {
-        // No conversion needed for non-grains
         explanation = weightMode === 'cooked' ? 'as served' : 'raw weight';
+        console.log(`Non-grain food - ${explanation}`);
     }
     
-    // Keep display quantities reasonable (between 30g and 600g)
-    displayQuantity = Math.max(30, Math.min(600, Math.round(displayQuantity)));
+    // Step 3: Nutrition calculation always uses the USDA quantity
+    const nutritionMultiplier = usdaQuantityNeeded / 100;
+    console.log(`Nutrition multiplier: ${nutritionMultiplier.toFixed(3)} (${usdaQuantityNeeded.toFixed(1)}g ÷ 100g)`);
+    console.log(`Will provide: ${(macroValue * nutritionMultiplier).toFixed(1)}g ${macro}`);
     
-    console.log(`${food.name}: Target ${target}g ${macro}, Need ${nutritionQuantity.toFixed(0)}g for nutrition, Show ${displayQuantity}g to user, Multiplier: ${nutritionMultiplier.toFixed(2)}`);
+    // Keep display quantities reasonable
+    displayQuantity = Math.max(30, Math.min(600, Math.round(displayQuantity)));
     
     return { 
         quantity: displayQuantity, 
@@ -1086,8 +1122,10 @@ function displayMealPlan(mealPlan) {
 
 // Update daily summary
 function updateDailySummary(mealPlan) {
+    console.log(`\n📊 CALCULATING DAILY SUMMARY:`);
+    
     const dailyTotals = mealPlan.reduce((totals, meal) => {
-        console.log(`Meal ${meal.name}:`, meal.totals); // Debug log
+        console.log(`Adding ${meal.name}: ${meal.totals.protein.toFixed(1)}p ${meal.totals.carbs.toFixed(1)}c ${meal.totals.fat.toFixed(1)}f`);
         totals.protein += meal.totals.protein;
         totals.carbs += meal.totals.carbs;
         totals.fat += meal.totals.fat;
@@ -1095,7 +1133,14 @@ function updateDailySummary(mealPlan) {
         return totals;
     }, { protein: 0, carbs: 0, fat: 0, calories: 0 });
     
-    console.log('Daily totals calculated:', dailyTotals); // Debug log
+    const targetProtein = parseFloat(document.getElementById('targetProtein').value) || 1;
+    const targetCarbs = parseFloat(document.getElementById('targetCarbs').value) || 1;
+    const targetFat = parseFloat(document.getElementById('targetFat').value) || 1;
+    
+    console.log(`📋 FINAL COMPARISON:`);
+    console.log(`🎯 TARGETS: ${targetProtein}p ${targetCarbs}c ${targetFat}f`);
+    console.log(`📈 ACTUAL:  ${dailyTotals.protein.toFixed(1)}p ${dailyTotals.carbs.toFixed(1)}c ${dailyTotals.fat.toFixed(1)}f`);
+    console.log(`📊 ACCURACY: ${((dailyTotals.protein/targetProtein)*100).toFixed(0)}% protein, ${((dailyTotals.carbs/targetCarbs)*100).toFixed(0)}% carbs, ${((dailyTotals.fat/targetFat)*100).toFixed(0)}% fat`);
     
     // Update display
     document.getElementById('totalProtein').textContent = dailyTotals.protein.toFixed(1);
@@ -1104,9 +1149,6 @@ function updateDailySummary(mealPlan) {
     document.getElementById('totalCalories').textContent = dailyTotals.calories.toFixed(0);
     
     // Update progress bars
-    const targetProtein = parseFloat(document.getElementById('targetProtein').value) || 1;
-    const targetCarbs = parseFloat(document.getElementById('targetCarbs').value) || 1;
-    const targetFat = parseFloat(document.getElementById('targetFat').value) || 1;
     const targetCalories = targetProtein * 4 + targetCarbs * 4 + targetFat * 9;
     
     document.getElementById('proteinProgress').style.width = Math.min(100, (dailyTotals.protein / targetProtein) * 100) + '%';
