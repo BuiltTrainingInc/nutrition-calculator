@@ -1021,13 +1021,26 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
             console.log(`Global ${iteration}: ${(proteinAcc * 100).toFixed(1)}% protein, ${(carbsAcc * 100).toFixed(1)}% carbs, ${(fatAcc * 100).toFixed(1)}% fat`);
         }
         
-        // Check for success
+        // Check for success - STRICTER CRITERIA
         const meets99 = proteinAcc >= 0.99 && carbsAcc >= 0.99 && fatAcc >= 0.99;
-        const under101 = proteinAcc <= 1.01 && carbsAcc <= 1.01 && fatAcc <= 1.01;
+        const under102 = proteinAcc <= 1.02 && carbsAcc <= 1.02 && fatAcc <= 1.02;
         
-        if (meets99 && under101) {
+        // CRITICAL: Fat must be especially tight - no more than 101% for fat
+        const fatTightControl = fatAcc <= 1.01;
+        // CRITICAL: Protein must be at least 95% - no exceptions
+        const proteinMinimum = proteinAcc >= 0.95;
+        
+        if (meets99 && under102 && fatTightControl && proteinMinimum) {
             console.log(`✅ Global optimization converged at iteration ${iteration}!`);
             break;
+        }
+        
+        // Log problematic macros
+        if (proteinAcc < 0.95) {
+            console.log(`⚠️ Protein critically low: ${(proteinAcc * 100).toFixed(1)}% - boosting lean proteins`);
+        }
+        if (fatAcc > 1.10) {
+            console.log(`⚠️ Fat significantly over: ${(fatAcc * 100).toFixed(1)}% - reducing fat sources`);
         }
         
         // Track best solution
@@ -1050,15 +1063,47 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
     
     console.log(`Final deficits: ${proteinDeficit.toFixed(2)}p ${carbsDeficit.toFixed(2)}c ${fatDeficit.toFixed(2)}f`);
     
-    // Smart rebalancing: if one macro is significantly off, adjust most efficient foods
-    if (Math.abs(proteinDeficit) > 2) {
+    // Smart rebalancing: be more aggressive with larger deficits
+    if (Math.abs(proteinDeficit) > 1) {
         rebalanceProtein(allFoods, proteinDeficit);
+        console.log(`Applied protein rebalancing for ${proteinDeficit.toFixed(1)}g deficit`);
     }
-    if (Math.abs(carbsDeficit) > 2) {
+    if (Math.abs(carbsDeficit) > 1) {
         rebalanceCarbs(allFoods, carbsDeficit);
+        console.log(`Applied carbs rebalancing for ${carbsDeficit.toFixed(1)}g deficit`);
     }
-    if (Math.abs(fatDeficit) > 1) {
+    if (Math.abs(fatDeficit) > 0.5) { // Be more sensitive to fat imbalances
         rebalanceFat(allFoods, fatDeficit);
+        console.log(`Applied fat rebalancing for ${fatDeficit.toFixed(1)}g deficit`);
+    }
+    
+    // PHASE 3: Secondary optimization round if still not meeting targets
+    const secondTotals = calculateGlobalTotals(allFoods);
+    const secondProteinAcc = secondTotals.protein / targets.targetProtein;
+    const secondCarbsAcc = secondTotals.carbs / targets.targetCarbs;
+    const secondFatAcc = secondTotals.fat / targets.targetFat;
+    
+    console.log(`\n=== PHASE 3: VERIFICATION & SECONDARY OPTIMIZATION ===`);
+    console.log(`Second check: ${(secondProteinAcc * 100).toFixed(1)}% protein, ${(secondCarbsAcc * 100).toFixed(1)}% carbs, ${(secondFatAcc * 100).toFixed(1)}% fat`);
+    
+    // If still not meeting critical thresholds, do another round
+    const stillNeedsWork = secondProteinAcc < 0.95 || secondFatAcc > 1.10;
+    
+    if (stillNeedsWork) {
+        console.log(`Still needs optimization - running secondary adjustment round`);
+        for (let i = 0; i < 10; i++) {
+            const currentTotals = calculateGlobalTotals(allFoods);
+            applyGlobalAdjustments(allFoods, targets, currentTotals);
+            
+            const checkTotals = calculateGlobalTotals(allFoods);
+            const checkProteinAcc = checkTotals.protein / targets.targetProtein;
+            const checkFatAcc = checkTotals.fat / targets.targetFat;
+            
+            if (checkProteinAcc >= 0.95 && checkFatAcc <= 1.05) {
+                console.log(`Secondary optimization successful at iteration ${i + 1}`);
+                break;
+            }
+        }
     }
     
     // Use best solution if current isn't good enough
@@ -1087,20 +1132,22 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
     return mealPlan;
 }
 
-// Helper functions for global optimization
+// Helper functions for global optimization with improved bounds
 function getFoodMinQuantity(item) {
-    if (item.food.fat > 90) return 2; // Oils
-    if (item.food.protein > 70) return 15; // Protein powders
-    if (item.priority === 'veggie') return 20; // Vegetables
-    return 30; // Everything else
+    if (item.food.fat > 90) return 1; // Oils - can go very small
+    if (item.food.protein > 70) return 10; // Protein powders  
+    if (item.priority === 'veggie') return 10; // Vegetables
+    if (item.priority === 'protein') return 40; // Proteins - allow smaller portions
+    return 20; // Everything else
 }
 
 function getFoodMaxQuantity(item) {
-    if (item.food.fat > 90) return 25; // Oils
-    if (item.food.protein > 70) return 100; // Protein powders
-    if (item.priority === 'veggie') return 300; // Vegetables
-    if (item.priority === 'protein') return 500; // Proteins
-    return 400; // Carbs and mixed foods
+    if (item.food.fat > 90) return 30; // Oils - small max to prevent fat excess
+    if (item.food.protein > 70) return 120; // Protein powders - more flexibility
+    if (item.priority === 'veggie') return 400; // Vegetables - lots of flexibility
+    if (item.priority === 'protein') return 600; // Proteins - much more flexibility for hitting targets
+    if (item.priority === 'carbs') return 500; // Carbs
+    return 300; // Mixed foods
 }
 
 function calculateGlobalTotals(allFoods) {
@@ -1115,20 +1162,30 @@ function calculateGlobalTotals(allFoods) {
 function calculateGlobalScore(proteinAcc, carbsAcc, fatAcc) {
     let score = 0;
     
-    // Reward 99%+ accuracy heavily
-    if (proteinAcc >= 0.99) score += 1000; else score += proteinAcc * 500;
-    if (carbsAcc >= 0.99) score += 1000; else score += carbsAcc * 500;
-    if (fatAcc >= 0.99) score += 1000; else score += fatAcc * 500;
+    // Reward 99%+ accuracy heavily, but penalize being under more than being over for protein
+    if (proteinAcc >= 0.99) score += 1500; 
+    else if (proteinAcc >= 0.95) score += proteinAcc * 800; 
+    else score += proteinAcc * 400; // Heavy penalty for low protein
+    
+    if (carbsAcc >= 0.99) score += 1000; 
+    else score += carbsAcc * 500;
+    
+    if (fatAcc >= 0.99 && fatAcc <= 1.01) score += 1200; // Bonus for tight fat control
+    else if (fatAcc >= 0.99) score += 800; 
+    else score += fatAcc * 300;
     
     // Bonus for being close to 100%
-    score += Math.max(0, 300 - Math.abs(proteinAcc - 1) * 1000);
+    score += Math.max(0, 400 - Math.abs(proteinAcc - 1) * 1000);
     score += Math.max(0, 300 - Math.abs(carbsAcc - 1) * 1000);
-    score += Math.max(0, 300 - Math.abs(fatAcc - 1) * 1000);
+    score += Math.max(0, 500 - Math.abs(fatAcc - 1) * 1500); // Fat accuracy is most important
     
-    // Heavy penalty for going over 101%
-    if (proteinAcc > 1.01) score -= (proteinAcc - 1.01) * 2000;
-    if (carbsAcc > 1.01) score -= (carbsAcc - 1.01) * 2000;
-    if (fatAcc > 1.01) score -= (fatAcc - 1.01) * 3000; // Extra penalty for fat
+    // MASSIVE penalties for going over targets
+    if (proteinAcc > 1.05) score -= (proteinAcc - 1.05) * 1500;
+    if (carbsAcc > 1.05) score -= (carbsAcc - 1.05) * 1500;
+    if (fatAcc > 1.02) score -= (fatAcc - 1.02) * 4000; // Huge penalty for fat excess
+    
+    // Extra penalty for being under protein target
+    if (proteinAcc < 0.95) score -= (0.95 - proteinAcc) * 2000;
     
     return score;
 }
@@ -1138,46 +1195,91 @@ function applyGlobalAdjustments(allFoods, targets, currentTotals) {
     const carbsRatio = targets.targetCarbs / currentTotals.carbs;
     const fatRatio = targets.targetFat / currentTotals.fat;
     
+    console.log(`Global ratios: ${proteinRatio.toFixed(3)}x protein, ${carbsRatio.toFixed(3)}x carbs, ${fatRatio.toFixed(3)}x fat`);
+    
+    // CRITICAL: When fat is over target, be extremely aggressive
+    const fatIsSignificantlyOver = fatRatio < 0.85;
+    const proteinIsUnder = proteinRatio > 1.05;
+    
     allFoods.forEach(item => {
         let adjustmentFactor = 1;
         
         if (item.priority === 'protein') {
-            adjustmentFactor = proteinRatio * 0.7 + fatRatio * 0.2 + 0.1;
-            // If fat is over and this protein has fat, be conservative
-            if (item.food.fat > 5 && fatRatio < 0.98) {
-                adjustmentFactor = Math.min(adjustmentFactor, 1.05);
+            // Protein foods: prioritize protein targets
+            adjustmentFactor = proteinRatio * 0.8 + 0.2;
+            
+            // CRITICAL: If this protein has significant fat AND fat is over target, reduce it
+            if (item.food.fat > 8 && fatIsSignificantlyOver) {
+                adjustmentFactor = Math.min(adjustmentFactor, 0.85); // Reduce high-fat proteins
+                console.log(`Reducing high-fat protein ${item.food.name} due to fat excess`);
             }
+            // If protein is under and this is lean protein, boost it more
+            else if (item.food.fat < 5 && proteinIsUnder) {
+                adjustmentFactor = Math.min(1.4, adjustmentFactor * 1.2); // Boost lean proteins
+                console.log(`Boosting lean protein ${item.food.name} for protein target`);
+            }
+            
         } else if (item.priority === 'carbs') {
+            // Carbs: standard adjustment
             adjustmentFactor = carbsRatio * 0.8 + 0.2;
+            
         } else if (item.priority === 'fat') {
+            // CRITICAL: Fat sources get special handling
             adjustmentFactor = fatRatio;
-            // Be more aggressive with fat adjustments
-            if (fatRatio < 0.95) {
-                adjustmentFactor = fatRatio * 0.85; // Reduce more aggressively
-            } else if (fatRatio > 1.05) {
-                adjustmentFactor = fatRatio * 1.1; // Increase more cautiously
+            
+            if (fatIsSignificantlyOver) {
+                // Fat is way over - be very aggressive about reducing
+                if (item.food.fat > 90) {
+                    // Pure oils: slash them
+                    adjustmentFactor = Math.max(0.4, fatRatio * 0.6);
+                    console.log(`Slashing oil ${item.food.name} - fat severely over target`);
+                } else {
+                    // Other fat sources: reduce significantly  
+                    adjustmentFactor = Math.max(0.6, fatRatio * 0.8);
+                    console.log(`Reducing fat source ${item.food.name} - fat over target`);
+                }
             }
+        } else if (item.priority === 'none') {
+            // Vegetables: minimal adjustment
+            adjustmentFactor = 1.0;
         }
         
-        // Apply conservative bounds
-        adjustmentFactor = Math.max(0.8, Math.min(1.2, adjustmentFactor));
+        // Apply stricter bounds based on current macro status
+        if (fatIsSignificantlyOver && item.food.fat > 5) {
+            // When fat is significantly over, limit any food with fat
+            adjustmentFactor = Math.max(0.5, Math.min(1.1, adjustmentFactor));
+        } else if (proteinIsUnder && item.food.protein > 20) {
+            // When protein is under, allow protein foods to increase more
+            adjustmentFactor = Math.max(0.8, Math.min(1.5, adjustmentFactor));
+        } else {
+            // Normal bounds
+            adjustmentFactor = Math.max(0.7, Math.min(1.3, adjustmentFactor));
+        }
         
+        const oldQuantity = item.quantity;
         const newQuantity = item.quantity * adjustmentFactor;
         item.quantity = Math.max(item.minQty, Math.min(item.maxQty, newQuantity));
+        
+        if (Math.abs(item.quantity - oldQuantity) > 3) {
+            console.log(`${item.food.name}: ${oldQuantity.toFixed(1)}g → ${item.quantity.toFixed(1)}g (${adjustmentFactor.toFixed(3)}x)`);
+        }
     });
 }
 
 function rebalanceProtein(allFoods, deficit) {
-    const proteinFoods = allFoods.filter(f => f.priority === 'protein').sort((a, b) => 
-        (b.food.protein / b.food.fat || 999) - (a.food.protein / a.food.fat || 999)
-    );
+    // Sort proteins by protein efficiency (protein per gram with fat penalty)
+    const proteinFoods = allFoods.filter(f => f.priority === 'protein').sort((a, b) => {
+        const aEfficiency = a.food.protein / Math.max(a.food.fat, 1); // Penalize high fat
+        const bEfficiency = b.food.protein / Math.max(b.food.fat, 1);
+        return bEfficiency - aEfficiency;
+    });
     
     if (proteinFoods.length > 0) {
-        const bestProtein = proteinFoods[0]; // Highest protein:fat ratio
-        const adjustment = deficit / (bestProtein.food.protein / 100) * 0.5;
+        const bestProtein = proteinFoods[0]; // Most efficient protein:fat ratio
+        const adjustment = deficit / (bestProtein.food.protein / 100) * 0.7; // More aggressive
         const newQty = bestProtein.quantity + adjustment;
         bestProtein.quantity = Math.max(bestProtein.minQty, Math.min(bestProtein.maxQty, newQty));
-        console.log(`Rebalanced ${bestProtein.food.name} by ${adjustment.toFixed(1)}g for protein`);
+        console.log(`Rebalanced ${bestProtein.food.name} by ${adjustment.toFixed(1)}g for protein (efficiency: ${(bestProtein.food.protein / Math.max(bestProtein.food.fat, 1)).toFixed(1)})`);
     }
 }
 
@@ -1188,7 +1290,7 @@ function rebalanceCarbs(allFoods, deficit) {
     
     if (carbFoods.length > 0) {
         const bestCarb = carbFoods[0];
-        const adjustment = deficit / (bestCarb.food.carbs / 100) * 0.5;
+        const adjustment = deficit / (bestCarb.food.carbs / 100) * 0.6;
         const newQty = bestCarb.quantity + adjustment;
         bestCarb.quantity = Math.max(bestCarb.minQty, Math.min(bestCarb.maxQty, newQty));
         console.log(`Rebalanced ${bestCarb.food.name} by ${adjustment.toFixed(1)}g for carbs`);
@@ -1202,10 +1304,21 @@ function rebalanceFat(allFoods, deficit) {
     
     if (fatFoods.length > 0) {
         const bestFat = fatFoods[0];
-        const adjustment = deficit / (bestFat.food.fat / 100) * 0.3; // Smaller steps for fat
-        const newQty = bestFat.quantity + adjustment;
-        bestFat.quantity = Math.max(bestFat.minQty, Math.min(bestFat.maxQty, newQty));
-        console.log(`Rebalanced ${bestFat.food.name} by ${adjustment.toFixed(1)}g for fat`);
+        
+        // CRITICAL: Different handling for deficit vs excess
+        if (deficit < 0) {
+            // Fat is over target - be very aggressive about reduction
+            const adjustment = deficit / (bestFat.food.fat / 100) * 0.8; // More aggressive reduction
+            const newQty = Math.max(bestFat.minQty, bestFat.quantity + adjustment);
+            bestFat.quantity = newQty;
+            console.log(`Aggressively reduced ${bestFat.food.name} by ${Math.abs(adjustment).toFixed(1)}g to fix fat excess`);
+        } else {
+            // Fat is under target - moderate increase
+            const adjustment = deficit / (bestFat.food.fat / 100) * 0.3;
+            const newQty = bestFat.quantity + adjustment;
+            bestFat.quantity = Math.max(bestFat.minQty, Math.min(bestFat.maxQty, newQty));
+            console.log(`Increased ${bestFat.food.name} by ${adjustment.toFixed(1)}g for fat deficit`);
+        }
     }
 }
 
