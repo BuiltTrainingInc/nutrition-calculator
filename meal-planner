@@ -1,0 +1,144 @@
+BUILT Automated Meal Plan Generator
+Upload your food database and get precise meal plans with calculated quantities
+
+📁 Upload Your Food Database
+📊
+Drop your Google Sheets CSV export here or click to browse
+Choose CSV File
+Format: id,name,category,protein,carbs,fat,calories,state,notes
+Categories: protein, carb, fat, veggie
+📊 Daily Macro Targets
+Protein (g)
+150
+Carbs (g)
+200
+Fat (g)
+60
+Meals
+4
+🍽️ Food Preferences
+🥩 Protein Sources
+Calculate quantities as:
+Cooked Weight
+Raw Weight
+Cooked weight = what you eat | Raw weight = before cooking
+Search proteins... (chicken, salmon, eggs)
+Chicken Breast
+P: 31.0g | C: 0.0g | F: 3.6g
+PROTEIN
+Chicken Thigh
+P: 24.8g | C: 0.0g | F: 8.2g
+PROTEIN
+Extra Lean Ground Turkey
+P: 22.0g | C: 0.0g | F: 7.0g
+PROTEIN
+Turkey Breast
+P: 29.9g | C: 0.0g | F: 0.7g
+PROTEIN
+Sirloin Roast
+P: 26.1g | C: 0.0g | F: 8.4g
+PROTEIN
+Extra Lean Ground Beef
+P: 26.1g | C: 0.0g | F: 5.0g
+PROTEIN
+Sirloin Steak
+P: 26.0g | C: 0.0g | F: 6.1g
+PROTEIN
+Extra Lean Ground Bison
+P: 28.4g | C: 0.0g | F: 2.4g
+PROTEIN
+Selected Proteins:
+🍚 Carbohydrate Sources
+Calculate quantities as:
+Cooked Weight
+Dry Weight
+Cooked = ready to eat | Dry = uncooked rice/pasta/oats
+Search carbs... (rice, oats, pasta)
+White Jasmine Rice
+P: 2.7g | C: 28.6g | F: 0.3g
+CARB
+White Basmati Rice
+P: 2.7g | C: 28.0g | F: 0.3g
+CARB
+Golden Potato
+P: 2.5g | C: 21.0g | F: 0.1g
+CARB
+White Potato
+P: 2.5g | C: 21.0g | F: 0.1g
+CARB
+Sweet Potato
+P: 1.6g | C: 20.1g | F: 0.1g
+CARB
+Pasta
+P: 5.0g | C: 25.0g | F: 0.9g
+CARB
+Sourdough Bread
+P: 9.0g | C: 48.0g | F: 2.5g
+CARB
+Cream of Rice
+P: 1.5g | C: 22.0g | F: 0.1g
+CARB
+Selected Carbs:
+🥑 Fat Sources
+Calculate quantities as:
+As Served
+Raw Weight
+As served = ready to eat | Raw = before preparation
+Search fats... (avocado, nuts, oil)
+Natural Peanut Butter
+P: 25.1g | C: 20.0g | F: 50.4g
+FAT
+Natural Almond Butter
+P: 21.2g | C: 18.8g | F: 55.5g
+FAT
+Coconut Oil
+P: 0.0g | C: 0.0g | F: 99.1g
+FAT
+Avocado Oil
+P: 0.0g | C: 0.0g | F: 100.0g
+FAT
+Extra Virgin Olive Oil
+P: 0.0g | C: 0.0g | F: 100.0g
+FAT
+Avocado
+P: 2.0g | C: 8.5g | F: 14.7g
+FAT
+Dark Chocolate 80%
+P: 7.8g | C: 45.9g | F: 35.4g
+FAT
+Walnuts
+P: 15.2g | C: 13.7g | F: 65.2g
+FAT
+Selected Fats:
+🥬 Fruits & Vegetables
+Calculate quantities as:
+As Served
+Raw Weight
+As served = ready to eat | Raw = before cooking
+Search fruits/veggies... (spinach, berries, broccoli)
+Triple Berry Mix (Frozen)
+P: 0.7g | C: 12.0g | F: 0.4g
+CARB
+Blueberries (Frozen)
+P: 0.7g | C: 14.5g | F: 0.3g
+CARB
+Strawberries
+P: 0.7g | C: 7.7g | F: 0.3g
+CARB
+Apple
+P: 0.3g | C: 14.0g | F: 0.2g
+CARB
+Banana
+P: 1.1g | C: 22.8g | F: 0.3g
+CARB
+Cucumber
+P: 0.7g | C: 3.6g | F: 0.1g
+CARB
+Baby Carrots
+P: 0.9g | C: 9.6g | F: 0.2g
+CARB
+Zucchini
+P: 1.2g | C: 3.1g | F: 0.3g
+CARB
+Selected Fruits & Vegetables:
+⚠️ Please select some foods first
