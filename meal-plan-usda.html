@@ -65,51 +65,7 @@
             font-size: 16px;
         }
 
-        .upload-area {
-            border: 2px dashed #4da6d9;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            background: #1a1a1a;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 15px;
-        }
 
-        .upload-area:hover {
-            border-color: #2ecc71;
-            background: #1e1e1e;
-        }
-
-        .upload-area.dragover {
-            border-color: #2ecc71;
-            background: #0f2419;
-        }
-
-        .upload-icon {
-            font-size: 32px;
-            color: #4da6d9;
-            margin-bottom: 10px;
-        }
-
-        .upload-text {
-            color: #ccc;
-            margin-bottom: 10px;
-        }
-
-        .upload-button {
-            background: #4da6d9;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .upload-button:hover {
-            background: #3d8bb8;
-        }
 
         .food-category {
             margin-bottom: 20px;
@@ -122,7 +78,7 @@
             font-size: 16px;
         }
 
-        .food-search-input {
+        .food-dropdown {
             width: 100%;
             padding: 10px;
             background: #1e1e1e;
@@ -131,72 +87,16 @@
             border-radius: 4px;
             margin-bottom: 10px;
             font-size: 14px;
-        }
-
-        .food-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 10px;
-            background: #1a1a1a;
-        }
-
-        .food-item {
-            background: #333;
-            padding: 8px;
-            border-radius: 4px;
             cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-            font-size: 12px;
         }
 
-        .food-item:hover {
-            background: #444;
-            border-color: #4da6d9;
-        }
-
-        .food-item.selected {
-            background: #4da6d9;
+        .food-dropdown option {
+            background: #1e1e1e;
             color: white;
-            border-color: #4da6d9;
+            padding: 5px;
         }
 
-        .food-name {
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
 
-        .food-macros {
-            font-size: 10px;
-            color: #ccc;
-        }
-
-        .selected.food-macros {
-            color: white;
-        }
-
-        .food-badges {
-            display: flex;
-            gap: 5px;
-            margin-top: 3px;
-        }
-
-        .macro-badge {
-            padding: 1px 4px;
-            border-radius: 2px;
-            font-size: 8px;
-            font-weight: bold;
-        }
-
-        .protein-badge { background: #e74c3c; color: white; }
-        .carb-badge { background: #f39c12; color: white; }
-        .fat-badge { background: #9b59b6; color: white; }
-        .mixed-badge { background: #34495e; color: white; }
 
         .selected-foods {
             margin-top: 15px;
@@ -469,28 +369,9 @@
 <body>
 <div class="container">
     <h2 style="text-align: center; color: #4da6d9; margin-bottom: 10px;">BUILT Automated Meal Plan Generator</h2>
-    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Complete with 54 USDA-verified foods • Generate precise meal plans instantly</p>
+    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Professional meal planning with 54 USDA-verified foods • Generate precise meal plans instantly</p>
 
-    <!-- CSV Upload Section - Optional for custom foods -->
-    <div class="section" style="opacity: 0.7;">
-        <div class="section-title">📁 Add Custom Foods (Optional)</div>
-        <p style="color: #ccc; font-size: 13px; margin-bottom: 15px;">Already includes 54 foods! Upload your own CSV to add more foods to the database.</p>
-        <div class="upload-area" onclick="document.getElementById('csvFile').click()" 
-             ondragover="handleDragOver(event)" 
-             ondrop="handleDrop(event)"
-             ondragenter="handleDragEnter(event)"
-             ondragleave="handleDragLeave(event)">
-            <div class="upload-icon">📊</div>
-            <div class="upload-text">Drop your Google Sheets CSV export here or click to browse</div>
-            <button class="upload-button" type="button">Choose CSV File</button>
-            <input type="file" id="csvFile" style="display: none;" accept=".csv" onchange="handleFileSelect(event)">
-            <div style="font-size: 11px; color: #666; margin-top: 10px;">
-                Format: id,name,category,protein,carbs,fat,calories,state,notes<br>
-                Categories: protein, carb, fat, veggie
-            </div>
-        </div>
-        <div id="uploadStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; display: none;"></div>
-    </div>
+
 
     <!-- Macro Targets -->
     <div class="section">
@@ -530,8 +411,10 @@
                 </div>
                 <small class="toggle-explanation">Cooked weight = what you eat | Raw weight = before cooking</small>
             </div>
-            <input type="text" class="food-search-input" id="proteinSearch" placeholder="Search proteins... (chicken, salmon, eggs)" oninput="searchFoods('protein')">
-            <div class="food-grid" id="proteinGrid"></div>
+            <select class="food-dropdown" id="proteinDropdown" onchange="selectFoodFromDropdown('protein')">
+                <option value="">Select a protein source...</option>
+            </select>
+
             <div class="selected-foods">
                 <h4>Selected Proteins:</h4>
                 <div class="selected-food-tags" id="selectedProteins"></div>
@@ -549,8 +432,10 @@
                 </div>
                 <small class="toggle-explanation">Cooked = ready to eat | Dry = uncooked rice/pasta/oats</small>
             </div>
-            <input type="text" class="food-search-input" id="carbSearch" placeholder="Search carbs... (rice, oats, pasta)" oninput="searchFoods('carb')">
-            <div class="food-grid" id="carbGrid"></div>
+            <select class="food-dropdown" id="carbDropdown" onchange="selectFoodFromDropdown('carb')">
+                <option value="">Select a carbohydrate source...</option>
+            </select>
+
             <div class="selected-foods">
                 <h4>Selected Carbs:</h4>
                 <div class="selected-food-tags" id="selectedCarbs"></div>
@@ -568,8 +453,10 @@
                 </div>
                 <small class="toggle-explanation">As served = ready to eat | Raw = before preparation</small>
             </div>
-            <input type="text" class="food-search-input" id="fatSearch" placeholder="Search fats... (avocado, nuts, oil)" oninput="searchFoods('fat')">
-            <div class="food-grid" id="fatGrid"></div>
+            <select class="food-dropdown" id="fatDropdown" onchange="selectFoodFromDropdown('fat')">
+                <option value="">Select a fat source...</option>
+            </select>
+
             <div class="selected-foods">
                 <h4>Selected Fats:</h4>
                 <div class="selected-food-tags" id="selectedFats"></div>
@@ -587,8 +474,10 @@
                 </div>
                 <small class="toggle-explanation">As served = ready to eat | Raw = before cooking</small>
             </div>
-            <input type="text" class="food-search-input" id="veggieSearch" placeholder="Search fruits/veggies... (spinach, berries, broccoli)" oninput="searchFoods('veggie')">
-            <div class="food-grid" id="veggieGrid"></div>
+            <select class="food-dropdown" id="veggieDropdown" onchange="selectFoodFromDropdown('veggie')">
+                <option value="">Select fruits & vegetables...</option>
+            </select>
+
             <div class="selected-foods">
                 <h4>Selected Fruits & Vegetables:</h4>
                 <div class="selected-food-tags" id="selectedVeggies"></div>
@@ -727,7 +616,6 @@ let weightModes = {
     veggie: 'cooked'
 };
 
-let searchTimeout;
 let currentMealPlan = null;
 
 // Preparation factors for cooked/raw conversions
@@ -740,167 +628,6 @@ const preparationFactors = {
     'beans': { cookedToDry: 0.45, dryToCooked: 2.22 },
     'barley': { cookedToDry: 0.3, dryToCooked: 3.33 }
 };
-
-// CSV Upload Functions
-function handleDragOver(event) {
-    event.preventDefault();
-    event.currentTarget.style.borderColor = '#2ecc71';
-    event.currentTarget.style.backgroundColor = '#0f2419';
-}
-
-function handleDragEnter(event) {
-    event.preventDefault();
-}
-
-function handleDragLeave(event) {
-    event.currentTarget.style.borderColor = '#4da6d9';
-    event.currentTarget.style.backgroundColor = '#1a1a1a';
-}
-
-function handleDrop(event) {
-    event.preventDefault();
-    event.currentTarget.style.borderColor = '#4da6d9';
-    event.currentTarget.style.backgroundColor = '#1a1a1a';
-    
-    const files = event.dataTransfer.files;
-    if (files.length > 0) {
-        processCsvFile(files[0]);
-    }
-}
-
-function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (file) {
-        processCsvFile(file);
-    }
-}
-
-function processCsvFile(file) {
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-        showUploadStatus('Please select a CSV file.', 'error');
-        return;
-    }
-
-    showUploadStatus('Processing CSV file...', 'info');
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const csvData = e.target.result;
-            const parsedData = parseCSV(csvData);
-            updateCustomFoodDatabase(parsedData);
-            showUploadStatus(`Successfully added ${parsedData.length} custom foods!`, 'success');
-            
-            // Refresh the displayed foods
-            const categories = ['protein', 'carb', 'fat', 'veggie'];
-            categories.forEach(category => {
-                const grid = document.getElementById(`${category}Grid`);
-                displayFoods(category, foodDatabase[category].slice(0, 8));
-            });
-            
-        } catch (error) {
-            showUploadStatus(`Error parsing CSV: ${error.message}`, 'error');
-        }
-    };
-    reader.readAsText(file);
-}
-
-function parseCSV(csvData) {
-    const lines = csvData.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-    
-    // Validate headers
-    const requiredHeaders = ['id', 'name', 'category', 'protein', 'carbs', 'fat', 'calories'];
-    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
-    if (missingHeaders.length > 0) {
-        throw new Error(`Missing required columns: ${missingHeaders.join(', ')}`);
-    }
-    
-    const foods = [];
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        if (values.length >= headers.length) {
-            const food = {};
-            headers.forEach((header, index) => {
-                food[header] = values[index];
-            });
-            
-            // Convert numeric values
-            food.protein = parseFloat(food.protein) || 0;
-            food.carbs = parseFloat(food.carbs) || 0;
-            food.fat = parseFloat(food.fat) || 0;
-            food.calories = parseFloat(food.calories) || 0;
-            
-            foods.push(food);
-        }
-    }
-    
-    return foods;
-}
-
-function updateCustomFoodDatabase(foods) {
-    // Categorize new foods
-    const newFoods = {
-        protein: [],
-        carb: [],
-        fat: [],
-        veggie: []
-    };
-    
-    foods.forEach(food => {
-        const category = food.category.toLowerCase();
-        if (newFoods[category]) {
-            newFoods[category].push(food);
-        }
-    });
-    
-    // Add new foods to existing database (don't replace)
-    Object.keys(newFoods).forEach(category => {
-        if (newFoods[category].length > 0) {
-            // Add new foods to existing ones, avoiding duplicates by ID
-            newFoods[category].forEach(newFood => {
-                const existingFood = foodDatabase[category].find(f => f.id === newFood.id);
-                if (!existingFood) {
-                    foodDatabase[category].push(newFood);
-                } else {
-                    // Update existing food with new data
-                    Object.assign(existingFood, newFood);
-                }
-            });
-        }
-    });
-    
-    // Store updated database in localStorage
-    localStorage.setItem('customFoodDatabase', JSON.stringify(foodDatabase));
-    
-    const totalNewFoods = Object.values(newFoods).reduce((sum, cat) => sum + cat.length, 0);
-    const totalFoods = Object.values(foodDatabase).reduce((sum, cat) => sum + cat.length, 0);
-    
-    console.log(`✅ Added ${totalNewFoods} new foods. Total database now has ${totalFoods} foods`);
-}
-
-function showUploadStatus(message, type) {
-    const statusEl = document.getElementById('uploadStatus');
-    statusEl.textContent = message;
-    
-    // Set colors based on type
-    if (type === 'success') {
-        statusEl.style.backgroundColor = '#2ecc71';
-        statusEl.style.color = 'white';
-    } else if (type === 'error') {
-        statusEl.style.backgroundColor = '#e74c3c';
-        statusEl.style.color = 'white';
-    } else {
-        statusEl.style.backgroundColor = '#4da6d9';
-        statusEl.style.color = 'white';
-    }
-    
-    statusEl.style.display = 'block';
-    
-    setTimeout(() => {
-        statusEl.style.display = 'none';
-    }, 5000);
-}
 
 // Toggle weight mode
 function toggleWeightMode(category, mode) {
@@ -935,130 +662,48 @@ function isUSDAFoodCooked(food) {
     return name.includes('cooked') || name.includes('boiled') || name.includes('prepared');
 }
 
-// Food classification functions
-function getFoodMacroType(food) {
-    const protein = food.protein || 0;
-    const carbs = food.carbs || 0;
-    const fat = food.fat || 0;
+// Populate dropdown with foods from a category
+function populateDropdown(category) {
+    const dropdown = document.getElementById(`${category}Dropdown`);
+    const foods = foodDatabase[category] || [];
     
-    const totalMacros = protein * 4 + carbs * 4 + fat * 9;
-    if (totalMacros === 0) return 'mixed';
+    // Clear existing options except the first one
+    dropdown.innerHTML = `<option value="">Select ${category === 'veggie' ? 'fruits & vegetables' : category}...</option>`;
     
-    const proteinPercent = (protein * 4 / totalMacros) * 100;
-    const carbPercent = (carbs * 4 / totalMacros) * 100;
-    const fatPercent = (fat * 9 / totalMacros) * 100;
-    
-    if (proteinPercent >= 40) return 'protein';
-    if (carbPercent >= 50) return 'carb';
-    if (fatPercent >= 50) return 'fat';
-    return 'mixed';
+    // Add food options
+    foods.forEach(food => {
+        const option = document.createElement('option');
+        option.value = food.id;
+        option.textContent = `${food.name} (P:${food.protein.toFixed(1)}g C:${food.carbs.toFixed(1)}g F:${food.fat.toFixed(1)}g)`;
+        dropdown.appendChild(option);
+    });
 }
 
-function isVegetableOrFruit(food) {
-    const name = food.name.toLowerCase();
-    const keywords = ['vegetable', 'fruit', 'berry', 'green', 'spinach', 'lettuce', 'broccoli', 'carrot', 'tomato', 'apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberries'];
-    return keywords.some(keyword => name.includes(keyword)) || (food.carbs > 0 && food.carbs < 20 && food.protein < 5);
-}
-
-function getMacroBadge(type) {
-    const badges = {
-        'protein': '<span class="macro-badge protein-badge">PROTEIN</span>',
-        'carb': '<span class="macro-badge carb-badge">CARB</span>',
-        'fat': '<span class="macro-badge fat-badge">FAT</span>',
-        'mixed': '<span class="macro-badge mixed-badge">MIXED</span>'
-    };
-    return badges[type] || '';
-}
-
-// Search foods by category using database
-async function searchFoods(category) {
-    const searchInput = document.getElementById(`${category}Search`);
-    const grid = document.getElementById(`${category}Grid`);
-    const searchTerm = searchInput.value.trim().toLowerCase();
-
-    if (searchTerm.length < 2) {
-        grid.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Type 2+ characters to search...</div>';
+// Handle dropdown selection
+function selectFoodFromDropdown(category) {
+    const dropdown = document.getElementById(`${category}Dropdown`);
+    const foodId = dropdown.value;
+    
+    if (!foodId) return;
+    
+    // Find the selected food
+    const food = foodDatabase[category].find(f => f.id === foodId);
+    if (!food) return;
+    
+    // Check if already selected
+    const alreadySelected = selectedFoods[category].some(f => f.id === food.id);
+    if (alreadySelected) {
+        dropdown.value = ""; // Reset dropdown
         return;
     }
-
-    grid.innerHTML = '<div class="loading">🔍 Searching food database...</div>';
-
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(async () => {
-        try {
-            // Get foods from database
-            let availableFoods = foodDatabase[category] || [];
-            
-            // Filter by search term
-            let filteredFoods = availableFoods.filter(food => 
-                food.name.toLowerCase().includes(searchTerm)
-            );
-            
-            // If no exact matches in category, search all categories
-            if (filteredFoods.length === 0) {
-                const allFoods = [
-                    ...foodDatabase.protein,
-                    ...foodDatabase.carb, 
-                    ...foodDatabase.fat,
-                    ...foodDatabase.veggie
-                ];
-                
-                filteredFoods = allFoods.filter(food => 
-                    food.name.toLowerCase().includes(searchTerm)
-                ).slice(0, 12);
-            }
-            
-            if (filteredFoods.length > 0) {
-                displayFoods(category, filteredFoods.slice(0, 12));
-            } else {
-                grid.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">No foods found. Try different keywords.</div>';
-            }
-        } catch (error) {
-            grid.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 20px;">Search failed. Please try again.</div>';
-        }
-    }, 300);
-}
-
-// Display foods in grid
-function displayFoods(category, foods) {
-    const grid = document.getElementById(`${category}Grid`);
     
-    const foodsHTML = foods.map(food => {
-        const macroType = getFoodMacroType(food);
-        const badge = getMacroBadge(macroType);
-        const isSelected = selectedFoods[category].some(f => f.id === food.id);
-        
-        let displayName = food.name;
-        if (displayName.length > 30) {
-            displayName = displayName.substring(0, 30) + '...';
-        }
-        
-        return `
-            <div class="food-item ${isSelected ? 'selected' : ''}" onclick="toggleFood('${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
-                <div class="food-name">${displayName}</div>
-                <div class="food-macros ${isSelected ? 'selected' : ''}">
-                    P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
-                </div>
-                <div class="food-badges">${badge}</div>
-            </div>
-        `;
-    }).join('');
-    
-    grid.innerHTML = foodsHTML;
-}
-
-// Toggle food selection
-function toggleFood(category, food) {
-    const existingIndex = selectedFoods[category].findIndex(f => f.id === food.id);
-    
-    if (existingIndex >= 0) {
-        selectedFoods[category].splice(existingIndex, 1);
-    } else {
-        selectedFoods[category].push(food);
-    }
-    
+    // Add to selected foods
+    selectedFoods[category].push(food);
     updateSelectedFoodsDisplay(category);
     updateGenerateButton();
+    
+    // Reset dropdown
+    dropdown.value = "";
 }
 
 // Update selected foods display
@@ -1089,12 +734,6 @@ function removeFood(category, foodId) {
     selectedFoods[category] = selectedFoods[category].filter(f => f.id !== foodId);
     updateSelectedFoodsDisplay(category);
     updateGenerateButton();
-    
-    // Update the grid display
-    const searchInput = document.getElementById(`${category}Search`);
-    if (searchInput.value.trim().length >= 2) {
-        searchFoods(category);
-    }
 }
 
 // Update generate button state
@@ -1634,14 +1273,11 @@ function downloadMealPlan() {
 document.addEventListener('DOMContentLoaded', function() {
     updateGenerateButton();
     
-    // Load initial foods from built-in database
-    setTimeout(() => {
-        const categories = ['protein', 'carb', 'fat', 'veggie'];
-        categories.forEach(category => {
-            const grid = document.getElementById(`${category}Grid`);
-            displayFoods(category, foodDatabase[category].slice(0, 8));
-        });
-    }, 100);
+    // Populate all dropdowns with foods
+    const categories = ['protein', 'carb', 'fat', 'veggie'];
+    categories.forEach(category => {
+        populateDropdown(category);
+    });
     
     console.log('✅ Loaded built-in food database with', 
         Object.values(foodDatabase).reduce((sum, cat) => sum + cat.length, 0), 'foods');
