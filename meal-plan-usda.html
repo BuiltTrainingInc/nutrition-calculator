@@ -78,25 +78,70 @@
             font-size: 16px;
         }
 
-        .food-dropdown {
-            width: 100%;
-            padding: 10px;
-            background: #1e1e1e;
-            color: white;
-            border: 1px solid #444;
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
             border-radius: 4px;
-            margin-bottom: 10px;
-            font-size: 14px;
+            padding: 10px;
+            background: #1a1a1a;
+        }
+
+        .food-item {
+            background: #333;
+            padding: 8px;
+            border-radius: 4px;
             cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-size: 12px;
         }
 
-        .food-dropdown option {
-            background: #1e1e1e;
+        .food-item:hover {
+            background: #444;
+            border-color: #4da6d9;
+        }
+
+        .food-item.selected {
+            background: #4da6d9;
             color: white;
-            padding: 5px;
+            border-color: #4da6d9;
         }
 
+        .food-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
 
+        .food-macros {
+            font-size: 10px;
+            color: #ccc;
+        }
+
+        .selected.food-macros {
+            color: white;
+        }
+
+        .food-badges {
+            display: flex;
+            gap: 5px;
+            margin-top: 3px;
+        }
+
+        .macro-badge {
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .protein-badge { background: #e74c3c; color: white; }
+        .carb-badge { background: #f39c12; color: white; }
+        .fat-badge { background: #9b59b6; color: white; }
+        .mixed-badge { background: #34495e; color: white; }
 
         .selected-foods {
             margin-top: 15px;
@@ -285,11 +330,7 @@
             margin-top: 15px;
         }
 
-        .loading {
-            text-align: center;
-            color: #4da6d9;
-            font-style: italic;
-        }
+
 
         .weight-toggle {
             background: #1a1a1a;
@@ -411,10 +452,8 @@
                 </div>
                 <small class="toggle-explanation">Cooked weight = what you eat | Raw weight = before cooking</small>
             </div>
-            <select class="food-dropdown" id="proteinDropdown" onchange="selectFoodFromDropdown('protein')">
-                <option value="">Select a protein source...</option>
-            </select>
-
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 17 protein sources:</p>
+            <div class="food-grid" id="proteinGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Proteins:</h4>
                 <div class="selected-food-tags" id="selectedProteins"></div>
@@ -432,10 +471,8 @@
                 </div>
                 <small class="toggle-explanation">Cooked = ready to eat | Dry = uncooked rice/pasta/oats</small>
             </div>
-            <select class="food-dropdown" id="carbDropdown" onchange="selectFoodFromDropdown('carb')">
-                <option value="">Select a carbohydrate source...</option>
-            </select>
-
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 14 carbohydrate sources:</p>
+            <div class="food-grid" id="carbGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Carbs:</h4>
                 <div class="selected-food-tags" id="selectedCarbs"></div>
@@ -453,10 +490,8 @@
                 </div>
                 <small class="toggle-explanation">As served = ready to eat | Raw = before preparation</small>
             </div>
-            <select class="food-dropdown" id="fatDropdown" onchange="selectFoodFromDropdown('fat')">
-                <option value="">Select a fat source...</option>
-            </select>
-
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 10 fat sources:</p>
+            <div class="food-grid" id="fatGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Fats:</h4>
                 <div class="selected-food-tags" id="selectedFats"></div>
@@ -474,10 +509,8 @@
                 </div>
                 <small class="toggle-explanation">As served = ready to eat | Raw = before cooking</small>
             </div>
-            <select class="food-dropdown" id="veggieDropdown" onchange="selectFoodFromDropdown('veggie')">
-                <option value="">Select fruits & vegetables...</option>
-            </select>
-
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 13 fruits & vegetables:</p>
+            <div class="food-grid" id="veggieGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Fruits & Vegetables:</h4>
                 <div class="selected-food-tags" id="selectedVeggies"></div>
@@ -662,48 +695,90 @@ function isUSDAFoodCooked(food) {
     return name.includes('cooked') || name.includes('boiled') || name.includes('prepared');
 }
 
-// Populate dropdown with foods from a category
-function populateDropdown(category) {
-    const dropdown = document.getElementById(`${category}Dropdown`);
-    const foods = foodDatabase[category] || [];
+// Food classification functions
+function getFoodMacroType(food) {
+    const protein = food.protein || 0;
+    const carbs = food.carbs || 0;
+    const fat = food.fat || 0;
     
-    // Clear existing options except the first one
-    dropdown.innerHTML = `<option value="">Select ${category === 'veggie' ? 'fruits & vegetables' : category}...</option>`;
+    const totalMacros = protein * 4 + carbs * 4 + fat * 9;
+    if (totalMacros === 0) return 'mixed';
     
-    // Add food options
-    foods.forEach(food => {
-        const option = document.createElement('option');
-        option.value = food.id;
-        option.textContent = `${food.name} (P:${food.protein.toFixed(1)}g C:${food.carbs.toFixed(1)}g F:${food.fat.toFixed(1)}g)`;
-        dropdown.appendChild(option);
+    const proteinPercent = (protein * 4 / totalMacros) * 100;
+    const carbPercent = (carbs * 4 / totalMacros) * 100;
+    const fatPercent = (fat * 9 / totalMacros) * 100;
+    
+    if (proteinPercent >= 40) return 'protein';
+    if (carbPercent >= 50) return 'carb';
+    if (fatPercent >= 50) return 'fat';
+    return 'mixed';
+}
+
+function isVegetableOrFruit(food) {
+    const name = food.name.toLowerCase();
+    const keywords = ['vegetable', 'fruit', 'berry', 'green', 'spinach', 'lettuce', 'broccoli', 'carrot', 'tomato', 'apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberries'];
+    return keywords.some(keyword => name.includes(keyword)) || (food.carbs > 0 && food.carbs < 20 && food.protein < 5);
+}
+
+function getMacroBadge(type) {
+    const badges = {
+        'protein': '<span class="macro-badge protein-badge">PROTEIN</span>',
+        'carb': '<span class="macro-badge carb-badge">CARB</span>',
+        'fat': '<span class="macro-badge fat-badge">FAT</span>',
+        'mixed': '<span class="macro-badge mixed-badge">MIXED</span>'
+    };
+    return badges[type] || '';
+}
+
+// Display all foods in each category
+function loadAllFoods() {
+    const categories = ['protein', 'carb', 'fat', 'veggie'];
+    categories.forEach(category => {
+        const grid = document.getElementById(`${category}Grid`);
+        displayFoods(category, foodDatabase[category]);
     });
 }
 
-// Handle dropdown selection
-function selectFoodFromDropdown(category) {
-    const dropdown = document.getElementById(`${category}Dropdown`);
-    const foodId = dropdown.value;
+// Display foods in grid
+function displayFoods(category, foods) {
+    const grid = document.getElementById(`${category}Grid`);
     
-    if (!foodId) return;
+    const foodsHTML = foods.map(food => {
+        const macroType = getFoodMacroType(food);
+        const badge = getMacroBadge(macroType);
+        const isSelected = selectedFoods[category].some(f => f.id === food.id);
+        
+        let displayName = food.name;
+        if (displayName.length > 30) {
+            displayName = displayName.substring(0, 30) + '...';
+        }
+        
+        return `
+            <div class="food-item ${isSelected ? 'selected' : ''}" onclick="toggleFood('${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
+                <div class="food-name">${displayName}</div>
+                <div class="food-macros ${isSelected ? 'selected' : ''}">
+                    P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
+                </div>
+                <div class="food-badges">${badge}</div>
+            </div>
+        `;
+    }).join('');
     
-    // Find the selected food
-    const food = foodDatabase[category].find(f => f.id === foodId);
-    if (!food) return;
+    grid.innerHTML = foodsHTML;
+}
+
+// Toggle food selection
+function toggleFood(category, food) {
+    const existingIndex = selectedFoods[category].findIndex(f => f.id === food.id);
     
-    // Check if already selected
-    const alreadySelected = selectedFoods[category].some(f => f.id === food.id);
-    if (alreadySelected) {
-        dropdown.value = ""; // Reset dropdown
-        return;
+    if (existingIndex >= 0) {
+        selectedFoods[category].splice(existingIndex, 1);
+    } else {
+        selectedFoods[category].push(food);
     }
     
-    // Add to selected foods
-    selectedFoods[category].push(food);
     updateSelectedFoodsDisplay(category);
     updateGenerateButton();
-    
-    // Reset dropdown
-    dropdown.value = "";
 }
 
 // Update selected foods display
@@ -734,6 +809,10 @@ function removeFood(category, foodId) {
     selectedFoods[category] = selectedFoods[category].filter(f => f.id !== foodId);
     updateSelectedFoodsDisplay(category);
     updateGenerateButton();
+    
+    // Refresh the food grid to show updated selection
+    const grid = document.getElementById(`${category}Grid`);
+    displayFoods(category, foodDatabase[category]);
 }
 
 // Update generate button state
@@ -1273,11 +1352,8 @@ function downloadMealPlan() {
 document.addEventListener('DOMContentLoaded', function() {
     updateGenerateButton();
     
-    // Populate all dropdowns with foods
-    const categories = ['protein', 'carb', 'fat', 'veggie'];
-    categories.forEach(category => {
-        populateDropdown(category);
-    });
+    // Load all foods from built-in database
+    loadAllFoods();
     
     console.log('✅ Loaded built-in food database with', 
         Object.values(foodDatabase).reduce((sum, cat) => sum + cat.length, 0), 'foods');
