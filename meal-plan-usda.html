@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="frame-ancestors *;">
     <meta http-equiv="X-Frame-Options" content="ALLOWALL">
     <title>BUILT Automated Meal Plan Generator</title>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         .container {
             max-width: 1000px;
@@ -63,6 +63,52 @@
             border-radius: 4px;
             text-align: center;
             font-size: 16px;
+        }
+
+        .upload-area {
+            border: 2px dashed #4da6d9;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 15px;
+        }
+
+        .upload-area:hover {
+            border-color: #2ecc71;
+            background: #1e1e1e;
+        }
+
+        .upload-area.dragover {
+            border-color: #2ecc71;
+            background: #0f2419;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            color: #4da6d9;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .upload-button {
+            background: #4da6d9;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .upload-button:hover {
+            background: #3d8bb8;
         }
 
         .food-category {
@@ -423,7 +469,28 @@
 <body>
 <div class="container">
     <h2 style="text-align: center; color: #4da6d9; margin-bottom: 10px;">BUILT Automated Meal Plan Generator</h2>
-    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Set your preferences and get a complete meal plan with calculated quantities</p>
+    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Complete with 54 USDA-verified foods • Generate precise meal plans instantly</p>
+
+    <!-- CSV Upload Section - Optional for custom foods -->
+    <div class="section" style="opacity: 0.7;">
+        <div class="section-title">📁 Add Custom Foods (Optional)</div>
+        <p style="color: #ccc; font-size: 13px; margin-bottom: 15px;">Already includes 54 foods! Upload your own CSV to add more foods to the database.</p>
+        <div class="upload-area" onclick="document.getElementById('csvFile').click()" 
+             ondragover="handleDragOver(event)" 
+             ondrop="handleDrop(event)"
+             ondragenter="handleDragEnter(event)"
+             ondragleave="handleDragLeave(event)">
+            <div class="upload-icon">📊</div>
+            <div class="upload-text">Drop your Google Sheets CSV export here or click to browse</div>
+            <button class="upload-button" type="button">Choose CSV File</button>
+            <input type="file" id="csvFile" style="display: none;" accept=".csv" onchange="handleFileSelect(event)">
+            <div style="font-size: 11px; color: #666; margin-top: 10px;">
+                Format: id,name,category,protein,carbs,fat,calories,state,notes<br>
+                Categories: protein, carb, fat, veggie
+            </div>
+        </div>
+        <div id="uploadStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; display: none;"></div>
+    </div>
 
     <!-- Macro Targets -->
     <div class="section">
@@ -579,6 +646,72 @@
 </div>
 
 <script>
+// Complete USDA Food Database - Built-in with accurate nutrition data
+let foodDatabase = {
+    protein: [
+        { id: 'p1', name: 'Chicken Breast', protein: 31.0, carbs: 0.0, fat: 3.6, calories: 165, state: 'cooked' },
+        { id: 'p2', name: 'Chicken Thigh', protein: 24.8, carbs: 0.0, fat: 8.2, calories: 179, state: 'cooked' },
+        { id: 'p3', name: 'Extra Lean Ground Turkey', protein: 22.0, carbs: 0.0, fat: 7.0, calories: 149, state: 'cooked' },
+        { id: 'p4', name: 'Turkey Breast', protein: 29.9, carbs: 0.0, fat: 0.7, calories: 135, state: 'cooked' },
+        { id: 'p5', name: 'Sirloin Roast', protein: 26.1, carbs: 0.0, fat: 8.4, calories: 185, state: 'cooked' },
+        { id: 'p6', name: 'Extra Lean Ground Beef', protein: 26.1, carbs: 0.0, fat: 5.0, calories: 158, state: 'cooked' },
+        { id: 'p7', name: 'Sirloin Steak', protein: 26.0, carbs: 0.0, fat: 6.1, calories: 170, state: 'cooked' },
+        { id: 'p8', name: 'Extra Lean Ground Bison', protein: 28.4, carbs: 0.0, fat: 2.4, calories: 138, state: 'cooked' },
+        { id: 'p9', name: 'Cod', protein: 22.4, carbs: 0.0, fat: 1.2, calories: 106, state: 'cooked' },
+        { id: 'p10', name: 'Salmon', protein: 25.4, carbs: 0.0, fat: 11.6, calories: 206, state: 'cooked' },
+        { id: 'p11', name: 'Shrimp', protein: 23.3, carbs: 1.6, fat: 1.7, calories: 101, state: 'cooked' },
+        { id: 'p12', name: '2% Greek Yogurt (plain)', protein: 10.0, carbs: 3.9, fat: 2.0, calories: 81, state: 'ready' },
+        { id: 'p13', name: '0% Greek Yogurt (plain)', protein: 10.3, carbs: 3.6, fat: 0.4, calories: 59, state: 'ready' },
+        { id: 'p14', name: 'Liquid Egg Whites', protein: 10.9, carbs: 0.7, fat: 0.2, calories: 52, state: 'liquid' },
+        { id: 'p15', name: 'Whole Egg', protein: 12.6, carbs: 0.7, fat: 9.9, calories: 147, state: 'cooked' },
+        { id: 'p16', name: 'Whey Isolate Protein Powder', protein: 90.0, carbs: 0.0, fat: 0.5, calories: 375, state: 'powder' },
+        { id: 'p17', name: 'Vegan Protein Powder', protein: 75.0, carbs: 8.0, fat: 2.5, calories: 370, state: 'powder' }
+    ],
+    carb: [
+        { id: 'c1', name: 'White Jasmine Rice', protein: 2.7, carbs: 28.6, fat: 0.3, calories: 130, state: 'cooked' },
+        { id: 'c2', name: 'White Basmati Rice', protein: 2.7, carbs: 28.0, fat: 0.3, calories: 130, state: 'cooked' },
+        { id: 'c3', name: 'Golden Potato', protein: 2.5, carbs: 21.0, fat: 0.1, calories: 93, state: 'cooked' },
+        { id: 'c4', name: 'White Potato', protein: 2.5, carbs: 21.0, fat: 0.1, calories: 93, state: 'cooked' },
+        { id: 'c5', name: 'Sweet Potato', protein: 1.6, carbs: 20.1, fat: 0.1, calories: 86, state: 'cooked' },
+        { id: 'c6', name: 'Pasta', protein: 5.0, carbs: 25.0, fat: 0.9, calories: 131, state: 'cooked' },
+        { id: 'c7', name: 'Sourdough Bread', protein: 9.0, carbs: 48.0, fat: 2.5, calories: 259, state: 'ready' },
+        { id: 'c8', name: 'Cream of Rice', protein: 1.5, carbs: 22.0, fat: 0.1, calories: 95, state: 'cooked' },
+        { id: 'c9', name: 'Cream of Wheat', protein: 2.5, carbs: 22.0, fat: 0.5, calories: 105, state: 'cooked' },
+        { id: 'c10', name: 'Oats', protein: 16.9, carbs: 66.3, fat: 6.9, calories: 389, state: 'dry' },
+        { id: 'c11', name: 'Special K Red Berries Cereal', protein: 6.0, carbs: 84.0, fat: 1.0, calories: 375, state: 'dry' },
+        { id: 'c12', name: 'Vector Cereal', protein: 12.0, carbs: 72.0, fat: 3.0, calories: 380, state: 'dry' },
+        { id: 'c13', name: 'All Bran Buds Cereal', protein: 10.0, carbs: 72.0, fat: 4.0, calories: 320, state: 'dry' },
+        { id: 'c14', name: 'Granola', protein: 10.1, carbs: 65.4, fat: 12.8, calories: 421, state: 'ready' }
+    ],
+    fat: [
+        { id: 'f1', name: 'Natural Peanut Butter', protein: 25.1, carbs: 20.0, fat: 50.4, calories: 588, state: 'spread' },
+        { id: 'f2', name: 'Natural Almond Butter', protein: 21.2, carbs: 18.8, fat: 55.5, calories: 614, state: 'spread' },
+        { id: 'f3', name: 'Coconut Oil', protein: 0.0, carbs: 0.0, fat: 99.1, calories: 862, state: 'solid' },
+        { id: 'f4', name: 'Avocado Oil', protein: 0.0, carbs: 0.0, fat: 100.0, calories: 884, state: 'liquid' },
+        { id: 'f5', name: 'Extra Virgin Olive Oil', protein: 0.0, carbs: 0.0, fat: 100.0, calories: 884, state: 'liquid' },
+        { id: 'f6', name: 'Avocado', protein: 2.0, carbs: 8.5, fat: 14.7, calories: 160, state: 'raw' },
+        { id: 'f7', name: 'Dark Chocolate 80%', protein: 7.8, carbs: 45.9, fat: 35.4, calories: 501, state: 'solid' },
+        { id: 'f8', name: 'Walnuts', protein: 15.2, carbs: 13.7, fat: 65.2, calories: 654, state: 'raw' },
+        { id: 'f9', name: 'Almonds', protein: 21.2, carbs: 21.6, fat: 49.9, calories: 579, state: 'raw' },
+        { id: 'f10', name: 'Cashews', protein: 18.2, carbs: 30.2, fat: 43.9, calories: 553, state: 'raw' }
+    ],
+    veggie: [
+        { id: 'fr1', name: 'Triple Berry Mix (Frozen)', protein: 0.7, carbs: 12.0, fat: 0.4, calories: 57, state: 'frozen' },
+        { id: 'fr2', name: 'Blueberries (Frozen)', protein: 0.7, carbs: 14.5, fat: 0.3, calories: 57, state: 'frozen' },
+        { id: 'fr3', name: 'Strawberries', protein: 0.7, carbs: 7.7, fat: 0.3, calories: 32, state: 'raw' },
+        { id: 'fr4', name: 'Apple', protein: 0.3, carbs: 14.0, fat: 0.2, calories: 52, state: 'raw' },
+        { id: 'fr5', name: 'Banana', protein: 1.1, carbs: 22.8, fat: 0.3, calories: 89, state: 'raw' },
+        { id: 'fr6', name: 'Cucumber', protein: 0.7, carbs: 3.6, fat: 0.1, calories: 16, state: 'raw' },
+        { id: 'v1', name: 'Baby Carrots', protein: 0.9, carbs: 9.6, fat: 0.2, calories: 41, state: 'raw' },
+        { id: 'v2', name: 'Zucchini', protein: 1.2, carbs: 3.1, fat: 0.3, calories: 17, state: 'raw' },
+        { id: 'v3', name: 'Bell Peppers', protein: 1.0, carbs: 7.0, fat: 0.3, calories: 31, state: 'raw' },
+        { id: 'v4', name: 'Asparagus', protein: 2.4, carbs: 3.9, fat: 0.2, calories: 22, state: 'cooked' },
+        { id: 'v5', name: 'Green Beans', protein: 1.8, carbs: 7.0, fat: 0.1, calories: 31, state: 'cooked' },
+        { id: 'v6', name: 'Spinach', protein: 2.9, carbs: 3.6, fat: 0.4, calories: 23, state: 'cooked' },
+        { id: 'v7', name: 'Kale', protein: 2.9, carbs: 5.6, fat: 0.4, calories: 28, state: 'cooked' }
+    ]
+};
+
 // Global variables
 let selectedFoods = {
     protein: [],
@@ -607,6 +740,167 @@ const preparationFactors = {
     'beans': { cookedToDry: 0.45, dryToCooked: 2.22 },
     'barley': { cookedToDry: 0.3, dryToCooked: 3.33 }
 };
+
+// CSV Upload Functions
+function handleDragOver(event) {
+    event.preventDefault();
+    event.currentTarget.style.borderColor = '#2ecc71';
+    event.currentTarget.style.backgroundColor = '#0f2419';
+}
+
+function handleDragEnter(event) {
+    event.preventDefault();
+}
+
+function handleDragLeave(event) {
+    event.currentTarget.style.borderColor = '#4da6d9';
+    event.currentTarget.style.backgroundColor = '#1a1a1a';
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    event.currentTarget.style.borderColor = '#4da6d9';
+    event.currentTarget.style.backgroundColor = '#1a1a1a';
+    
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+        processCsvFile(files[0]);
+    }
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        processCsvFile(file);
+    }
+}
+
+function processCsvFile(file) {
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+        showUploadStatus('Please select a CSV file.', 'error');
+        return;
+    }
+
+    showUploadStatus('Processing CSV file...', 'info');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const csvData = e.target.result;
+            const parsedData = parseCSV(csvData);
+            updateCustomFoodDatabase(parsedData);
+            showUploadStatus(`Successfully added ${parsedData.length} custom foods!`, 'success');
+            
+            // Refresh the displayed foods
+            const categories = ['protein', 'carb', 'fat', 'veggie'];
+            categories.forEach(category => {
+                const grid = document.getElementById(`${category}Grid`);
+                displayFoods(category, foodDatabase[category].slice(0, 8));
+            });
+            
+        } catch (error) {
+            showUploadStatus(`Error parsing CSV: ${error.message}`, 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+
+function parseCSV(csvData) {
+    const lines = csvData.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.trim());
+    
+    // Validate headers
+    const requiredHeaders = ['id', 'name', 'category', 'protein', 'carbs', 'fat', 'calories'];
+    const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+    if (missingHeaders.length > 0) {
+        throw new Error(`Missing required columns: ${missingHeaders.join(', ')}`);
+    }
+    
+    const foods = [];
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length >= headers.length) {
+            const food = {};
+            headers.forEach((header, index) => {
+                food[header] = values[index];
+            });
+            
+            // Convert numeric values
+            food.protein = parseFloat(food.protein) || 0;
+            food.carbs = parseFloat(food.carbs) || 0;
+            food.fat = parseFloat(food.fat) || 0;
+            food.calories = parseFloat(food.calories) || 0;
+            
+            foods.push(food);
+        }
+    }
+    
+    return foods;
+}
+
+function updateCustomFoodDatabase(foods) {
+    // Categorize new foods
+    const newFoods = {
+        protein: [],
+        carb: [],
+        fat: [],
+        veggie: []
+    };
+    
+    foods.forEach(food => {
+        const category = food.category.toLowerCase();
+        if (newFoods[category]) {
+            newFoods[category].push(food);
+        }
+    });
+    
+    // Add new foods to existing database (don't replace)
+    Object.keys(newFoods).forEach(category => {
+        if (newFoods[category].length > 0) {
+            // Add new foods to existing ones, avoiding duplicates by ID
+            newFoods[category].forEach(newFood => {
+                const existingFood = foodDatabase[category].find(f => f.id === newFood.id);
+                if (!existingFood) {
+                    foodDatabase[category].push(newFood);
+                } else {
+                    // Update existing food with new data
+                    Object.assign(existingFood, newFood);
+                }
+            });
+        }
+    });
+    
+    // Store updated database in localStorage
+    localStorage.setItem('customFoodDatabase', JSON.stringify(foodDatabase));
+    
+    const totalNewFoods = Object.values(newFoods).reduce((sum, cat) => sum + cat.length, 0);
+    const totalFoods = Object.values(foodDatabase).reduce((sum, cat) => sum + cat.length, 0);
+    
+    console.log(`✅ Added ${totalNewFoods} new foods. Total database now has ${totalFoods} foods`);
+}
+
+function showUploadStatus(message, type) {
+    const statusEl = document.getElementById('uploadStatus');
+    statusEl.textContent = message;
+    
+    // Set colors based on type
+    if (type === 'success') {
+        statusEl.style.backgroundColor = '#2ecc71';
+        statusEl.style.color = 'white';
+    } else if (type === 'error') {
+        statusEl.style.backgroundColor = '#e74c3c';
+        statusEl.style.color = 'white';
+    } else {
+        statusEl.style.backgroundColor = '#4da6d9';
+        statusEl.style.color = 'white';
+    }
+    
+    statusEl.style.display = 'block';
+    
+    setTimeout(() => {
+        statusEl.style.display = 'none';
+    }, 5000);
+}
 
 // Toggle weight mode
 function toggleWeightMode(category, mode) {
@@ -641,42 +935,6 @@ function isUSDAFoodCooked(food) {
     return name.includes('cooked') || name.includes('boiled') || name.includes('prepared');
 }
 
-// Convert between cooked and raw weights
-function convertWeight(food, quantity, fromMode, toMode) {
-    const grainType = detectFoodGrainType(food);
-    
-    if (!grainType || !preparationFactors[grainType]) {
-        return { quantity, explanation: '' };
-    }
-    
-    const isUsdaCooked = isUSDAFoodCooked(food);
-    let convertedQuantity = quantity;
-    let explanation = '';
-    
-    // Conversion logic
-    if (fromMode === 'cooked' && toMode === 'raw') {
-        if (isUsdaCooked) {
-            // USDA is cooked, user wants raw weight
-            convertedQuantity = quantity * preparationFactors[grainType].cookedToDry;
-            explanation = `${quantity}g cooked = ${convertedQuantity.toFixed(0)}g dry weight`;
-        } else {
-            // USDA is already raw
-            explanation = `${quantity}g dry weight (USDA shows raw data)`;
-        }
-    } else if (fromMode === 'raw' && toMode === 'cooked') {
-        if (!isUsdaCooked) {
-            // USDA is raw, user wants cooked weight
-            convertedQuantity = quantity * preparationFactors[grainType].dryToCooked;
-            explanation = `${quantity}g dry = ${convertedQuantity.toFixed(0)}g cooked weight`;
-        } else {
-            // USDA is already cooked
-            explanation = `${quantity}g cooked weight (USDA shows cooked data)`;
-        }
-    }
-    
-    return { quantity: convertedQuantity, explanation };
-}
-
 // Food classification functions
 function getFoodMacroType(food) {
     const protein = food.protein || 0;
@@ -698,7 +956,7 @@ function getFoodMacroType(food) {
 
 function isVegetableOrFruit(food) {
     const name = food.name.toLowerCase();
-    const keywords = ['vegetable', 'fruit', 'berry', 'green', 'spinach', 'lettuce', 'broccoli', 'carrot', 'tomato', 'apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberry'];
+    const keywords = ['vegetable', 'fruit', 'berry', 'green', 'spinach', 'lettuce', 'broccoli', 'carrot', 'tomato', 'apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberries'];
     return keywords.some(keyword => name.includes(keyword)) || (food.carbs > 0 && food.carbs < 20 && food.protein < 5);
 }
 
@@ -712,52 +970,45 @@ function getMacroBadge(type) {
     return badges[type] || '';
 }
 
-// Search foods by category
+// Search foods by category using database
 async function searchFoods(category) {
     const searchInput = document.getElementById(`${category}Search`);
     const grid = document.getElementById(`${category}Grid`);
-    const searchTerm = searchInput.value.trim();
+    const searchTerm = searchInput.value.trim().toLowerCase();
 
     if (searchTerm.length < 2) {
         grid.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Type 2+ characters to search...</div>';
         return;
     }
 
-    grid.innerHTML = '<div class="loading">🔍 Searching USDA database...</div>';
+    grid.innerHTML = '<div class="loading">🔍 Searching food database...</div>';
 
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(async () => {
         try {
-            const response = await fetch('/api/usda-search-dropdown', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ searchTerm })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
-            }
-
-            const data = await response.json();
+            // Get foods from database
+            let availableFoods = foodDatabase[category] || [];
             
-            if (data.foods && data.foods.length > 0) {
-                // Filter foods by category
-                let filteredFoods = data.foods.filter(food => {
-                    const macroType = getFoodMacroType(food);
-                    
-                    if (category === 'protein') return macroType === 'protein';
-                    if (category === 'carb') return macroType === 'carb';
-                    if (category === 'fat') return macroType === 'fat';
-                    if (category === 'veggie') return isVegetableOrFruit(food);
-                    
-                    return false;
-                });
-
-                // If no exact matches, show mixed foods too
-                if (filteredFoods.length === 0) {
-                    filteredFoods = data.foods.slice(0, 12);
-                }
-
+            // Filter by search term
+            let filteredFoods = availableFoods.filter(food => 
+                food.name.toLowerCase().includes(searchTerm)
+            );
+            
+            // If no exact matches in category, search all categories
+            if (filteredFoods.length === 0) {
+                const allFoods = [
+                    ...foodDatabase.protein,
+                    ...foodDatabase.carb, 
+                    ...foodDatabase.fat,
+                    ...foodDatabase.veggie
+                ];
+                
+                filteredFoods = allFoods.filter(food => 
+                    food.name.toLowerCase().includes(searchTerm)
+                ).slice(0, 12);
+            }
+            
+            if (filteredFoods.length > 0) {
                 displayFoods(category, filteredFoods.slice(0, 12));
             } else {
                 grid.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">No foods found. Try different keywords.</div>';
@@ -765,7 +1016,7 @@ async function searchFoods(category) {
         } catch (error) {
             grid.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 20px;">Search failed. Please try again.</div>';
         }
-    }, 500);
+    }, 300);
 }
 
 // Display foods in grid
@@ -1006,178 +1257,184 @@ async function buildMealPlan(params) {
     return mealPlan;
 }
 
-// Advanced macro balancing algorithm
+// Precision macro balancing algorithm - 95-105% accuracy target
 function balanceMacros(availableFoods, targets) {
-    console.log(`\n🧮 MACRO BALANCING ALGORITHM`);
+    console.log(`\n🎯 PRECISION MACRO BALANCING (95-105% accuracy target)`);
     console.log(`Targets: ${targets.protein}p ${targets.carbs}c ${targets.fat}f`);
     
-    // Initialize with small quantities
-    let currentQuantities = availableFoods.map(item => ({
-        ...item,
-        quantity: item.type === 'veggie' ? 30 : 30, // Start smaller
-        nutritionMultiplier: item.type === 'veggie' ? 0.3 : 0.3
-    }));
+    const targetCalories = (targets.protein * 4) + (targets.carbs * 4) + (targets.fat * 9);
+    console.log(`Target calories: ${targetCalories.toFixed(0)}`);
     
-    // Calculate initial totals
-    let currentTotals = calculateTotals(currentQuantities);
-    console.log(`Starting totals: ${currentTotals.protein.toFixed(1)}p ${currentTotals.carbs.toFixed(1)}c ${currentTotals.fat.toFixed(1)}f`);
-    
-    let bestAccuracy = 0;
-    let bestQuantities = [...currentQuantities];
-    
-    // More aggressive iterative optimization (25 iterations)
-    for (let iteration = 0; iteration < 25; iteration++) {
-        console.log(`\nIteration ${iteration + 1}:`);
+    // Classify foods by macro density and set smart initial quantities
+    const foods = availableFoods.map(item => {
+        const food = item.food;
         
-        // Calculate accuracy with heavy fat penalty
-        const proteinAccuracy = currentTotals.protein > 0 ? Math.min(targets.protein / currentTotals.protein, currentTotals.protein / targets.protein) : 0;
-        const carbsAccuracy = currentTotals.carbs > 0 ? Math.min(targets.carbs / currentTotals.carbs, currentTotals.carbs / targets.carbs) : 0;
-        const fatAccuracy = currentTotals.fat > 0 ? Math.min(targets.fat / currentTotals.fat, currentTotals.fat / targets.fat) : 0;
+        // Determine food characteristics and safe quantity ranges
+        const isPureOil = food.fat > 80 && food.protein < 5 && food.carbs < 5;
+        const isLeanProtein = food.protein > 20 && food.fat < 10;
+        const isPureCarb = food.carbs > 70 && food.protein < 15 && food.fat < 5;
         
-        // Heavy penalty for excess fat
-        const fatPenalty = currentTotals.fat > targets.fat ? Math.pow(currentTotals.fat / targets.fat, 2) : 1;
-        const adjustedFatAccuracy = fatAccuracy / fatPenalty;
+        let initialQuantity;
+        let minQty, maxQty;
         
-        const overallAccuracy = (proteinAccuracy + carbsAccuracy + adjustedFatAccuracy) / 3;
-        
-        if (overallAccuracy > bestAccuracy) {
-            bestAccuracy = overallAccuracy;
-            bestQuantities = [...currentQuantities];
+        if (isPureOil) {
+            // Oils: very small quantities
+            initialQuantity = Math.round(targets.fat / food.fat * 100);
+            minQty = 3; maxQty = 20;
+        } else if (isLeanProtein) {
+            // Proteins: moderate to large quantities
+            initialQuantity = Math.round(targets.protein / food.protein * 100);
+            minQty = 80; maxQty = 300;
+        } else if (isPureCarb) {
+            // Carbs: moderate to large quantities
+            initialQuantity = Math.round(targets.carbs / food.carbs * 100);
+            minQty = 60; maxQty = 350;
+        } else {
+            // Mixed foods: moderate quantities
+            initialQuantity = 100;
+            minQty = 30; maxQty = 200;
         }
         
-        // Calculate ratios
-        const proteinRatio = targets.protein / Math.max(currentTotals.protein, 1);
-        const carbsRatio = targets.carbs / Math.max(currentTotals.carbs, 1);
-        const fatRatio = targets.fat / Math.max(currentTotals.fat, 1);
+        initialQuantity = Math.max(minQty, Math.min(maxQty, initialQuantity));
         
-        console.log(`Ratios needed: ${proteinRatio.toFixed(2)}x protein, ${carbsRatio.toFixed(2)}x carbs, ${fatRatio.toFixed(2)}x fat`);
-        console.log(`Fat status: ${currentTotals.fat.toFixed(1)}g current vs ${targets.fat}g target`);
+        console.log(`${food.name}: ${food.protein.toFixed(1)}p ${food.carbs.toFixed(1)}c ${food.fat.toFixed(1)}f per 100g → ${initialQuantity}g initial`);
         
-        // Determine if we're in fat crisis mode
-        const fatCrisis = currentTotals.fat > targets.fat * 1.15;
-        const fatOverage = currentTotals.fat / targets.fat;
-        
-        if (fatCrisis) {
-            console.log(`🚨 FAT CRISIS MODE: ${(fatOverage * 100).toFixed(0)}% of target`);
-        }
-        
-        // More aggressive adjustments with special fat handling
-        currentQuantities = currentQuantities.map(item => {
-            let adjustmentFactor = 1;
-            
-            // Calculate how much fat this food contributes
-            const foodFatContribution = item.food.fat * item.nutritionMultiplier;
-            const foodFatPercentage = currentTotals.fat > 0 ? foodFatContribution / currentTotals.fat : 0;
-            
-            console.log(`${item.food.name}: contributes ${foodFatContribution.toFixed(1)}g fat (${(foodFatPercentage * 100).toFixed(1)}% of total)`);
-            
-            if (fatCrisis) {
-                // In fat crisis mode, dramatically reduce high-fat contributors
-                if (foodFatPercentage > 0.3) { // If this food provides >30% of fat
-                    adjustmentFactor = Math.min(0.5, fatRatio * 0.7); // Aggressive reduction
-                    console.log(`  🔥 MAJOR FAT CONTRIBUTOR - aggressive reduction`);
-                } else if (foodFatPercentage > 0.15) { // If this food provides >15% of fat
-                    adjustmentFactor = Math.min(0.7, fatRatio * 0.85); // Moderate reduction
-                    console.log(`  ⚠️  MODERATE FAT CONTRIBUTOR - moderate reduction`);
-                } else {
-                    // Low fat contributors can increase if needed for protein/carbs
-                    if (item.priority === 'protein') {
-                        adjustmentFactor = proteinRatio * 0.95 + fatRatio * 0.05;
-                    } else if (item.priority === 'carbs') {
-                        adjustmentFactor = carbsRatio * 0.95 + fatRatio * 0.05;
-                    } else {
-                        adjustmentFactor = fatRatio * 0.9;
-                    }
-                }
-            } else {
-                // Normal mode - priority-based adjustments
-                if (item.priority === 'protein') {
-                    adjustmentFactor = proteinRatio * 0.85 + carbsRatio * 0.05 + fatRatio * 0.1;
-                } else if (item.priority === 'carbs') {
-                    adjustmentFactor = carbsRatio * 0.85 + proteinRatio * 0.05 + fatRatio * 0.1;
-                } else if (item.priority === 'fat') {
-                    adjustmentFactor = fatRatio * 0.9 + (proteinRatio + carbsRatio) * 0.05;
-                } else {
-                    adjustmentFactor = 1.0; // Veggies stay stable
-                }
-            }
-            
-            // Apply adjustment with variable aggressiveness
-            const aggressiveness = fatCrisis ? 0.8 : Math.max(0.3, 1 - (iteration / 15));
-            const maxChange = fatCrisis ? 0.6 : (0.3 + aggressiveness * 0.4);
-            adjustmentFactor = Math.max(1 - maxChange, Math.min(1 + maxChange, adjustmentFactor));
-            
-            const newQuantity = Math.round(item.quantity * adjustmentFactor);
-            const clampedQuantity = Math.max(5, Math.min(350, newQuantity)); // Even tighter bounds
-            
-            console.log(`  ${item.quantity}g → ${clampedQuantity}g (${adjustmentFactor.toFixed(2)}x)`);
-            
-            return {
-                ...item,
-                quantity: clampedQuantity,
-                nutritionMultiplier: clampedQuantity / 100,
-                explanation: getWeightExplanation(item.food, clampedQuantity, item.type)
-            };
-        });
-        
-        // Recalculate totals
-        const newTotals = calculateTotals(currentQuantities);
-        console.log(`New totals: ${newTotals.protein.toFixed(1)}p ${newTotals.carbs.toFixed(1)}c ${newTotals.fat.toFixed(1)}f`);
-        
-        // Check convergence with stricter fat requirements
-        const newProteinAccuracy = newTotals.protein / targets.protein;
-        const newCarbsAccuracy = newTotals.carbs / targets.carbs;
-        const newFatAccuracy = newTotals.fat / targets.fat;
-        
-        // Stricter convergence criteria
-        if (newProteinAccuracy >= 0.9 && newProteinAccuracy <= 1.15 &&
-            newCarbsAccuracy >= 0.9 && newCarbsAccuracy <= 1.15 &&
-            newFatAccuracy >= 0.85 && newFatAccuracy <= 1.15) { // Tighter fat range
-            console.log(`✅ Converged! All macros within targets.`);
-            bestQuantities = [...currentQuantities];
-            break;
-        }
-        
-        // If fat is getting better, save this as best
-        if (Math.abs(newFatAccuracy - 1.0) < Math.abs(calculateTotals(bestQuantities).fat / targets.fat - 1.0)) {
-            bestQuantities = [...currentQuantities];
-            bestAccuracy = overallAccuracy;
-        }
-        
-        // Early termination if fat is under control and other macros are good
-        if (newFatAccuracy <= 1.2 && newProteinAccuracy >= 0.85 && newCarbsAccuracy >= 0.85) {
-            console.log(`✅ Good enough! Fat under control, stopping early.`);
-            bestQuantities = [...currentQuantities];
-            break;
-        }
-        
-        currentTotals = newTotals;
-    }
-    
-    // Use best solution found
-    currentQuantities = bestQuantities;
-    const finalTotals = calculateTotals(currentQuantities);
-    
-    console.log(`🎯 Final balanced quantities:`);
-    currentQuantities.forEach(item => {
-        const macros = {
-            protein: item.food.protein * item.nutritionMultiplier,
-            carbs: item.food.carbs * item.nutritionMultiplier,
-            fat: item.food.fat * item.nutritionMultiplier
+        return {
+            ...item,
+            quantity: initialQuantity,
+            nutritionMultiplier: initialQuantity / 100,
+            minQty,
+            maxQty,
+            isPureOil,
+            isLeanProtein,
+            isPureCarb
         };
-        console.log(`${item.food.name}: ${item.quantity}g → ${macros.protein.toFixed(1)}p ${macros.carbs.toFixed(1)}c ${macros.fat.toFixed(1)}f`);
     });
     
-    const finalAccuracy = {
-        protein: (finalTotals.protein / targets.protein * 100).toFixed(0),
-        carbs: (finalTotals.carbs / targets.carbs * 100).toFixed(0),
-        fat: (finalTotals.fat / targets.fat * 100).toFixed(0)
-    };
+    // Precision optimization loop - aim for 95-105% accuracy
+    let iteration = 0;
+    const maxIterations = 30;
+    let bestSolution = null;
+    let bestAccuracyScore = 0;
     
-    console.log(`Final totals: ${finalTotals.protein.toFixed(1)}p ${finalTotals.carbs.toFixed(1)}c ${finalTotals.fat.toFixed(1)}f`);
-    console.log(`Final accuracy: ${finalAccuracy.protein}% protein, ${finalAccuracy.carbs}% carbs, ${finalAccuracy.fat}% fat`);
+    while (iteration < maxIterations) {
+        iteration++;
+        console.log(`\n--- Precision Iteration ${iteration} ---`);
+        
+        // Calculate current totals
+        const currentTotals = calculateTotals(foods);
+        const currentCalories = (currentTotals.protein * 4) + (currentTotals.carbs * 4) + (currentTotals.fat * 9);
+        
+        console.log(`Current: ${currentTotals.protein.toFixed(1)}p ${currentTotals.carbs.toFixed(1)}c ${currentTotals.fat.toFixed(1)}f = ${currentCalories.toFixed(0)} cal`);
+        
+        // Calculate accuracy scores
+        const proteinAccuracy = currentTotals.protein / targets.protein;
+        const carbsAccuracy = currentTotals.carbs / targets.carbs;
+        const fatAccuracy = currentTotals.fat / targets.fat;
+        const calorieAccuracy = currentCalories / targetCalories;
+        
+        console.log(`Accuracy: ${(proteinAccuracy * 100).toFixed(1)}% protein, ${(carbsAccuracy * 100).toFixed(1)}% carbs, ${(fatAccuracy * 100).toFixed(1)}% fat, ${(calorieAccuracy * 100).toFixed(1)}% calories`);
+        
+        // Check if we're within 95-105% range for all macros
+        const withinRange = (val) => val >= 0.95 && val <= 1.05;
+        const allMacrosGood = withinRange(proteinAccuracy) && withinRange(carbsAccuracy) && withinRange(fatAccuracy);
+        const caloriesGood = withinRange(calorieAccuracy);
+        
+        if (allMacrosGood && caloriesGood) {
+            console.log(`✅ SUCCESS! All macros and calories within 95-105% range!`);
+            break;
+        }
+        
+        // Calculate accuracy score (closer to 1.0 = better)
+        const accuracyScore = 1 / (
+            Math.abs(proteinAccuracy - 1) + 
+            Math.abs(carbsAccuracy - 1) + 
+            Math.abs(fatAccuracy - 1) + 
+            Math.abs(calorieAccuracy - 1) + 0.01
+        );
+        
+        if (accuracyScore > bestAccuracyScore) {
+            bestAccuracyScore = accuracyScore;
+            bestSolution = foods.map(f => ({ ...f }));
+        }
+        
+        // Calculate precise adjustment ratios
+        const proteinRatio = targets.protein / currentTotals.protein;
+        const carbsRatio = targets.carbs / currentTotals.carbs;
+        const fatRatio = targets.fat / currentTotals.fat;
+        
+        console.log(`Adjustment ratios: ${proteinRatio.toFixed(3)}x protein, ${carbsRatio.toFixed(3)}x carbs, ${fatRatio.toFixed(3)}x fat`);
+        
+        // Apply precise adjustments to each food
+        foods.forEach(food => {
+            let adjustmentFactor = 1;
+            
+            // Determine adjustment based on food's primary contribution and current deficits
+            if (food.priority === 'protein') {
+                // Protein foods: adjust mainly for protein, but consider fat impact
+                const fatImpact = food.food.fat > 5 ? Math.min(1.1, fatRatio) : fatRatio;
+                adjustmentFactor = proteinRatio * 0.8 + fatImpact * 0.2;
+                
+            } else if (food.priority === 'carbs') {
+                // Carb foods: adjust mainly for carbs, consider protein/fat impact  
+                const fatImpact = food.food.fat > 3 ? Math.min(1.1, fatRatio) : fatRatio;
+                adjustmentFactor = carbsRatio * 0.8 + fatImpact * 0.2;
+                
+            } else if (food.priority === 'fat') {
+                // Fat foods: very precise fat adjustment
+                if (food.isPureOil) {
+                    // Pure oils: micro-adjustments only
+                    adjustmentFactor = Math.max(0.7, Math.min(1.3, fatRatio));
+                    if (fatAccuracy > 1.05) adjustmentFactor = Math.min(0.9, adjustmentFactor);
+                } else {
+                    // Regular fat sources: moderate adjustment
+                    adjustmentFactor = Math.max(0.8, Math.min(1.2, fatRatio));
+                }
+                
+            } else {
+                // Vegetables: minimal adjustment, focus on not disrupting macros
+                adjustmentFactor = 1.0;
+            }
+            
+            // Apply conservative adjustment (smaller steps for precision)
+            const conservativeness = 0.3; // 30% max change per iteration
+            adjustmentFactor = Math.max(1 - conservativeness, Math.min(1 + conservativeness, adjustmentFactor));
+            
+            const oldQuantity = food.quantity;
+            const newQuantity = Math.round(oldQuantity * adjustmentFactor);
+            food.quantity = Math.max(food.minQty, Math.min(food.maxQty, newQuantity));
+            food.nutritionMultiplier = food.quantity / 100;
+            
+            if (food.quantity !== oldQuantity) {
+                console.log(`${food.food.name}: ${oldQuantity}g → ${food.quantity}g (${adjustmentFactor.toFixed(3)}x)`);
+            }
+        });
+        
+        // Check for convergence (minimal changes)
+        if (iteration > 5) {
+            const hasGoodAccuracy = proteinAccuracy >= 0.93 && proteinAccuracy <= 1.07 &&
+                                  carbsAccuracy >= 0.93 && carbsAccuracy <= 1.07 &&
+                                  fatAccuracy >= 0.93 && fatAccuracy <= 1.07;
+            
+            if (hasGoodAccuracy) {
+                console.log(`✅ Close enough! All macros within 93-107% range.`);
+                break;
+            }
+        }
+    }
     
-    return currentQuantities;
+    // Use best solution if we didn't converge perfectly
+    if (bestSolution && iteration >= maxIterations) {
+        console.log(`⚠️  Using best solution found (score: ${bestAccuracyScore.toFixed(3)})`);
+        foods.splice(0, foods.length, ...bestSolution);
+    }
+    
+    // Add explanations
+    foods.forEach(food => {
+        food.explanation = getWeightExplanation(food.food, food.quantity, food.type);
+    });
+    
+    return foods;
 }
 
 // Helper function to calculate totals from food quantities
@@ -1208,64 +1465,6 @@ function getWeightExplanation(food, quantity, category) {
     }
     
     return weightMode === 'cooked' ? 'as served' : 'raw weight';
-}
-
-// Calculate optimal quantity for target macro with weight mode consideration
-function calculateQuantity(food, macro, target, category) {
-    const macroValue = food[macro] || 1;
-    if (macroValue === 0) return { quantity: 100, explanation: '', nutritionMultiplier: 1 };
-    
-    console.log(`\n=== Calculating ${food.name} for ${target}g ${macro} ===`);
-    console.log(`USDA data: ${macroValue}g ${macro} per 100g`);
-    
-    // Step 1: Calculate how much of the USDA food we need (this is always based on USDA data)
-    const usdaQuantityNeeded = (target / macroValue) * 100;
-    console.log(`Need ${usdaQuantityNeeded.toFixed(1)}g of USDA food for ${target}g ${macro}`);
-    
-    // Step 2: Check if we need weight conversion for display
-    const weightMode = weightModes[category];
-    const grainType = detectFoodGrainType(food);
-    const isUsdaCooked = isUSDAFoodCooked(food);
-    
-    let displayQuantity = usdaQuantityNeeded;
-    let explanation = '';
-    
-    if (grainType && preparationFactors[grainType]) {
-        if (weightMode === 'raw' && isUsdaCooked) {
-            // User wants to see dry weight, but USDA data is for cooked
-            // Convert cooked quantity to dry weight for display
-            displayQuantity = usdaQuantityNeeded * preparationFactors[grainType].cookedToDry;
-            explanation = `${Math.round(displayQuantity)}g dry weight (≈${Math.round(usdaQuantityNeeded)}g cooked)`;
-            console.log(`Converting display: ${usdaQuantityNeeded.toFixed(1)}g cooked → ${displayQuantity.toFixed(1)}g dry`);
-        } else if (weightMode === 'cooked' && !isUsdaCooked) {
-            // User wants to see cooked weight, but USDA data is for dry
-            // Convert dry quantity to cooked weight for display
-            displayQuantity = usdaQuantityNeeded * preparationFactors[grainType].dryToCooked;
-            explanation = `${Math.round(displayQuantity)}g cooked weight (≈${Math.round(usdaQuantityNeeded)}g dry)`;
-            console.log(`Converting display: ${usdaQuantityNeeded.toFixed(1)}g dry → ${displayQuantity.toFixed(1)}g cooked`);
-        } else {
-            // No conversion needed
-            explanation = weightMode === 'cooked' ? 'cooked weight' : 'dry weight';
-            console.log(`No conversion needed - ${explanation}`);
-        }
-    } else {
-        explanation = weightMode === 'cooked' ? 'as served' : 'raw weight';
-        console.log(`Non-grain food - ${explanation}`);
-    }
-    
-    // Step 3: Nutrition calculation always uses the USDA quantity
-    const nutritionMultiplier = usdaQuantityNeeded / 100;
-    console.log(`Nutrition multiplier: ${nutritionMultiplier.toFixed(3)} (${usdaQuantityNeeded.toFixed(1)}g ÷ 100g)`);
-    console.log(`Will provide: ${(macroValue * nutritionMultiplier).toFixed(1)}g ${macro}`);
-    
-    // Keep display quantities reasonable
-    displayQuantity = Math.max(30, Math.min(600, Math.round(displayQuantity)));
-    
-    return { 
-        quantity: displayQuantity, 
-        explanation,
-        nutritionMultiplier: nutritionMultiplier
-    };
 }
 
 // Display generated meal plan
@@ -1434,6 +1633,18 @@ function downloadMealPlan() {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     updateGenerateButton();
+    
+    // Load initial foods from built-in database
+    setTimeout(() => {
+        const categories = ['protein', 'carb', 'fat', 'veggie'];
+        categories.forEach(category => {
+            const grid = document.getElementById(`${category}Grid`);
+            displayFoods(category, foodDatabase[category].slice(0, 8));
+        });
+    }, 100);
+    
+    console.log('✅ Loaded built-in food database with', 
+        Object.values(foodDatabase).reduce((sum, cat) => sum + cat.length, 0), 'foods');
 });
 </script>
 </body>
