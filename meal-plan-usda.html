@@ -141,6 +141,16 @@
         .fat-badge { background: #9b59b6; color: white; }
         .mixed-badge { background: #34495e; color: white; }
 
+        .meal-indicator {
+            background: #2c3e50;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 8px;
+            margin-left: 5px;
+            cursor: help;
+        }
+
         .selected-foods {
             margin-top: 15px;
             padding: 10px;
@@ -327,86 +337,12 @@
             font-size: 16px;
             margin-top: 15px;
         }
-
-        .weight-toggle {
-            background: #1a1a1a;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            border: 1px solid #333;
-        }
-
-        .weight-toggle label {
-            color: #4da6d9;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .toggle-buttons {
-            display: flex;
-            gap: 0;
-            margin-bottom: 8px;
-        }
-
-        .toggle-btn {
-            background: #333;
-            color: #ccc;
-            border: 1px solid #444;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-            flex: 1;
-        }
-
-        .toggle-btn:first-child {
-            border-radius: 4px 0 0 4px;
-        }
-
-        .toggle-btn:last-child {
-            border-radius: 0 4px 4px 0;
-            border-left: none;
-        }
-
-        .toggle-btn.active {
-            background: #4da6d9;
-            color: white;
-            border-color: #4da6d9;
-        }
-
-        .toggle-btn:hover:not(.active) {
-            background: #444;
-            color: white;
-        }
-
-        .toggle-explanation {
-            color: #999;
-            font-size: 11px;
-            font-style: italic;
-            display: block;
-        }
-
-        .weight-indicator {
-            background: #2ecc71;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: bold;
-            margin-left: 5px;
-        }
-
-        .weight-indicator.raw {
-            background: #e74c3c;
-        }
     </style>
 </head>
 <body>
 <div class="container">
     <h2 style="text-align: center; color: #4da6d9; margin-bottom: 10px;">BUILT Automated Meal Plan Generator</h2>
-    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Professional meal planning with 54 USDA-verified foods • <span style="color: #FFD700; font-weight: bold; text-shadow: 0 0 5px #FFD700;">GLOBAL SYSTEM OPTIMIZATION - 99%+ Accuracy 🌐</span></p>
+    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Professional meal planning with 54 USDA-verified foods • <span style="color: #FFD700; font-weight: bold; text-shadow: 0 0 5px #FFD700;">SMART MEAL-SPECIFIC OPTIMIZATION - 99%+ Accuracy 🌐</span></p>
 
     <!-- Macro Targets -->
     <div class="section">
@@ -438,15 +374,7 @@
         <!-- Proteins -->
         <div class="food-category">
             <div class="category-title">🥩 Protein Sources</div>
-            <div class="weight-toggle">
-                <label>Calculate quantities as:</label>
-                <div class="toggle-buttons">
-                    <button class="toggle-btn active" id="proteinCookedToggle" onclick="toggleWeightMode('protein', 'cooked')">Cooked Weight</button>
-                    <button class="toggle-btn" id="proteinRawToggle" onclick="toggleWeightMode('protein', 'raw')">Raw Weight</button>
-                </div>
-                <small class="toggle-explanation">Cooked weight = what you eat | Raw weight = before cooking</small>
-            </div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 17 protein sources:</p>
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 17 protein sources. Icons show meal appropriateness: 🌅breakfast 🌞lunch 🌙dinner 🍎snack 💪pre-workout ⚡post-workout</p>
             <div class="food-grid" id="proteinGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Proteins:</h4>
@@ -457,15 +385,7 @@
         <!-- Carbs -->
         <div class="food-category">
             <div class="category-title">🍚 Carbohydrate Sources</div>
-            <div class="weight-toggle">
-                <label>Calculate quantities as:</label>
-                <div class="toggle-buttons">
-                    <button class="toggle-btn active" id="carbCookedToggle" onclick="toggleWeightMode('carb', 'cooked')">Cooked Weight</button>
-                    <button class="toggle-btn" id="carbRawToggle" onclick="toggleWeightMode('carb', 'raw')">Dry Weight</button>
-                </div>
-                <small class="toggle-explanation">Cooked = ready to eat | Dry = uncooked rice/pasta/oats</small>
-            </div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 14 carbohydrate sources:</p>
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select carbs. Icons show meal timing: 🌅breakfast foods like oats, 🌞🌙lunch/dinner foods like rice</p>
             <div class="food-grid" id="carbGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Carbs:</h4>
@@ -476,15 +396,7 @@
         <!-- Fats -->
         <div class="food-category">
             <div class="category-title">🥑 Fat Sources</div>
-            <div class="weight-toggle">
-                <label>Calculate quantities as:</label>
-                <div class="toggle-buttons">
-                    <button class="toggle-btn active" id="fatCookedToggle" onclick="toggleWeightMode('fat', 'cooked')">As Served</button>
-                    <button class="toggle-btn" id="fatRawToggle" onclick="toggleWeightMode('fat', 'raw')">Raw Weight</button>
-                </div>
-                <small class="toggle-explanation">As served = ready to eat | Raw = before preparation</small>
-            </div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 10 fat sources:</p>
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select fats. 🌅breakfast: nut butters, 🌞🌙lunch/dinner: cooking oils, 🍎snacks: nuts</p>
             <div class="food-grid" id="fatGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Fats:</h4>
@@ -495,15 +407,7 @@
         <!-- Fruits & Vegetables -->
         <div class="food-category">
             <div class="category-title">🥬 Fruits & Vegetables</div>
-            <div class="weight-toggle">
-                <label>Calculate quantities as:</label>
-                <div class="toggle-buttons">
-                    <button class="toggle-btn active" id="veggieCookedToggle" onclick="toggleWeightMode('veggie', 'cooked')">As Served</button>
-                    <button class="toggle-btn" id="veggieRawToggle" onclick="toggleWeightMode('veggie', 'raw')">Raw Weight</button>
-                </div>
-                <small class="toggle-explanation">As served = ready to eat | Raw = before cooking</small>
-            </div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 13 fruits & vegetables:</p>
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select produce. 🌅breakfast: berries & fruits, 🌞🌙meals: vegetables, 🍎anytime: portable options</p>
             <div class="food-grid" id="veggieGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Fruits & Vegetables:</h4>
@@ -522,7 +426,8 @@
         <div id="generatedMeals"></div>
         
         <div class="daily-summary">
-            <h3 style="color: #2ecc71; text-align: center; margin-bottom: 15px;">Daily Nutrition Summary - Global System Optimization 🌐</h3>
+            <h3 style="color: #2ecc71; text-align: center; margin-bottom: 15px;">Daily Nutrition Summary - Smart Meal-Specific Optimization 🧠</h3>
+            <p style="text-align: center; color: #ccc; margin-bottom: 15px; font-size: 12px;">Meals are balanced to be within ±30% of average size • Foods chosen based on meal appropriateness</p>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="summary-number" id="totalProtein">0</div>
@@ -562,69 +467,69 @@
 </div>
 
 <script>
-// Complete USDA Food Database - Built-in with accurate nutrition data
+// Complete USDA Food Database - Built-in with accurate nutrition data + MEAL APPROPRIATENESS
 let foodDatabase = {
     protein: [
-        { id: 'p1', name: 'Chicken Breast', protein: 31.0, carbs: 0.0, fat: 3.6, calories: 165, state: 'cooked' },
-        { id: 'p2', name: 'Chicken Thigh', protein: 24.8, carbs: 0.0, fat: 8.2, calories: 179, state: 'cooked' },
-        { id: 'p3', name: 'Extra Lean Ground Turkey', protein: 22.0, carbs: 0.0, fat: 7.0, calories: 149, state: 'cooked' },
-        { id: 'p4', name: 'Turkey Breast', protein: 29.9, carbs: 0.0, fat: 0.7, calories: 135, state: 'cooked' },
-        { id: 'p5', name: 'Sirloin Roast', protein: 26.1, carbs: 0.0, fat: 8.4, calories: 185, state: 'cooked' },
-        { id: 'p6', name: 'Extra Lean Ground Beef', protein: 26.1, carbs: 0.0, fat: 5.0, calories: 158, state: 'cooked' },
-        { id: 'p7', name: 'Sirloin Steak', protein: 26.0, carbs: 0.0, fat: 6.1, calories: 170, state: 'cooked' },
-        { id: 'p8', name: 'Extra Lean Ground Bison', protein: 28.4, carbs: 0.0, fat: 2.4, calories: 138, state: 'cooked' },
-        { id: 'p9', name: 'Cod', protein: 22.4, carbs: 0.0, fat: 1.2, calories: 106, state: 'cooked' },
-        { id: 'p10', name: 'Salmon', protein: 25.4, carbs: 0.0, fat: 11.6, calories: 206, state: 'cooked' },
-        { id: 'p11', name: 'Shrimp', protein: 23.3, carbs: 1.6, fat: 1.7, calories: 101, state: 'cooked' },
-        { id: 'p12', name: '2% Greek Yogurt (plain)', protein: 10.0, carbs: 3.9, fat: 2.0, calories: 81, state: 'ready' },
-        { id: 'p13', name: '0% Greek Yogurt (plain)', protein: 10.3, carbs: 3.6, fat: 0.4, calories: 59, state: 'ready' },
-        { id: 'p14', name: 'Liquid Egg Whites', protein: 10.9, carbs: 0.7, fat: 0.2, calories: 52, state: 'liquid' },
-        { id: 'p15', name: 'Whole Egg', protein: 12.6, carbs: 0.7, fat: 9.9, calories: 147, state: 'cooked' },
-        { id: 'p16', name: 'Whey Isolate Protein Powder', protein: 90.0, carbs: 0.0, fat: 0.5, calories: 375, state: 'powder' },
-        { id: 'p17', name: 'Vegan Protein Powder', protein: 75.0, carbs: 8.0, fat: 2.5, calories: 370, state: 'powder' }
+        { id: 'p1', name: 'Chicken Breast', protein: 31.0, carbs: 0.0, fat: 3.6, calories: 165, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p2', name: 'Chicken Thigh', protein: 24.8, carbs: 0.0, fat: 8.2, calories: 179, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p3', name: 'Extra Lean Ground Turkey', protein: 22.0, carbs: 0.0, fat: 7.0, calories: 149, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p4', name: 'Turkey Breast', protein: 29.9, carbs: 0.0, fat: 0.7, calories: 135, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p5', name: 'Sirloin Roast', protein: 26.1, carbs: 0.0, fat: 8.4, calories: 185, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p6', name: 'Extra Lean Ground Beef', protein: 26.1, carbs: 0.0, fat: 5.0, calories: 158, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p7', name: 'Sirloin Steak', protein: 26.0, carbs: 0.0, fat: 6.1, calories: 170, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p8', name: 'Extra Lean Ground Bison', protein: 28.4, carbs: 0.0, fat: 2.4, calories: 138, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p9', name: 'Cod', protein: 22.4, carbs: 0.0, fat: 1.2, calories: 106, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p10', name: 'Salmon', protein: 25.4, carbs: 0.0, fat: 11.6, calories: 206, state: 'cooked', meals: ['breakfast', 'lunch', 'dinner'] },
+        { id: 'p11', name: 'Shrimp', protein: 23.3, carbs: 1.6, fat: 1.7, calories: 101, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'p12', name: '2% Greek Yogurt (plain)', protein: 10.0, carbs: 3.9, fat: 2.0, calories: 81, state: 'ready', meals: ['breakfast', 'snack'] },
+        { id: 'p13', name: '0% Greek Yogurt (plain)', protein: 10.3, carbs: 3.6, fat: 0.4, calories: 59, state: 'ready', meals: ['breakfast', 'snack'] },
+        { id: 'p14', name: 'Liquid Egg Whites', protein: 10.9, carbs: 0.7, fat: 0.2, calories: 52, state: 'liquid', meals: ['breakfast'] },
+        { id: 'p15', name: 'Whole Egg', protein: 12.6, carbs: 0.7, fat: 9.9, calories: 147, state: 'cooked', meals: ['breakfast'] },
+        { id: 'p16', name: 'Whey Isolate Protein Powder', protein: 90.0, carbs: 0.0, fat: 0.5, calories: 375, state: 'powder', meals: ['breakfast', 'snack', 'pre-workout', 'post-workout'] },
+        { id: 'p17', name: 'Vegan Protein Powder', protein: 75.0, carbs: 8.0, fat: 2.5, calories: 370, state: 'powder', meals: ['breakfast', 'snack', 'pre-workout', 'post-workout'] }
     ],
     carb: [
-        { id: 'c1', name: 'White Jasmine Rice', protein: 2.7, carbs: 28.6, fat: 0.3, calories: 130, state: 'cooked' },
-        { id: 'c2', name: 'White Basmati Rice', protein: 2.7, carbs: 28.0, fat: 0.3, calories: 130, state: 'cooked' },
-        { id: 'c3', name: 'Golden Potato', protein: 2.5, carbs: 21.0, fat: 0.1, calories: 93, state: 'cooked' },
-        { id: 'c4', name: 'White Potato', protein: 2.5, carbs: 21.0, fat: 0.1, calories: 93, state: 'cooked' },
-        { id: 'c5', name: 'Sweet Potato', protein: 1.6, carbs: 20.1, fat: 0.1, calories: 86, state: 'cooked' },
-        { id: 'c6', name: 'Pasta', protein: 5.0, carbs: 25.0, fat: 0.9, calories: 131, state: 'cooked' },
-        { id: 'c7', name: 'Sourdough Bread', protein: 9.0, carbs: 48.0, fat: 2.5, calories: 259, state: 'ready' },
-        { id: 'c8', name: 'Cream of Rice', protein: 1.5, carbs: 22.0, fat: 0.1, calories: 95, state: 'cooked' },
-        { id: 'c9', name: 'Cream of Wheat', protein: 2.5, carbs: 22.0, fat: 0.5, calories: 105, state: 'cooked' },
-        { id: 'c10', name: 'Oats', protein: 16.9, carbs: 66.3, fat: 6.9, calories: 389, state: 'dry' },
-        { id: 'c11', name: 'Special K Red Berries Cereal', protein: 6.0, carbs: 84.0, fat: 1.0, calories: 375, state: 'dry' },
-        { id: 'c12', name: 'Vector Cereal', protein: 12.0, carbs: 72.0, fat: 3.0, calories: 380, state: 'dry' },
-        { id: 'c13', name: 'All Bran Buds Cereal', protein: 10.0, carbs: 72.0, fat: 4.0, calories: 320, state: 'dry' },
-        { id: 'c14', name: 'Granola', protein: 10.1, carbs: 65.4, fat: 12.8, calories: 421, state: 'ready' }
+        { id: 'c1', name: 'White Jasmine Rice', protein: 2.7, carbs: 28.6, fat: 0.3, calories: 130, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'c2', name: 'White Basmati Rice', protein: 2.7, carbs: 28.0, fat: 0.3, calories: 130, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'c3', name: 'Golden Potato', protein: 2.5, carbs: 21.0, fat: 0.1, calories: 93, state: 'cooked', meals: ['breakfast', 'lunch', 'dinner'] },
+        { id: 'c4', name: 'White Potato', protein: 2.5, carbs: 21.0, fat: 0.1, calories: 93, state: 'cooked', meals: ['breakfast', 'lunch', 'dinner'] },
+        { id: 'c5', name: 'Sweet Potato', protein: 1.6, carbs: 20.1, fat: 0.1, calories: 86, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'c6', name: 'Pasta', protein: 5.0, carbs: 25.0, fat: 0.9, calories: 131, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'c7', name: 'Sourdough Bread', protein: 9.0, carbs: 48.0, fat: 2.5, calories: 259, state: 'ready', meals: ['breakfast', 'lunch', 'snack'] },
+        { id: 'c8', name: 'Cream of Rice', protein: 1.5, carbs: 22.0, fat: 0.1, calories: 95, state: 'cooked', meals: ['breakfast', 'post-workout'] },
+        { id: 'c9', name: 'Cream of Wheat', protein: 2.5, carbs: 22.0, fat: 0.5, calories: 105, state: 'cooked', meals: ['breakfast', 'post-workout'] },
+        { id: 'c10', name: 'Oats', protein: 16.9, carbs: 66.3, fat: 6.9, calories: 389, state: 'dry', meals: ['breakfast'] },
+        { id: 'c11', name: 'Special K Red Berries Cereal', protein: 6.0, carbs: 84.0, fat: 1.0, calories: 375, state: 'dry', meals: ['breakfast'] },
+        { id: 'c12', name: 'Vector Cereal', protein: 12.0, carbs: 72.0, fat: 3.0, calories: 380, state: 'dry', meals: ['breakfast'] },
+        { id: 'c13', name: 'All Bran Buds Cereal', protein: 10.0, carbs: 72.0, fat: 4.0, calories: 320, state: 'dry', meals: ['breakfast'] },
+        { id: 'c14', name: 'Granola', protein: 10.1, carbs: 65.4, fat: 12.8, calories: 421, state: 'ready', meals: ['breakfast', 'snack'] }
     ],
     fat: [
-        { id: 'f1', name: 'Natural Peanut Butter', protein: 25.1, carbs: 20.0, fat: 50.4, calories: 588, state: 'spread' },
-        { id: 'f2', name: 'Natural Almond Butter', protein: 21.2, carbs: 18.8, fat: 55.5, calories: 614, state: 'spread' },
-        { id: 'f3', name: 'Coconut Oil', protein: 0.0, carbs: 0.0, fat: 99.1, calories: 862, state: 'solid' },
-        { id: 'f4', name: 'Avocado Oil', protein: 0.0, carbs: 0.0, fat: 100.0, calories: 884, state: 'liquid' },
-        { id: 'f5', name: 'Extra Virgin Olive Oil', protein: 0.0, carbs: 0.0, fat: 100.0, calories: 884, state: 'liquid' },
-        { id: 'f6', name: 'Avocado', protein: 2.0, carbs: 8.5, fat: 14.7, calories: 160, state: 'raw' },
-        { id: 'f7', name: 'Dark Chocolate 80%', protein: 7.8, carbs: 45.9, fat: 35.4, calories: 501, state: 'solid' },
-        { id: 'f8', name: 'Walnuts', protein: 15.2, carbs: 13.7, fat: 65.2, calories: 654, state: 'raw' },
-        { id: 'f9', name: 'Almonds', protein: 21.2, carbs: 21.6, fat: 49.9, calories: 579, state: 'raw' },
-        { id: 'f10', name: 'Cashews', protein: 18.2, carbs: 30.2, fat: 43.9, calories: 553, state: 'raw' }
+        { id: 'f1', name: 'Natural Peanut Butter', protein: 25.1, carbs: 20.0, fat: 50.4, calories: 588, state: 'spread', meals: ['breakfast', 'snack'] },
+        { id: 'f2', name: 'Natural Almond Butter', protein: 21.2, carbs: 18.8, fat: 55.5, calories: 614, state: 'spread', meals: ['breakfast', 'snack'] },
+        { id: 'f3', name: 'Coconut Oil', protein: 0.0, carbs: 0.0, fat: 99.1, calories: 862, state: 'solid', meals: ['breakfast', 'lunch', 'dinner'] },
+        { id: 'f4', name: 'Avocado Oil', protein: 0.0, carbs: 0.0, fat: 100.0, calories: 884, state: 'liquid', meals: ['breakfast', 'lunch', 'dinner'] },
+        { id: 'f5', name: 'Extra Virgin Olive Oil', protein: 0.0, carbs: 0.0, fat: 100.0, calories: 884, state: 'liquid', meals: ['lunch', 'dinner'] },
+        { id: 'f6', name: 'Avocado', protein: 2.0, carbs: 8.5, fat: 14.7, calories: 160, state: 'raw', meals: ['breakfast', 'lunch', 'snack'] },
+        { id: 'f7', name: 'Dark Chocolate 80%', protein: 7.8, carbs: 45.9, fat: 35.4, calories: 501, state: 'solid', meals: ['snack'] },
+        { id: 'f8', name: 'Walnuts', protein: 15.2, carbs: 13.7, fat: 65.2, calories: 654, state: 'raw', meals: ['breakfast', 'snack'] },
+        { id: 'f9', name: 'Almonds', protein: 21.2, carbs: 21.6, fat: 49.9, calories: 579, state: 'raw', meals: ['breakfast', 'snack'] },
+        { id: 'f10', name: 'Cashews', protein: 18.2, carbs: 30.2, fat: 43.9, calories: 553, state: 'raw', meals: ['breakfast', 'snack'] }
     ],
     veggie: [
-        { id: 'fr1', name: 'Triple Berry Mix (Frozen)', protein: 0.7, carbs: 12.0, fat: 0.4, calories: 57, state: 'frozen' },
-        { id: 'fr2', name: 'Blueberries (Frozen)', protein: 0.7, carbs: 14.5, fat: 0.3, calories: 57, state: 'frozen' },
-        { id: 'fr3', name: 'Strawberries', protein: 0.7, carbs: 7.7, fat: 0.3, calories: 32, state: 'raw' },
-        { id: 'fr4', name: 'Apple', protein: 0.3, carbs: 14.0, fat: 0.2, calories: 52, state: 'raw' },
-        { id: 'fr5', name: 'Banana', protein: 1.1, carbs: 22.8, fat: 0.3, calories: 89, state: 'raw' },
-        { id: 'fr6', name: 'Cucumber', protein: 0.7, carbs: 3.6, fat: 0.1, calories: 16, state: 'raw' },
-        { id: 'v1', name: 'Baby Carrots', protein: 0.9, carbs: 9.6, fat: 0.2, calories: 41, state: 'raw' },
-        { id: 'v2', name: 'Zucchini', protein: 1.2, carbs: 3.1, fat: 0.3, calories: 17, state: 'raw' },
-        { id: 'v3', name: 'Bell Peppers', protein: 1.0, carbs: 7.0, fat: 0.3, calories: 31, state: 'raw' },
-        { id: 'v4', name: 'Asparagus', protein: 2.4, carbs: 3.9, fat: 0.2, calories: 22, state: 'cooked' },
-        { id: 'v5', name: 'Green Beans', protein: 1.8, carbs: 7.0, fat: 0.1, calories: 31, state: 'cooked' },
-        { id: 'v6', name: 'Spinach', protein: 2.9, carbs: 3.6, fat: 0.4, calories: 23, state: 'cooked' },
-        { id: 'v7', name: 'Kale', protein: 2.9, carbs: 5.6, fat: 0.4, calories: 28, state: 'cooked' }
+        { id: 'fr1', name: 'Triple Berry Mix (Frozen)', protein: 0.7, carbs: 12.0, fat: 0.4, calories: 57, state: 'frozen', meals: ['breakfast', 'snack'] },
+        { id: 'fr2', name: 'Blueberries (Frozen)', protein: 0.7, carbs: 14.5, fat: 0.3, calories: 57, state: 'frozen', meals: ['breakfast', 'snack'] },
+        { id: 'fr3', name: 'Strawberries', protein: 0.7, carbs: 7.7, fat: 0.3, calories: 32, state: 'raw', meals: ['breakfast', 'snack'] },
+        { id: 'fr4', name: 'Apple', protein: 0.3, carbs: 14.0, fat: 0.2, calories: 52, state: 'raw', meals: ['breakfast', 'snack'] },
+        { id: 'fr5', name: 'Banana', protein: 1.1, carbs: 22.8, fat: 0.3, calories: 89, state: 'raw', meals: ['breakfast', 'snack', 'pre-workout', 'post-workout'] },
+        { id: 'fr6', name: 'Cucumber', protein: 0.7, carbs: 3.6, fat: 0.1, calories: 16, state: 'raw', meals: ['lunch', 'dinner', 'snack'] },
+        { id: 'v1', name: 'Baby Carrots', protein: 0.9, carbs: 9.6, fat: 0.2, calories: 41, state: 'raw', meals: ['lunch', 'dinner', 'snack'] },
+        { id: 'v2', name: 'Zucchini', protein: 1.2, carbs: 3.1, fat: 0.3, calories: 17, state: 'raw', meals: ['lunch', 'dinner'] },
+        { id: 'v3', name: 'Bell Peppers', protein: 1.0, carbs: 7.0, fat: 0.3, calories: 31, state: 'raw', meals: ['lunch', 'dinner'] },
+        { id: 'v4', name: 'Asparagus', protein: 2.4, carbs: 3.9, fat: 0.2, calories: 22, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'v5', name: 'Green Beans', protein: 1.8, carbs: 7.0, fat: 0.1, calories: 31, state: 'cooked', meals: ['lunch', 'dinner'] },
+        { id: 'v6', name: 'Spinach', protein: 2.9, carbs: 3.6, fat: 0.4, calories: 23, state: 'cooked', meals: ['breakfast', 'lunch', 'dinner'] },
+        { id: 'v7', name: 'Kale', protein: 2.9, carbs: 5.6, fat: 0.4, calories: 28, state: 'cooked', meals: ['breakfast', 'lunch', 'dinner'] }
     ]
 };
 
@@ -636,58 +541,7 @@ let selectedFoods = {
     veggie: []
 };
 
-let weightModes = {
-    protein: 'cooked',
-    carb: 'cooked', 
-    fat: 'cooked',
-    veggie: 'cooked'
-};
-
 let currentMealPlan = null;
-
-// Preparation factors for cooked/raw conversions
-const preparationFactors = {
-    'rice': { cookedToDry: 0.28, dryToCooked: 3.57 },
-    'pasta': { cookedToDry: 0.31, dryToCooked: 3.23 },
-    'oats': { cookedToDry: 0.33, dryToCooked: 3.03 },
-    'quinoa': { cookedToDry: 0.25, dryToCooked: 4.0 },
-    'lentils': { cookedToDry: 0.4, dryToCooked: 2.5 },
-    'beans': { cookedToDry: 0.45, dryToCooked: 2.22 },
-    'barley': { cookedToDry: 0.3, dryToCooked: 3.33 }
-};
-
-// Toggle weight mode
-function toggleWeightMode(category, mode) {
-    weightModes[category] = mode;
-    
-    // Update button states
-    document.getElementById(`${category}CookedToggle`).classList.toggle('active', mode === 'cooked');
-    document.getElementById(`${category}RawToggle`).classList.toggle('active', mode === 'raw');
-    
-    // Update selected foods display to show new weight indicators
-    updateSelectedFoodsDisplay(category);
-}
-
-// Detect if food needs cooked/raw conversion
-function detectFoodGrainType(food) {
-    const name = food.name.toLowerCase();
-    
-    if (name.includes('rice')) return 'rice';
-    if (name.includes('pasta') || name.includes('noodle')) return 'pasta';
-    if (name.includes('oats') || name.includes('oatmeal')) return 'oats';
-    if (name.includes('quinoa')) return 'quinoa';
-    if (name.includes('lentil')) return 'lentils';
-    if (name.includes('bean')) return 'beans';
-    if (name.includes('barley')) return 'barley';
-    
-    return null;
-}
-
-// Check if USDA food is already in cooked state
-function isUSDAFoodCooked(food) {
-    const name = food.name.toLowerCase();
-    return name.includes('cooked') || name.includes('boiled') || name.includes('prepared');
-}
 
 // Food classification functions
 function getFoodMacroType(food) {
@@ -733,7 +587,7 @@ function loadAllFoods() {
     });
 }
 
-// Display foods in grid
+// Display foods in grid with meal appropriateness indicators
 function displayFoods(category, foods) {
     const grid = document.getElementById(`${category}Grid`);
     
@@ -747,13 +601,28 @@ function displayFoods(category, foods) {
             displayName = displayName.substring(0, 30) + '...';
         }
         
+        // Create meal appropriateness indicators
+        const mealIcons = {
+            'breakfast': '🌅',
+            'lunch': '🌞', 
+            'dinner': '🌙',
+            'snack': '🍎',
+            'pre-workout': '💪',
+            'post-workout': '⚡'
+        };
+        
+        const mealIndicators = food.meals.map(meal => mealIcons[meal] || '🍽️').join('');
+        
         return `
             <div class="food-item ${isSelected ? 'selected' : ''}" onclick="toggleFood('${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
                 <div class="food-name">${displayName}</div>
                 <div class="food-macros ${isSelected ? 'selected' : ''}">
                     P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
                 </div>
-                <div class="food-badges">${badge}</div>
+                <div class="food-badges">
+                    ${badge}
+                    <span class="meal-indicator" title="Appropriate for: ${food.meals.join(', ')}">${mealIndicators}</span>
+                </div>
             </div>
         `;
     }).join('');
@@ -778,7 +647,6 @@ function toggleFood(category, food) {
 // Update selected foods display
 function updateSelectedFoodsDisplay(category) {
     const container = document.getElementById(`selected${category.charAt(0).toUpperCase() + category.slice(1)}s`);
-    const weightMode = weightModes[category];
     
     const tagsHTML = selectedFoods[category].map(food => {
         let displayName = food.name;
@@ -786,11 +654,9 @@ function updateSelectedFoodsDisplay(category) {
             displayName = displayName.substring(0, 25) + '...';
         }
         
-        const weightIndicator = `<span class="weight-indicator ${weightMode === 'raw' ? 'raw' : ''}">${weightMode.toUpperCase()}</span>`;
-        
         return `
             <div class="selected-food-tag" onclick="removeFood('${category}', '${food.id}')" title="Click to remove">
-                ${displayName} ${weightIndicator} ✕
+                ${displayName} ✕
             </div>
         `;
     }).join('');
@@ -866,47 +732,123 @@ async function buildMealPlan(params) {
     
     const mealNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout'];
     
-    // STEP 1: Generate initial meal structure with food variety
-    console.log(`\n=== STEP 1: INITIAL MEAL STRUCTURE ===`);
+    // STEP 1: Generate initial meal structure with SMART FOOD ASSIGNMENT
+    console.log(`\n=== STEP 1: SMART MEAL STRUCTURE WITH FOOD APPROPRIATENESS ===`);
     const mealPlan = [];
     
+    // Define meal types based on number of meals
+    const getMealTypes = (count) => {
+        switch(count) {
+            case 3: return ['breakfast', 'lunch', 'dinner'];
+            case 4: return ['breakfast', 'lunch', 'dinner', 'snack'];
+            case 5: return ['breakfast', 'lunch', 'dinner', 'snack', 'post-workout'];
+            case 6: return ['breakfast', 'lunch', 'dinner', 'snack', 'pre-workout', 'post-workout'];
+            default: return ['breakfast', 'lunch', 'dinner', 'snack', 'snack'];
+        }
+    };
+    
+    const mealTypes = getMealTypes(mealsCount);
+    const mealDisplayNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout'];
+    
     for (let i = 0; i < mealsCount; i++) {
+        const mealType = mealTypes[i];
         const meal = {
-            name: mealNames[i] || `Meal ${i + 1}`,
+            name: mealDisplayNames[i] || `Meal ${i + 1}`,
+            type: mealType,
             foods: [],
             totals: { protein: 0, carbs: 0, fat: 0, calories: 0 }
         };
         
-        // Assign foods to meals with variety (cycle through selections)
+        console.log(`Building ${meal.name} (${mealType}) with appropriate foods...`);
+        
+        // Smart food selection based on meal type
         const availableFoods = [];
         
+        // Smart protein selection
         if (selectedFoods.protein.length > 0) {
+            const appropriateProteins = selectedFoods.protein.filter(food => 
+                food.meals.includes(mealType)
+            );
+            
+            let chosenProtein;
+            if (appropriateProteins.length > 0) {
+                // Use appropriate protein for this meal type
+                chosenProtein = appropriateProteins[i % appropriateProteins.length];
+                console.log(`  Using appropriate protein: ${chosenProtein.name} for ${mealType}`);
+            } else {
+                // Fallback to any selected protein
+                chosenProtein = selectedFoods.protein[i % selectedFoods.protein.length];
+                console.log(`  Fallback protein: ${chosenProtein.name} for ${mealType}`);
+            }
+            
             availableFoods.push({
-                food: selectedFoods.protein[i % selectedFoods.protein.length],
+                food: chosenProtein,
                 type: 'protein',
                 priority: 'protein'
             });
         }
         
+        // Smart carb selection
         if (selectedFoods.carb.length > 0) {
+            const appropriateCarbs = selectedFoods.carb.filter(food => 
+                food.meals.includes(mealType)
+            );
+            
+            let chosenCarb;
+            if (appropriateCarbs.length > 0) {
+                chosenCarb = appropriateCarbs[i % appropriateCarbs.length];
+                console.log(`  Using appropriate carb: ${chosenCarb.name} for ${mealType}`);
+            } else {
+                chosenCarb = selectedFoods.carb[i % selectedFoods.carb.length];
+                console.log(`  Fallback carb: ${chosenCarb.name} for ${mealType}`);
+            }
+            
             availableFoods.push({
-                food: selectedFoods.carb[i % selectedFoods.carb.length],
+                food: chosenCarb,
                 type: 'carb', 
                 priority: 'carbs'
             });
         }
         
+        // Smart fat selection
         if (selectedFoods.fat.length > 0) {
+            const appropriateFats = selectedFoods.fat.filter(food => 
+                food.meals.includes(mealType)
+            );
+            
+            let chosenFat;
+            if (appropriateFats.length > 0) {
+                chosenFat = appropriateFats[i % appropriateFats.length];
+                console.log(`  Using appropriate fat: ${chosenFat.name} for ${mealType}`);
+            } else {
+                chosenFat = selectedFoods.fat[i % selectedFoods.fat.length];
+                console.log(`  Fallback fat: ${chosenFat.name} for ${mealType}`);
+            }
+            
             availableFoods.push({
-                food: selectedFoods.fat[i % selectedFoods.fat.length],
+                food: chosenFat,
                 type: 'fat',
                 priority: 'fat'
             });
         }
         
+        // Smart veggie selection
         if (selectedFoods.veggie.length > 0) {
+            const appropriateVeggies = selectedFoods.veggie.filter(food => 
+                food.meals.includes(mealType)
+            );
+            
+            let chosenVeggie;
+            if (appropriateVeggies.length > 0) {
+                chosenVeggie = appropriateVeggies[i % appropriateVeggies.length];
+                console.log(`  Using appropriate veggie: ${chosenVeggie.name} for ${mealType}`);
+            } else {
+                chosenVeggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
+                console.log(`  Fallback veggie: ${chosenVeggie.name} for ${mealType}`);
+            }
+            
             availableFoods.push({
-                food: selectedFoods.veggie[i % selectedFoods.veggie.length],
+                food: chosenVeggie,
                 type: 'veggie',
                 priority: 'none'
             });
@@ -953,12 +895,24 @@ async function buildMealPlan(params) {
         console.log(`${meal.name}: ${meal.totals.protein.toFixed(1)}p ${meal.totals.carbs.toFixed(1)}c ${meal.totals.fat.toFixed(1)}f ${meal.totals.calories.toFixed(0)}cal`);
     });
     
-    // Verify global accuracy
+    // Verify global accuracy and meal balance
     const totalActual = optimizedPlan.reduce((sum, meal) => ({
         protein: sum.protein + meal.totals.protein,
         carbs: sum.carbs + meal.totals.carbs,
         fat: sum.fat + meal.totals.fat
     }), {protein: 0, carbs: 0, fat: 0});
+    
+    // Calculate meal balance for final verification
+    const targetCalories = (params.targetProtein * 4) + (params.targetCarbs * 4) + (params.targetFat * 9);
+    const avgCaloriesPerMeal = targetCalories / mealsCount;
+    const minMealCalories = avgCaloriesPerMeal * 0.7;
+    const maxMealCalories = avgCaloriesPerMeal * 1.3;
+    
+    const mealCalories = optimizedPlan.map(meal => meal.totals.calories);
+    const mealBalance = mealCalories.filter(cal => cal >= minMealCalories && cal <= maxMealCalories).length / mealsCount;
+    
+    console.log(`Meal sizes: ${mealCalories.map(c => c.toFixed(0)).join(', ')} calories`);
+    console.log(`Meal balance: ${(mealBalance * 100).toFixed(0)}% of meals within range (${minMealCalories.toFixed(0)}-${maxMealCalories.toFixed(0)} cal)`);
     
     const finalProteinAcc = (totalActual.protein/params.targetProtein)*100;
     const finalCarbsAcc = (totalActual.carbs/params.targetCarbs)*100;
@@ -971,19 +925,33 @@ async function buildMealPlan(params) {
     
     const meets99 = finalProteinAcc >= 99 && finalCarbsAcc >= 99 && finalFatAcc >= 99;
     const under101 = finalProteinAcc <= 101 && finalCarbsAcc <= 101 && finalFatAcc <= 101;
+    const mealsBalanced = mealBalance >= 0.8;
     
-    if (meets99 && under101) {
-        console.log(`🏆 GLOBAL SUCCESS! 99-101% accuracy achieved through system optimization!`);
+    if (meets99 && under101 && mealsBalanced) {
+        console.log(`🏆 GLOBAL SUCCESS! 99-101% accuracy achieved with balanced meal sizes!`);
     } else if (finalProteinAcc >= 95 && finalCarbsAcc >= 95 && finalFatAcc >= 95) {
         console.log(`✅ Global system exceeds 95% baseline accuracy`);
+        if (mealsBalanced) {
+            console.log(`✅ Meal sizes are well balanced`);
+        } else {
+            console.log(`⚠️ Some meals may be unbalanced - consider regenerating`);
+        }
     }
     
     return optimizedPlan;
 }
 
-// Global optimization function - treats entire day as one system
+// Global optimization function - ULTRA-AGGRESSIVE fat control and protein boosting + MEAL SIZE BALANCING
 async function globalOptimizeMealPlan(mealPlan, targets) {
     console.log(`Global optimization: ${targets.targetProtein}p ${targets.targetCarbs}c ${targets.targetFat}f`);
+    
+    // Calculate target calories and meal size ranges
+    const targetCalories = (targets.targetProtein * 4) + (targets.targetCarbs * 4) + (targets.targetFat * 9);
+    const avgCaloriesPerMeal = targetCalories / mealPlan.length;
+    const minMealCalories = avgCaloriesPerMeal * 0.7; // Minimum 70% of average
+    const maxMealCalories = avgCaloriesPerMeal * 1.3; // Maximum 130% of average
+    
+    console.log(`Target meal size: ${avgCaloriesPerMeal.toFixed(0)} ± 30% (${minMealCalories.toFixed(0)}-${maxMealCalories.toFixed(0)} cal range)`);
     
     // Flatten all foods across all meals for global optimization
     const allFoods = [];
@@ -1000,13 +968,14 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
         });
     });
     
-    console.log(`Optimizing ${allFoods.length} foods across ${mealPlan.length} meals globally...`);
+    console.log(`Optimizing ${allFoods.length} foods across ${mealPlan.length} meals globally with meal-specific assignments and size balancing...`);
     
-    // PHASE 1: Coarse global optimization
+    // PHASE 1: Ultra-aggressive optimization with meal balancing
     let iteration = 0;
-    const maxIterations = 40;
+    const maxIterations = 60; // More iterations
     let bestSolution = null;
-    let bestScore = 0;
+    let bestScore = -999999;
+    let stuckIterations = 0; // Count iterations without improvement
     
     while (iteration < maxIterations) {
         iteration++;
@@ -1017,105 +986,100 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
         const carbsAcc = globalTotals.carbs / targets.targetCarbs;
         const fatAcc = globalTotals.fat / targets.targetFat;
         
+        // Calculate meal size balance
+        const mealSizeBalance = calculateMealSizeBalance(allFoods, mealPlan.length, minMealCalories, maxMealCalories);
+        
         if (iteration % 5 === 0) {
-            console.log(`Global ${iteration}: ${(proteinAcc * 100).toFixed(1)}% protein, ${(carbsAcc * 100).toFixed(1)}% carbs, ${(fatAcc * 100).toFixed(1)}% fat`);
+            console.log(`Global ${iteration}: ${(proteinAcc * 100).toFixed(1)}% protein, ${(carbsAcc * 100).toFixed(1)}% carbs, ${(fatAcc * 100).toFixed(1)}% fat, meal balance: ${mealSizeBalance.toFixed(1)}`);
         }
         
-        // Check for success - STRICTER CRITERIA
+        // CRITICAL: Check if we're making progress
+        const currentScore = calculateGlobalScoreWithMealBalance(proteinAcc, carbsAcc, fatAcc, mealSizeBalance);
+        if (currentScore > bestScore) {
+            bestScore = currentScore;
+            bestSolution = allFoods.map(f => ({ ...f }));
+            stuckIterations = 0; // Reset stuck counter
+        } else {
+            stuckIterations++;
+        }
+        
+        // Check for success - STRICTER CRITERIA including meal balance
         const meets99 = proteinAcc >= 0.99 && carbsAcc >= 0.99 && fatAcc >= 0.99;
         const under102 = proteinAcc <= 1.02 && carbsAcc <= 1.02 && fatAcc <= 1.02;
-        
-        // CRITICAL: Fat must be especially tight - no more than 101% for fat
         const fatTightControl = fatAcc <= 1.01;
-        // CRITICAL: Protein must be at least 95% - no exceptions
         const proteinMinimum = proteinAcc >= 0.95;
+        const mealsBalanced = mealSizeBalance >= 0.8; // Meals reasonably balanced
         
-        if (meets99 && under102 && fatTightControl && proteinMinimum) {
-            console.log(`✅ Global optimization converged at iteration ${iteration}!`);
+        if (meets99 && under102 && fatTightControl && proteinMinimum && mealsBalanced) {
+            console.log(`✅ Global optimization converged at iteration ${iteration} with balanced meals!`);
             break;
         }
         
-        // Log problematic macros
+        // CRITICAL: If stuck for too long, apply shock therapy
+        if (stuckIterations >= 8) {
+            console.log(`⚡ SHOCK THERAPY: Stuck for ${stuckIterations} iterations - applying aggressive corrections`);
+            applyShockTherapy(allFoods, targets, globalTotals);
+            stuckIterations = 0; // Reset after shock therapy
+        } else {
+            // Normal adjustments with meal balancing
+            applyGlobalAdjustmentsWithMealBalance(allFoods, targets, globalTotals, mealPlan.length, avgCaloriesPerMeal);
+        }
+        
+        // Log problematic macros and meal sizes
         if (proteinAcc < 0.95) {
             console.log(`⚠️ Protein critically low: ${(proteinAcc * 100).toFixed(1)}% - boosting lean proteins`);
         }
         if (fatAcc > 1.10) {
             console.log(`⚠️ Fat significantly over: ${(fatAcc * 100).toFixed(1)}% - reducing fat sources`);
         }
-        
-        // Track best solution
-        const score = calculateGlobalScore(proteinAcc, carbsAcc, fatAcc);
-        if (score > bestScore) {
-            bestScore = score;
-            bestSolution = allFoods.map(f => ({ ...f }));
+        if (mealSizeBalance < 0.7) {
+            console.log(`⚠️ Meals unbalanced (${mealSizeBalance.toFixed(2)}) - rebalancing meal sizes`);
         }
-        
-        // Apply global adjustments
-        applyGlobalAdjustments(allFoods, targets, globalTotals);
     }
     
-    // PHASE 2: Fine-tuning with food swapping
-    console.log(`\n=== PHASE 2: FINE-TUNING WITH FOOD REBALANCING ===`);
+    // PHASE 2: Emergency corrections if still not meeting targets
     const finalTotals = calculateGlobalTotals(allFoods);
-    const proteinDeficit = targets.targetProtein - finalTotals.protein;
-    const carbsDeficit = targets.targetCarbs - finalTotals.carbs;
-    const fatDeficit = targets.targetFat - finalTotals.fat;
+    const finalProteinAcc = finalTotals.protein / targets.targetProtein;
+    const finalCarbsAcc = finalTotals.carbs / targets.targetCarbs;
+    const finalFatAcc = finalTotals.fat / targets.targetFat;
+    const finalMealBalance = calculateMealSizeBalance(allFoods, mealPlan.length, minMealCalories, maxMealCalories);
     
-    console.log(`Final deficits: ${proteinDeficit.toFixed(2)}p ${carbsDeficit.toFixed(2)}c ${fatDeficit.toFixed(2)}f`);
+    console.log(`\n=== PHASE 2: EMERGENCY CORRECTIONS ===`);
+    console.log(`Current state: ${(finalProteinAcc * 100).toFixed(1)}% protein, ${(finalCarbsAcc * 100).toFixed(1)}% carbs, ${(finalFatAcc * 100).toFixed(1)}% fat, meal balance: ${finalMealBalance.toFixed(2)}`);
     
-    // Smart rebalancing: be more aggressive with larger deficits
-    if (Math.abs(proteinDeficit) > 1) {
-        rebalanceProtein(allFoods, proteinDeficit);
-        console.log(`Applied protein rebalancing for ${proteinDeficit.toFixed(1)}g deficit`);
-    }
-    if (Math.abs(carbsDeficit) > 1) {
-        rebalanceCarbs(allFoods, carbsDeficit);
-        console.log(`Applied carbs rebalancing for ${carbsDeficit.toFixed(1)}g deficit`);
-    }
-    if (Math.abs(fatDeficit) > 0.5) { // Be more sensitive to fat imbalances
-        rebalanceFat(allFoods, fatDeficit);
-        console.log(`Applied fat rebalancing for ${fatDeficit.toFixed(1)}g deficit`);
+    // Emergency meal rebalancing if meals are too uneven
+    if (finalMealBalance < 0.7) {
+        console.log(`🚨 EMERGENCY MEAL REBALANCING`);
+        emergencyMealRebalancing(allFoods, mealPlan.length, avgCaloriesPerMeal);
     }
     
-    // PHASE 3: Secondary optimization round if still not meeting targets
-    const secondTotals = calculateGlobalTotals(allFoods);
-    const secondProteinAcc = secondTotals.protein / targets.targetProtein;
-    const secondCarbsAcc = secondTotals.carbs / targets.targetCarbs;
-    const secondFatAcc = secondTotals.fat / targets.targetFat;
-    
-    console.log(`\n=== PHASE 3: VERIFICATION & SECONDARY OPTIMIZATION ===`);
-    console.log(`Second check: ${(secondProteinAcc * 100).toFixed(1)}% protein, ${(secondCarbsAcc * 100).toFixed(1)}% carbs, ${(secondFatAcc * 100).toFixed(1)}% fat`);
-    
-    // If still not meeting critical thresholds, do another round
-    const stillNeedsWork = secondProteinAcc < 0.95 || secondFatAcc > 1.10;
-    
-    if (stillNeedsWork) {
-        console.log(`Still needs optimization - running secondary adjustment round`);
-        for (let i = 0; i < 10; i++) {
-            const currentTotals = calculateGlobalTotals(allFoods);
-            applyGlobalAdjustments(allFoods, targets, currentTotals);
-            
-            const checkTotals = calculateGlobalTotals(allFoods);
-            const checkProteinAcc = checkTotals.protein / targets.targetProtein;
-            const checkFatAcc = checkTotals.fat / targets.targetFat;
-            
-            if (checkProteinAcc >= 0.95 && checkFatAcc <= 1.05) {
-                console.log(`Secondary optimization successful at iteration ${i + 1}`);
-                break;
-            }
-        }
+    // Emergency fat reduction if still over 110%
+    if (finalFatAcc > 1.10) {
+        console.log(`🚨 EMERGENCY FAT REDUCTION`);
+        emergencyFatReduction(allFoods, targets, finalTotals);
     }
     
-    // Use best solution if current isn't good enough
-    const currentScore = calculateGlobalScore(
-        finalTotals.protein / targets.targetProtein,
-        finalTotals.carbs / targets.targetCarbs,
-        finalTotals.fat / targets.targetFat
+    // Emergency protein boost if still under 95%
+    if (finalProteinAcc < 0.95) {
+        console.log(`🚨 EMERGENCY PROTEIN BOOST`);
+        emergencyProteinBoost(allFoods, targets, finalTotals);
+    }
+    
+    // Use best solution if current still isn't good enough
+    const emergencyTotals = calculateGlobalTotals(allFoods);
+    const emergencyMealBalance = calculateMealSizeBalance(allFoods, mealPlan.length, minMealCalories, maxMealCalories);
+    const emergencyScore = calculateGlobalScoreWithMealBalance(
+        emergencyTotals.protein / targets.targetProtein,
+        emergencyTotals.carbs / targets.targetCarbs,
+        emergencyTotals.fat / targets.targetFat,
+        emergencyMealBalance
     );
     
-    if (bestSolution && bestScore > currentScore) {
+    if (bestSolution && bestScore > emergencyScore) {
         console.log(`Using best global solution (score: ${bestScore.toFixed(0)})`);
         allFoods.splice(0, allFoods.length, ...bestSolution);
+    } else {
+        console.log(`Using current solution (score: ${emergencyScore.toFixed(0)})`);
     }
     
     // Update meal plan with optimized quantities
@@ -1130,6 +1094,100 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
     });
     
     return mealPlan;
+}
+
+// Shock therapy for when optimization gets stuck
+function applyShockTherapy(allFoods, targets, currentTotals) {
+    const proteinAcc = currentTotals.protein / targets.targetProtein;
+    const fatAcc = currentTotals.fat / targets.targetFat;
+    
+    console.log(`Applying shock therapy - current: ${(proteinAcc * 100).toFixed(1)}% protein, ${(fatAcc * 100).toFixed(1)}% fat`);
+    
+    allFoods.forEach(item => {
+        // SHOCK THERAPY: Much more extreme adjustments
+        if (item.priority === 'fat') {
+            // Fat sources: slash them hard if fat is over target
+            if (fatAcc > 1.15) {
+                item.quantity = Math.max(item.minQty, item.quantity * 0.4); // 60% reduction
+                console.log(`SHOCK: Slashed ${item.food.name} fat source by 60%`);
+            } else if (fatAcc > 1.05) {
+                item.quantity = Math.max(item.minQty, item.quantity * 0.7); // 30% reduction
+                console.log(`SHOCK: Reduced ${item.food.name} fat source by 30%`);
+            }
+        }
+        
+        if (item.priority === 'protein') {
+            // Protein sources: boost lean ones, reduce fatty ones
+            const proteinFatRatio = item.food.protein / Math.max(item.food.fat, 1);
+            
+            if (proteinAcc < 0.95 && proteinFatRatio > 5) {
+                // Lean protein: boost it significantly
+                item.quantity = Math.min(item.maxQty, item.quantity * 1.4); // 40% increase
+                console.log(`SHOCK: Boosted lean protein ${item.food.name} by 40%`);
+            } else if (fatAcc > 1.10 && item.food.fat > 8) {
+                // Fatty protein: reduce it when fat is over
+                item.quantity = Math.max(item.minQty, item.quantity * 0.8); // 20% reduction
+                console.log(`SHOCK: Reduced fatty protein ${item.food.name} by 20%`);
+            }
+        }
+    });
+}
+
+// Emergency fat reduction when normal optimization fails
+function emergencyFatReduction(allFoods, targets, currentTotals) {
+    const fatExcess = currentTotals.fat - targets.targetFat;
+    console.log(`Need to remove ${fatExcess.toFixed(1)}g fat urgently`);
+    
+    // Sort fat sources by fat content (highest first)
+    const fatSources = allFoods.filter(f => f.priority === 'fat' || f.food.fat > 8)
+                               .sort((a, b) => b.food.fat - a.food.fat);
+    
+    let removedFat = 0;
+    for (const fatFood of fatSources) {
+        if (removedFat >= fatExcess) break;
+        
+        const currentFatContrib = fatFood.food.fat * (fatFood.quantity / 100);
+        const targetReduction = Math.min(currentFatContrib * 0.5, fatExcess - removedFat);
+        const quantityReduction = (targetReduction / fatFood.food.fat) * 100;
+        
+        const newQuantity = Math.max(fatFood.minQty, fatFood.quantity - quantityReduction);
+        const actualReduction = (fatFood.quantity - newQuantity) * (fatFood.food.fat / 100);
+        
+        fatFood.quantity = newQuantity;
+        removedFat += actualReduction;
+        
+        console.log(`Emergency reduced ${fatFood.food.name} by ${quantityReduction.toFixed(1)}g (${actualReduction.toFixed(1)}g fat)`);
+    }
+}
+
+// Emergency protein boost when normal optimization fails
+function emergencyProteinBoost(allFoods, targets, currentTotals) {
+    const proteinDeficit = targets.targetProtein - currentTotals.protein;
+    console.log(`Need to add ${proteinDeficit.toFixed(1)}g protein urgently`);
+    
+    // Sort protein sources by protein:fat efficiency (lean proteins first)
+    const proteinSources = allFoods.filter(f => f.priority === 'protein')
+                                   .sort((a, b) => {
+                                       const aEff = a.food.protein / Math.max(a.food.fat, 1);
+                                       const bEff = b.food.protein / Math.max(b.food.fat, 1);
+                                       return bEff - aEff;
+                                   });
+    
+    let addedProtein = 0;
+    for (const proteinFood of proteinSources) {
+        if (addedProtein >= proteinDeficit) break;
+        
+        const targetIncrease = Math.min(proteinDeficit - addedProtein, proteinDeficit * 0.4);
+        const quantityIncrease = (targetIncrease / proteinFood.food.protein) * 100;
+        
+        const newQuantity = Math.min(proteinFood.maxQty, proteinFood.quantity + quantityIncrease);
+        const actualIncrease = (newQuantity - proteinFood.quantity) * (proteinFood.food.protein / 100);
+        
+        proteinFood.quantity = newQuantity;
+        addedProtein += actualIncrease;
+        
+        console.log(`Emergency boosted ${proteinFood.food.name} by ${quantityIncrease.toFixed(1)}g (${actualIncrease.toFixed(1)}g protein)`);
+    }
 }
 
 // Helper functions for global optimization with improved bounds
@@ -1159,7 +1217,47 @@ function calculateGlobalTotals(allFoods) {
     }, { protein: 0, carbs: 0, fat: 0 });
 }
 
+// Simplified global score function (for backwards compatibility)
 function calculateGlobalScore(proteinAcc, carbsAcc, fatAcc) {
+    // This assumes meal balance of 0.8 for basic scoring
+    return calculateGlobalScoreWithMealBalance(proteinAcc, carbsAcc, fatAcc, 0.8);
+}
+
+// Calculate meal size balance (1.0 = perfectly balanced, 0.0 = extremely unbalanced)
+function calculateMealSizeBalance(allFoods, mealCount, minMealCalories, maxMealCalories) {
+    const mealCalories = new Array(mealCount).fill(0);
+    
+    // Calculate calories per meal
+    allFoods.forEach(item => {
+        const calories = item.food.calories * (item.quantity / 100);
+        mealCalories[item.mealIndex] += calories;
+    });
+    
+    // Check how many meals are within the acceptable range
+    let mealsInRange = 0;
+    const avgCalories = mealCalories.reduce((sum, cal) => sum + cal, 0) / mealCount;
+    
+    mealCalories.forEach((calories, index) => {
+        if (calories >= minMealCalories && calories <= maxMealCalories) {
+            mealsInRange++;
+        } else {
+            const deviation = Math.abs(calories - avgCalories) / avgCalories;
+            if (deviation < 0.5) mealsInRange += 0.5; // Partial credit for being close
+        }
+    });
+    
+    const balanceScore = mealsInRange / mealCount;
+    
+    // Log meal sizes for debugging
+    if (Math.random() < 0.1) { // Occasional logging
+        console.log(`Meal calories: ${mealCalories.map(c => c.toFixed(0)).join(', ')} | Balance: ${balanceScore.toFixed(2)}`);
+    }
+    
+    return balanceScore;
+}
+
+// Enhanced scoring function that includes meal balance
+function calculateGlobalScoreWithMealBalance(proteinAcc, carbsAcc, fatAcc, mealBalance) {
     let score = 0;
     
     // Reward 99%+ accuracy heavily, but penalize being under more than being over for protein
@@ -1174,6 +1272,12 @@ function calculateGlobalScore(proteinAcc, carbsAcc, fatAcc) {
     else if (fatAcc >= 0.99) score += 800; 
     else score += fatAcc * 300;
     
+    // MEAL BALANCE SCORING - very important for user experience
+    if (mealBalance >= 0.9) score += 1000; // Bonus for well-balanced meals
+    else if (mealBalance >= 0.8) score += mealBalance * 800;
+    else if (mealBalance >= 0.6) score += mealBalance * 400;
+    else score += mealBalance * 200; // Penalty for unbalanced meals
+    
     // Bonus for being close to 100%
     score += Math.max(0, 400 - Math.abs(proteinAcc - 1) * 1000);
     score += Math.max(0, 300 - Math.abs(carbsAcc - 1) * 1000);
@@ -1187,15 +1291,156 @@ function calculateGlobalScore(proteinAcc, carbsAcc, fatAcc) {
     // Extra penalty for being under protein target
     if (proteinAcc < 0.95) score -= (0.95 - proteinAcc) * 2000;
     
+    // Penalty for severely unbalanced meals
+    if (mealBalance < 0.5) score -= (0.5 - mealBalance) * 1500;
+    
     return score;
 }
 
-function applyGlobalAdjustments(allFoods, targets, currentTotals) {
+// Enhanced global adjustments that consider meal balance
+function applyGlobalAdjustmentsWithMealBalance(allFoods, targets, currentTotals, mealCount, avgCaloriesPerMeal) {
     const proteinRatio = targets.targetProtein / currentTotals.protein;
     const carbsRatio = targets.targetCarbs / currentTotals.carbs;
     const fatRatio = targets.targetFat / currentTotals.fat;
     
+    // Calculate current meal sizes
+    const mealCalories = new Array(mealCount).fill(0);
+    allFoods.forEach(item => {
+        const calories = item.food.calories * (item.quantity / 100);
+        mealCalories[item.mealIndex] += calories;
+    });
+    
     console.log(`Global ratios: ${proteinRatio.toFixed(3)}x protein, ${carbsRatio.toFixed(3)}x carbs, ${fatRatio.toFixed(3)}x fat`);
+    
+    // CRITICAL: When fat is over target, be extremely aggressive
+    const fatIsSignificantlyOver = fatRatio < 0.85;
+    const proteinIsUnder = proteinRatio > 1.05;
+    
+    allFoods.forEach(item => {
+        let adjustmentFactor = 1;
+        const mealIndex = item.mealIndex;
+        const currentMealCalories = mealCalories[mealIndex];
+        
+        // Meal balance factor - reduce foods in oversized meals, boost in undersized meals
+        const mealSizeFactor = avgCaloriesPerMeal / Math.max(currentMealCalories, 100);
+        const mealBalanceAdjustment = Math.max(0.7, Math.min(1.3, mealSizeFactor));
+        
+        if (item.priority === 'protein') {
+            // Protein foods: prioritize protein targets
+            adjustmentFactor = proteinRatio * 0.8 + 0.2;
+            
+            // CRITICAL: If this protein has significant fat AND fat is over target, reduce it
+            if (item.food.fat > 8 && fatIsSignificantlyOver) {
+                adjustmentFactor = Math.min(adjustmentFactor, 0.85); // Reduce high-fat proteins
+                console.log(`Reducing high-fat protein ${item.food.name} due to fat excess`);
+            }
+            // If protein is under and this is lean protein, boost it more
+            else if (item.food.fat < 5 && proteinIsUnder) {
+                adjustmentFactor = Math.min(1.4, adjustmentFactor * 1.2); // Boost lean proteins
+                console.log(`Boosting lean protein ${item.food.name} for protein target`);
+            }
+            
+        } else if (item.priority === 'carbs') {
+            // Carbs: standard adjustment
+            adjustmentFactor = carbsRatio * 0.8 + 0.2;
+            
+        } else if (item.priority === 'fat') {
+            // CRITICAL: Fat sources get special handling
+            adjustmentFactor = fatRatio;
+            
+            if (fatIsSignificantlyOver) {
+                // Fat is way over - be very aggressive about reducing
+                if (item.food.fat > 90) {
+                    // Pure oils: slash them
+                    adjustmentFactor = Math.max(0.4, fatRatio * 0.6);
+                    console.log(`Slashing oil ${item.food.name} - fat severely over target`);
+                } else {
+                    // Other fat sources: reduce significantly  
+                    adjustmentFactor = Math.max(0.6, fatRatio * 0.8);
+                    console.log(`Reducing fat source ${item.food.name} - fat over target`);
+                }
+            }
+        } else if (item.priority === 'none') {
+            // Vegetables: minimal adjustment but consider meal balance
+            adjustmentFactor = 1.0;
+        }
+        
+        // Apply meal balance adjustment
+        adjustmentFactor *= mealBalanceAdjustment;
+        
+        // Apply stricter bounds based on current macro status
+        if (fatIsSignificantlyOver && item.food.fat > 5) {
+            // When fat is significantly over, limit any food with fat
+            adjustmentFactor = Math.max(0.5, Math.min(1.1, adjustmentFactor));
+        } else if (proteinIsUnder && item.food.protein > 20) {
+            // When protein is under, allow protein foods to increase more
+            adjustmentFactor = Math.max(0.8, Math.min(1.5, adjustmentFactor));
+        } else {
+            // Normal bounds
+            adjustmentFactor = Math.max(0.7, Math.min(1.3, adjustmentFactor));
+        }
+        
+        const oldQuantity = item.quantity;
+        const newQuantity = item.quantity * adjustmentFactor;
+        item.quantity = Math.max(item.minQty, Math.min(item.maxQty, newQuantity));
+        
+        if (Math.abs(item.quantity - oldQuantity) > 3) {
+            console.log(`${item.food.name} (${item.mealName}): ${oldQuantity.toFixed(1)}g → ${item.quantity.toFixed(1)}g (${adjustmentFactor.toFixed(3)}x)`);
+        }
+    });
+}
+
+// Emergency meal rebalancing when meals are severely uneven
+function emergencyMealRebalancing(allFoods, mealCount, avgCaloriesPerMeal) {
+    console.log(`Emergency meal rebalancing - target: ${avgCaloriesPerMeal.toFixed(0)} calories per meal`);
+    
+    // Calculate current meal sizes
+    const mealCalories = new Array(mealCount).fill(0);
+    const mealFoods = new Array(mealCount).fill(null).map(() => []);
+    
+    allFoods.forEach(item => {
+        const calories = item.food.calories * (item.quantity / 100);
+        mealCalories[item.mealIndex] += calories;
+        mealFoods[item.mealIndex].push(item);
+    });
+    
+    console.log(`Current meal sizes: ${mealCalories.map(c => c.toFixed(0)).join(', ')} calories`);
+    
+    // Find oversized and undersized meals
+    for (let mealIndex = 0; mealIndex < mealCount; mealIndex++) {
+        const currentCalories = mealCalories[mealIndex];
+        const targetCalories = avgCaloriesPerMeal;
+        const ratio = currentCalories / targetCalories;
+        
+        if (ratio > 1.4) {
+            // Meal is too big - reduce all foods proportionally
+            const reductionFactor = 1 / Math.min(1.3, ratio);
+            mealFoods[mealIndex].forEach(item => {
+                const newQuantity = item.quantity * reductionFactor;
+                item.quantity = Math.max(item.minQty, newQuantity);
+            });
+            console.log(`Reduced oversized meal ${mealIndex + 1} by ${((1 - reductionFactor) * 100).toFixed(0)}%`);
+            
+        } else if (ratio < 0.6) {
+            // Meal is too small - boost all foods proportionally
+            const boostFactor = Math.min(1.5, 1 / Math.max(0.8, ratio));
+            mealFoods[mealIndex].forEach(item => {
+                const newQuantity = item.quantity * boostFactor;
+                item.quantity = Math.min(item.maxQty, newQuantity);
+            });
+            console.log(`Boosted undersized meal ${mealIndex + 1} by ${((boostFactor - 1) * 100).toFixed(0)}%`);
+        }
+    }
+}
+
+function applyGlobalAdjustments(allFoods, targets, currentTotals) {
+    // This function is kept for backwards compatibility with shock therapy
+    // For normal optimization, use applyGlobalAdjustmentsWithMealBalance
+    const proteinRatio = targets.targetProtein / currentTotals.protein;
+    const carbsRatio = targets.targetCarbs / currentTotals.carbs;
+    const fatRatio = targets.targetFat / currentTotals.fat;
+    
+    console.log(`Basic ratios: ${proteinRatio.toFixed(3)}x protein, ${carbsRatio.toFixed(3)}x carbs, ${fatRatio.toFixed(3)}x fat`);
     
     // CRITICAL: When fat is over target, be extremely aggressive
     const fatIsSignificantlyOver = fatRatio < 0.85;
@@ -1787,21 +2032,7 @@ function calculateTotals(foodItems) {
 
 // Helper function to get weight explanation
 function getWeightExplanation(food, quantity, category) {
-    const weightMode = weightModes[category];
-    const grainType = detectFoodGrainType(food);
-    const isUsdaCooked = isUSDAFoodCooked(food);
-    
-    if (grainType && preparationFactors[grainType]) {
-        if (weightMode === 'raw' && isUsdaCooked) {
-            const dryWeight = quantity * preparationFactors[grainType].cookedToDry;
-            return `${Math.round(dryWeight)}g dry weight (≈${quantity}g cooked)`;
-        } else if (weightMode === 'cooked' && !isUsdaCooked) {
-            const cookedWeight = quantity * preparationFactors[grainType].dryToCooked;
-            return `${Math.round(cookedWeight)}g cooked weight (≈${quantity}g dry)`;
-        }
-    }
-    
-    return weightMode === 'cooked' ? 'as served' : 'raw weight';
+    return 'as listed in database';
 }
 
 // Display generated meal plan
@@ -1836,14 +2067,14 @@ function displayMealPlan(mealPlan) {
         
         return `
             <div class="meal-section">
-                <div class="meal-header">Meal ${index + 1}: ${meal.name}</div>
+                <div class="meal-header">Meal ${index + 1}: ${meal.name} (${meal.totals.calories.toFixed(0)} calories)</div>
                 ${foodsHTML}
                 <div class="meal-totals">
                     <strong>Meal Totals:</strong> 
                     P: ${meal.totals.protein.toFixed(1)}g | 
                     C: ${meal.totals.carbs.toFixed(1)}g | 
                     F: ${meal.totals.fat.toFixed(1)}g | 
-                    Cal: ${meal.totals.calories.toFixed(0)}
+                    <strong>Cal: ${meal.totals.calories.toFixed(0)}</strong>
                 </div>
             </div>
         `;
