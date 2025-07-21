@@ -141,16 +141,6 @@
         .fat-badge { background: #9b59b6; color: white; }
         .mixed-badge { background: #34495e; color: white; }
 
-        .meal-indicator {
-            background: #2c3e50;
-            color: white;
-            padding: 1px 4px;
-            border-radius: 2px;
-            font-size: 8px;
-            margin-left: 5px;
-            cursor: help;
-        }
-
         .selected-foods {
             margin-top: 15px;
             padding: 10px;
@@ -342,7 +332,7 @@
 <body>
 <div class="container">
     <h2 style="text-align: center; color: #4da6d9; margin-bottom: 10px;">BUILT Automated Meal Plan Generator</h2>
-    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Professional meal planning with 54 USDA-verified foods • <span style="color: #FFD700; font-weight: bold; text-shadow: 0 0 5px #FFD700;">SMART MEAL-SPECIFIC OPTIMIZATION - 99%+ Accuracy 🌐</span></p>
+    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Professional meal planning with 54 USDA-verified foods • <span style="color: #FFD700; font-weight: bold; text-shadow: 0 0 5px #FFD700;">SMART MEAL ASSIGNMENT - 99%+ Accuracy 🧠</span></p>
 
     <!-- Macro Targets -->
     <div class="section">
@@ -374,7 +364,7 @@
         <!-- Proteins -->
         <div class="food-category">
             <div class="category-title">🥩 Protein Sources</div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select from all 17 protein sources. Icons show meal appropriateness: 🌅breakfast 🌞lunch 🌙dinner 🍎snack 💪pre-workout ⚡post-workout</p>
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Select your preferred protein sources.</p>
             <div class="food-grid" id="proteinGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Proteins:</h4>
@@ -385,7 +375,7 @@
         <!-- Carbs -->
         <div class="food-category">
             <div class="category-title">🍚 Carbohydrate Sources</div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select carbs. Icons show meal timing: 🌅breakfast foods like oats, 🌞🌙lunch/dinner foods like rice</p>
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Select your preferred carbohydrate sources.</p>
             <div class="food-grid" id="carbGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Carbs:</h4>
@@ -396,7 +386,7 @@
         <!-- Fats -->
         <div class="food-category">
             <div class="category-title">🥑 Fat Sources</div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select fats. 🌅breakfast: nut butters, 🌞🌙lunch/dinner: cooking oils, 🍎snacks: nuts</p>
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Select your preferred fat sources.</p>
             <div class="food-grid" id="fatGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Fats:</h4>
@@ -407,7 +397,7 @@
         <!-- Fruits & Vegetables -->
         <div class="food-category">
             <div class="category-title">🥬 Fruits & Vegetables</div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Click to select produce. 🌅breakfast: berries & fruits, 🌞🌙meals: vegetables, 🍎anytime: portable options</p>
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Select your preferred source of fruits/veggies.</p>
             <div class="food-grid" id="veggieGrid"></div>
             <div class="selected-foods">
                 <h4>Selected Fruits & Vegetables:</h4>
@@ -426,8 +416,8 @@
         <div id="generatedMeals"></div>
         
         <div class="daily-summary">
-            <h3 style="color: #2ecc71; text-align: center; margin-bottom: 15px;">Daily Nutrition Summary - Smart Meal-Specific Optimization 🧠</h3>
-            <p style="text-align: center; color: #ccc; margin-bottom: 15px; font-size: 12px;">Meals are balanced to be within ±30% of average size • Foods chosen based on meal appropriateness</p>
+            <h3 style="color: #2ecc71; text-align: center; margin-bottom: 15px;">Daily Nutrition Summary - Smart Meal Assignment 🧠</h3>
+            <p style="text-align: center; color: #ccc; margin-bottom: 15px; font-size: 12px;">Meals balanced to ±30% average size • Foods intelligently assigned by meal type</p>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="summary-number" id="totalProtein">0</div>
@@ -587,7 +577,7 @@ function loadAllFoods() {
     });
 }
 
-// Display foods in grid with meal appropriateness indicators
+// Display foods in grid (clean interface, smart assignment behind the scenes)
 function displayFoods(category, foods) {
     const grid = document.getElementById(`${category}Grid`);
     
@@ -601,28 +591,13 @@ function displayFoods(category, foods) {
             displayName = displayName.substring(0, 30) + '...';
         }
         
-        // Create meal appropriateness indicators
-        const mealIcons = {
-            'breakfast': '🌅',
-            'lunch': '🌞', 
-            'dinner': '🌙',
-            'snack': '🍎',
-            'pre-workout': '💪',
-            'post-workout': '⚡'
-        };
-        
-        const mealIndicators = food.meals.map(meal => mealIcons[meal] || '🍽️').join('');
-        
         return `
             <div class="food-item ${isSelected ? 'selected' : ''}" onclick="toggleFood('${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
                 <div class="food-name">${displayName}</div>
                 <div class="food-macros ${isSelected ? 'selected' : ''}">
                     P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
                 </div>
-                <div class="food-badges">
-                    ${badge}
-                    <span class="meal-indicator" title="Appropriate for: ${food.meals.join(', ')}">${mealIndicators}</span>
-                </div>
+                <div class="food-badges">${badge}</div>
             </div>
         `;
     }).join('');
