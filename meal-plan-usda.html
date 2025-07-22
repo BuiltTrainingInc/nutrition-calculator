@@ -9,28 +9,31 @@
         .container {
             max-width: 1000px;
             margin: auto;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial Black', Arial, sans-serif;
             padding: 20px;
-            background-color: #1a1a1a;
-            color: #f5f5f5;
-            border-radius: 10px;
+            background-color: #1A1A1A;
+            color: #FFFFFF;
+            border-radius: 8px;
         }
 
         .section {
-            background: #2a2a2a;
-            padding: 20px;
-            border-radius: 8px;
+            background: #000000;
+            padding: 25px;
+            border-radius: 4px;
             margin-bottom: 20px;
-            border: 1px solid #444;
+            border: 1px solid #6B7280;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
         }
 
         .section-title {
-            color: #4da6d9;
-            font-weight: bold;
+            color: #FFFFFF;
+            font-weight: 900;
             margin-bottom: 15px;
             font-size: 18px;
-            border-bottom: 2px solid #4da6d9;
-            padding-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #DC2626;
+            padding-bottom: 8px;
         }
 
         .macro-inputs {
@@ -47,20 +50,30 @@
         .macro-input label {
             display: block;
             font-size: 14px;
-            color: #4da6d9;
+            color: #FFFFFF;
             margin-bottom: 5px;
-            font-weight: bold;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .macro-input input {
             width: 100%;
-            padding: 10px;
-            background: #1e1e1e;
-            color: white;
-            border: 1px solid #444;
+            padding: 12px;
+            background: #1A1A1A;
+            color: #FFFFFF;
+            border: 2px solid #6B7280;
             border-radius: 4px;
             text-align: center;
             font-size: 16px;
+            font-weight: bold;
+            transition: border-color 0.2s ease;
+        }
+
+        .macro-input input:focus {
+            outline: none;
+            border-color: #DC2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
         }
 
         .food-category {
@@ -68,10 +81,12 @@
         }
 
         .category-title {
-            color: #4da6d9;
-            font-weight: bold;
+            color: #FFFFFF;
+            font-weight: 900;
             margin-bottom: 10px;
             font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .food-grid {
@@ -80,140 +95,170 @@
             gap: 10px;
             max-height: 300px;
             overflow-y: auto;
-            border: 1px solid #333;
+            border: 2px solid #6B7280;
             border-radius: 4px;
-            padding: 10px;
-            background: #1a1a1a;
+            padding: 15px;
+            background: #1A1A1A;
         }
 
         .food-item {
-            background: #333;
-            padding: 8px;
+            background: #000000;
+            padding: 12px;
             border-radius: 4px;
             cursor: pointer;
-            border: 2px solid transparent;
+            border: 2px solid #6B7280;
             transition: all 0.2s ease;
             font-size: 12px;
+            font-weight: 600;
         }
 
         .food-item:hover {
-            background: #444;
-            border-color: #4da6d9;
+            background: #1A1A1A;
+            border-color: #FFFFFF;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
         }
 
         .food-item.selected {
-            background: #4da6d9;
-            color: white;
-            border-color: #4da6d9;
+            background: #DC2626;
+            color: #FFFFFF;
+            border-color: #DC2626;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
         }
 
         .food-item.not-appropriate {
-            opacity: 0.7;
-            border-left: 3px solid #f39c12;
+            opacity: 0.6;
+            border-left: 4px solid #6B7280;
         }
 
         .food-item.not-appropriate:hover {
             opacity: 1;
-            background: #5a3a00;
-            border-color: #f39c12;
+            background: #1A1A1A;
+            border-color: #6B7280;
         }
 
         .food-name {
-            font-weight: bold;
-            margin-bottom: 3px;
+            font-weight: 900;
+            margin-bottom: 5px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .food-macros {
             font-size: 10px;
-            color: #ccc;
+            color: #6B7280;
+            font-weight: 600;
         }
 
-        .selected.food-macros {
-            color: white;
+        .selected .food-macros {
+            color: #FFFFFF;
         }
 
         .food-badges {
             display: flex;
             gap: 5px;
-            margin-top: 3px;
+            margin-top: 6px;
         }
 
         .macro-badge {
-            padding: 1px 4px;
+            padding: 2px 6px;
             border-radius: 2px;
             font-size: 8px;
-            font-weight: bold;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .protein-badge { background: #e74c3c; color: white; }
-        .carb-badge { background: #f39c12; color: white; }
-        .fat-badge { background: #9b59b6; color: white; }
-        .mixed-badge { background: #34495e; color: white; }
+        .protein-badge { background: #DC2626; color: #FFFFFF; }
+        .carb-badge { background: #6B7280; color: #FFFFFF; }
+        .fat-badge { background: #000000; color: #FFFFFF; border: 1px solid #6B7280; }
+        .mixed-badge { background: #1A1A1A; color: #FFFFFF; border: 1px solid #6B7280; }
 
         .selected-foods {
             margin-top: 15px;
-            padding: 10px;
-            background: #1a1a1a;
+            padding: 15px;
+            background: #1A1A1A;
             border-radius: 4px;
-            border: 1px solid #333;
+            border: 2px solid #6B7280;
         }
 
         .selected-foods h4 {
-            color: #4da6d9;
+            color: #FFFFFF;
             margin: 0 0 10px 0;
             font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .selected-food-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 8px;
         }
 
         .selected-food-tag {
-            background: #4da6d9;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
+            background: #DC2626;
+            color: #FFFFFF;
+            padding: 6px 12px;
+            border-radius: 4px;
             font-size: 11px;
             cursor: pointer;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
         }
 
         .selected-food-tag:hover {
-            background: #e74c3c;
+            background: #000000;
+            border: 2px solid #DC2626;
+            transform: translateY(-1px);
         }
 
         .generate-btn {
             width: 100%;
-            padding: 15px;
+            padding: 20px;
             font-size: 18px;
-            background: linear-gradient(45deg, #4da6d9, #2ecc71);
-            color: white;
+            background: #DC2626;
+            color: #FFFFFF;
             border: none;
-            border-radius: 8px;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            margin: 20px 0;
-            transition: transform 0.2s ease;
+            font-weight: 900;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
         }
 
         .generate-btn:hover {
+            background: #FFFFFF;
+            color: #DC2626;
+            border: 2px solid #DC2626;
             transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
         }
 
         .generate-btn:disabled {
-            background: #666;
+            background: #6B7280;
+            color: #1A1A1A;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
+            border: none;
         }
 
         .meal-plan-output {
             display: none;
-            background: #0f3460;
-            padding: 20px;
-            border-radius: 8px;
-            border: 2px solid #4da6d9;
-            margin-top: 20px;
+            background: #000000;
+            padding: 25px;
+            border-radius: 4px;
+            border: 2px solid #DC2626;
+            margin-top: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
         }
 
         .meal-plan-output.active {
@@ -221,27 +266,31 @@
         }
 
         .meal-section {
-            background: #1a4a6b;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+            background: #1A1A1A;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 2px solid #6B7280;
         }
 
         .meal-header {
-            color: #4da6d9;
-            font-weight: bold;
+            color: #FFFFFF;
+            font-weight: 900;
             font-size: 16px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #4da6d9;
-            padding-bottom: 5px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #DC2626;
+            padding-bottom: 8px;
         }
 
         .meal-food {
-            background: #2a4a6b;
-            padding: 10px;
+            background: #000000;
+            padding: 15px;
             border-radius: 4px;
-            margin-bottom: 8px;
-            border-left: 3px solid #4da6d9;
+            margin-bottom: 10px;
+            border-left: 4px solid #DC2626;
+            border: 1px solid #6B7280;
         }
 
         .food-details {
@@ -255,64 +304,73 @@
         }
 
         .food-quantity {
-            font-weight: bold;
-            color: #2ecc71;
+            font-weight: 900;
+            color: #DC2626;
+            font-size: 16px;
         }
 
         .food-nutrition {
             font-size: 12px;
-            color: #ccc;
-            margin-top: 3px;
+            color: #6B7280;
+            margin-top: 4px;
+            font-weight: 600;
         }
 
         .meal-totals {
-            background: #0a2240;
-            padding: 10px;
+            background: #1A1A1A;
+            padding: 15px;
             border-radius: 4px;
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 13px;
-            border: 1px solid #4da6d9;
+            border: 2px solid #DC2626;
+            font-weight: 700;
+            color: #FFFFFF;
         }
 
         .daily-summary {
-            background: #0a2240;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border: 2px solid #2ecc71;
+            background: #1A1A1A;
+            padding: 25px;
+            border-radius: 4px;
+            margin-top: 25px;
+            border: 2px solid #6B7280;
         }
 
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            gap: 20px;
             text-align: center;
         }
 
         .summary-item {
-            background: #1a4a6b;
-            padding: 15px;
-            border-radius: 6px;
+            background: #000000;
+            padding: 20px;
+            border-radius: 4px;
+            border: 2px solid #6B7280;
         }
 
         .summary-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2ecc71;
+            font-size: 28px;
+            font-weight: 900;
+            color: #FFFFFF;
         }
 
         .summary-label {
             font-size: 12px;
-            color: #ccc;
-            margin-top: 5px;
+            color: #6B7280;
+            margin-top: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .progress-bar {
-            background: #333;
+            background: #1A1A1A;
             height: 8px;
             border-radius: 4px;
-            margin-top: 8px;
+            margin-top: 10px;
             overflow: hidden;
+            border: 1px solid #6B7280;
         }
 
         .progress-fill {
@@ -321,49 +379,72 @@
             transition: width 0.3s ease;
         }
 
-        .protein-fill { background: #e74c3c; }
-        .carbs-fill { background: #f39c12; }
-        .fat-fill { background: #9b59b6; }
-        .calories-fill { background: #2ecc71; }
+        .protein-fill { background: #DC2626; }
+        .carbs-fill { background: #6B7280; }
+        .fat-fill { background: #FFFFFF; }
+        .calories-fill { background: #6B7280; }
 
         .download-btn {
-            background: #2ecc71;
-            color: white;
+            background: #DC2626;
+            color: #FFFFFF;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 15px 30px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            margin-top: 15px;
+            margin-top: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+
+        .download-btn:hover {
+            background: #FFFFFF;
+            color: #DC2626;
+            border: 2px solid #DC2626;
+            transform: translateY(-2px);
         }
 
         /* Mode Toggle Styles */
         .mode-toggle {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 15px;
             margin-bottom: 25px;
         }
 
         .mode-btn {
-            background: #333;
-            color: #ccc;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            background: #1A1A1A;
+            color: #6B7280;
+            border: 2px solid #6B7280;
+            padding: 15px 30px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 900;
             transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .mode-btn.active {
-            background: #4da6d9;
-            color: white;
+            background: #DC2626;
+            color: #FFFFFF;
+            border-color: #DC2626;
         }
 
         .mode-btn:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            background: #FFFFFF;
+            color: #1A1A1A;
+            border-color: #FFFFFF;
+        }
+
+        .mode-btn.active:hover {
+            background: #FFFFFF;
+            color: #DC2626;
+            border-color: #DC2626;
         }
 
         /* Meal Tabs Styles */
@@ -374,37 +455,42 @@
         .tab-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #444;
+            border-bottom: 2px solid #6B7280;
             padding-bottom: 15px;
         }
 
         .tab-btn {
-            background: #1a1a1a;
-            color: #ccc;
-            border: 1px solid #444;
-            padding: 10px 20px;
-            border-radius: 6px;
+            background: #1A1A1A;
+            color: #6B7280;
+            border: 2px solid #6B7280;
+            padding: 12px 24px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 900;
             transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .tab-btn.active {
-            background: #4da6d9;
-            color: white;
-            border-color: #4da6d9;
+            background: #DC2626;
+            color: #FFFFFF;
+            border-color: #DC2626;
         }
 
         .tab-btn:hover {
-            background: #333;
-            border-color: #4da6d9;
+            background: #FFFFFF;
+            color: #1A1A1A;
+            border-color: #FFFFFF;
         }
 
         .tab-btn.active:hover {
-            background: #3a96c9;
+            background: #FFFFFF;
+            color: #DC2626;
+            border-color: #DC2626;
         }
 
         .meal-tab-content {
@@ -416,15 +502,17 @@
         }
 
         .meal-title {
-            color: #4da6d9;
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 15px;
+            color: #FFFFFF;
+            font-weight: 900;
+            font-size: 20px;
+            margin-bottom: 20px;
             text-align: center;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 8px;
-            border-left: 4px solid #4da6d9;
+            padding: 20px;
+            background: #1A1A1A;
+            border-radius: 4px;
+            border: 2px solid #DC2626;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .meal-food-categories {
@@ -434,70 +522,74 @@
         }
 
         .compact-food-category {
-            background: #1a1a1a;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #444;
+            background: #1A1A1A;
+            padding: 20px;
+            border-radius: 4px;
+            border: 2px solid #6B7280;
         }
 
         .compact-category-title {
-            color: #4da6d9;
-            font-weight: bold;
-            margin-bottom: 10px;
+            color: #FFFFFF;
+            font-weight: 900;
+            margin-bottom: 15px;
             font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .compact-food-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 8px;
+            gap: 10px;
             max-height: 200px;
             overflow-y: auto;
-            padding: 10px;
-            background: #2a2a2a;
-            border-radius: 6px;
-            border: 1px solid #444;
+            padding: 15px;
+            background: #000000;
+            border-radius: 4px;
+            border: 2px solid #6B7280;
         }
 
         .compact-selected-foods {
-            margin-top: 10px;
-            padding: 8px;
-            background: #2a2a2a;
-            border-radius: 6px;
-            border: 1px solid #444;
+            margin-top: 15px;
+            padding: 12px;
+            background: #000000;
+            border-radius: 4px;
+            border: 2px solid #6B7280;
         }
 
         .compact-selected-foods h5 {
-            color: #4da6d9;
-            margin: 0 0 6px 0;
+            color: #FFFFFF;
+            margin: 0 0 8px 0;
             font-size: 11px;
-            font-weight: bold;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2 style="text-align: center; color: #4da6d9; margin-bottom: 10px;">BUILT Automated Meal Plan Generator</h2>
-    <p style="text-align: center; margin-bottom: 30px; color: #ccc;">Professional meal planning with 54 USDA-verified foods • <span style="color: #FFD700; font-weight: bold; text-shadow: 0 0 5px #FFD700;">SMART MEAL ASSIGNMENT - 99%+ Accuracy 🧠</span></p>
+    <h2 style="text-align: center; color: #FFFFFF; margin-bottom: 10px; font-weight: 900; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">BUILT AUTOMATED MEAL PLAN GENERATOR</h2>
+    <p style="text-align: center; margin-bottom: 30px; color: #6B7280; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Professional meal planning with 54 USDA-verified foods • <span style="color: #DC2626; font-weight: 900; text-shadow: 0 0 5px #DC2626;">SMART MEAL ASSIGNMENT - 99%+ ACCURACY 🧠</span></p>
 
     <!-- Macro Targets -->
     <div class="section">
-        <div class="section-title">📊 Daily Macro Targets</div>
+        <div class="section-title">📊 DAILY MACRO TARGETS</div>
         <div class="macro-inputs">
             <div class="macro-input">
-                <label>Protein (g)</label>
+                <label>PROTEIN (G)</label>
                 <input type="number" id="targetProtein" value="150" min="50" max="400">
             </div>
             <div class="macro-input">
-                <label>Carbs (g)</label>
+                <label>CARBS (G)</label>
                 <input type="number" id="targetCarbs" value="200" min="50" max="600">
             </div>
             <div class="macro-input">
-                <label>Fat (g)</label>
+                <label>FATS (G)</label>
                 <input type="number" id="targetFat" value="60" min="20" max="200">
             </div>
             <div class="macro-input">
-                <label>Meals</label>
+                <label>MEALS</label>
                 <input type="number" id="mealsCount" value="4" min="3" max="6" onchange="updateMealTabs()">
             </div>
         </div>
@@ -505,8 +597,8 @@
 
     <!-- Food Preferences -->
     <div class="section">
-        <div class="section-title">🍽️ Food Preferences</div>
-        <p style="color: #888; font-size: 12px; margin-bottom: 20px;">Choose how you want to select foods for your meals.</p>
+        <div class="section-title">🍽️ NUTRITION SOURCES</div>
+        <p style="color: #6B7280; font-size: 12px; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">CHOOSE YOUR FOOD SELECTION METHOD.</p>
         
         <!-- Mode Toggle -->
         <div class="mode-toggle">
@@ -520,44 +612,44 @@
 
         <!-- Quick Setup Mode (Original) -->
         <div id="quickSetupMode">
-            <p style="color: #888; font-size: 12px; margin-bottom: 20px;">Select your preferred foods and we'll automatically assign them to appropriate meals based on nutritional timing.</p>
+            <p style="color: #6B7280; font-size: 12px; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SELECT YOUR PREFERRED FOODS. SYSTEM WILL AUTOMATICALLY ASSIGN TO OPTIMAL MEALS.</p>
             
             <!-- Proteins -->
             <div class="food-category">
-                <div class="category-title">🥩 Protein Sources</div>
+                <div class="category-title">🥩 PROTEIN SOURCES</div>
                 <div class="food-grid" id="proteinGrid"></div>
                 <div class="selected-foods">
-                    <h4>Selected Proteins:</h4>
+                    <h4>SELECTED PROTEINS:</h4>
                     <div class="selected-food-tags" id="selectedProteins"></div>
                 </div>
             </div>
 
             <!-- Carbs -->
             <div class="food-category">
-                <div class="category-title">🍚 Carbohydrate Sources</div>
+                <div class="category-title">🍚 CARBOHYDRATE SOURCES</div>
                 <div class="food-grid" id="carbGrid"></div>
                 <div class="selected-foods">
-                    <h4>Selected Carbs:</h4>
+                    <h4>SELECTED CARBS:</h4>
                     <div class="selected-food-tags" id="selectedCarbs"></div>
                 </div>
             </div>
 
             <!-- Fats -->
             <div class="food-category">
-                <div class="category-title">🥑 Fat Sources</div>
+                <div class="category-title">🥑 FAT SOURCES</div>
                 <div class="food-grid" id="fatGrid"></div>
                 <div class="selected-foods">
-                    <h4>Selected Fats:</h4>
+                    <h4>SELECTED FATS:</h4>
                     <div class="selected-food-tags" id="selectedFats"></div>
                 </div>
             </div>
 
             <!-- Fruits & Vegetables -->
             <div class="food-category">
-                <div class="category-title">🥬 Fruits & Vegetables</div>
+                <div class="category-title">🥬 FRUITS & VEGETABLES</div>
                 <div class="food-grid" id="veggieGrid"></div>
                 <div class="selected-foods">
-                    <h4>Selected Fruits & Vegetables:</h4>
+                    <h4>SELECTED FRUITS & VEGETABLES:</h4>
                     <div class="selected-food-tags" id="selectedVeggies"></div>
                 </div>
             </div>
@@ -565,7 +657,7 @@
 
         <!-- Custom Per Meal Mode -->
         <div id="customMealsMode" style="display: none;">
-            <p style="color: #888; font-size: 12px; margin-bottom: 20px;">Select specific foods for each meal based on your palate preferences. Foods marked with ⚠️ are not typically used for that meal but can still be selected.</p>
+            <p style="color: #6B7280; font-size: 12px; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SELECT SPECIFIC FOODS FOR EACH MEAL. FOODS MARKED WITH ⚠️ ARE ATYPICAL BUT SELECTABLE.</p>
             
             <div class="meal-tabs">
                 <div class="tab-buttons" id="mealTabButtons"></div>
@@ -580,37 +672,37 @@
 
     <!-- Meal Plan Output -->
     <div class="meal-plan-output" id="mealPlanOutput">
-        <h3 style="color: #4da6d9; text-align: center; margin-bottom: 20px;">Your Personalized Meal Plan</h3>
+        <h3 style="color: #FFFFFF; text-align: center; margin-bottom: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">YOUR PERSONALIZED MEAL PLAN</h3>
         <div id="generatedMeals"></div>
         
         <div class="daily-summary">
-            <h3 style="color: #2ecc71; text-align: center; margin-bottom: 15px;">Daily Nutrition Summary - Smart Meal Assignment 🧠</h3>
-            <p style="text-align: center; color: #ccc; margin-bottom: 15px; font-size: 12px;">Meals balanced to ±30% average size • Foods intelligently assigned by meal type</p>
+            <h3 style="color: #DC2626; text-align: center; margin-bottom: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">DAILY NUTRITION SUMMARY - SMART MEAL ASSIGNMENT 🧠</h3>
+            <p style="text-align: center; color: #6B7280; margin-bottom: 15px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">MEALS BALANCED TO ±30% AVERAGE SIZE • FOODS INTELLIGENTLY ASSIGNED BY MEAL TYPE</p>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="summary-number" id="totalProtein">0</div>
-                    <div class="summary-label">Protein (g)<br><small style="color: #FFD700;">👑 = 99%+ | ✓ = 95%+</small></div>
+                    <div class="summary-label">PROTEIN (G)<br><small style="color: #DC2626; font-weight: 900;">👑 = 99%+ | ✓ = 95%+</small></div>
                     <div class="progress-bar">
                         <div class="progress-fill protein-fill" id="proteinProgress"></div>
                     </div>
                 </div>
                 <div class="summary-item">
                     <div class="summary-number" id="totalCarbs">0</div>
-                    <div class="summary-label">Carbs (g)<br><small style="color: #FFD700;">👑 = 99%+ | ✓ = 95%+</small></div>
+                    <div class="summary-label">CARBS (G)<br><small style="color: #DC2626; font-weight: 900;">👑 = 99%+ | ✓ = 95%+</small></div>
                     <div class="progress-bar">
                         <div class="progress-fill carbs-fill" id="carbsProgress"></div>
                     </div>
                 </div>
                 <div class="summary-item">
                     <div class="summary-number" id="totalFat">0</div>
-                    <div class="summary-label">Fat (g)<br><small style="color: #FFD700;">👑 = 99%+ | ✓ = 95%+</small></div>
+                    <div class="summary-label">FAT (G)<br><small style="color: #DC2626; font-weight: 900;">👑 = 99%+ | ✓ = 95%+</small></div>
                     <div class="progress-bar">
                         <div class="progress-fill fat-fill" id="fatProgress"></div>
                     </div>
                 </div>
                 <div class="summary-item">
                     <div class="summary-number" id="totalCalories">0</div>
-                    <div class="summary-label">Calories</div>
+                    <div class="summary-label">CALORIES</div>
                     <div class="progress-bar">
                         <div class="progress-fill calories-fill" id="caloriesProgress"></div>
                     </div>
@@ -619,7 +711,7 @@
         </div>
 
         <div style="text-align: center; margin-top: 20px;">
-            <button class="download-btn" onclick="downloadMealPlan()">📥 Download Meal Plan</button>
+            <button class="download-btn" onclick="downloadMealPlan()">📥 DOWNLOAD MEAL PLAN</button>
         </div>
     </div>
 </div>
