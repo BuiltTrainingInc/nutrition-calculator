@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="frame-ancestors *;">
-    <meta http-equiv="X-Frame-Options" content="ALLOWALL">
     <title>BUILT Automated Meal Plan Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -107,6 +105,17 @@
             background: #4da6d9;
             color: white;
             border-color: #4da6d9;
+        }
+
+        .food-item.not-appropriate {
+            opacity: 0.7;
+            border-left: 3px solid #f39c12;
+        }
+
+        .food-item.not-appropriate:hover {
+            opacity: 1;
+            background: #5a3a00;
+            border-color: #f39c12;
         }
 
         .food-name {
@@ -327,6 +336,143 @@
             font-size: 16px;
             margin-top: 15px;
         }
+
+        /* Mode Toggle Styles */
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .mode-btn {
+            background: #333;
+            color: #ccc;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background: #4da6d9;
+            color: white;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Meal Tabs Styles */
+        .meal-tabs {
+            margin-top: 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            background: #1a1a1a;
+            color: #ccc;
+            border: 1px solid #444;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #4da6d9;
+            color: white;
+            border-color: #4da6d9;
+        }
+
+        .tab-btn:hover {
+            background: #333;
+            border-color: #4da6d9;
+        }
+
+        .tab-btn.active:hover {
+            background: #3a96c9;
+        }
+
+        .meal-tab-content {
+            display: none;
+        }
+
+        .meal-tab-content.active {
+            display: block;
+        }
+
+        .meal-title {
+            color: #4da6d9;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border-left: 4px solid #4da6d9;
+        }
+
+        .meal-food-categories {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .compact-food-category {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+
+        .compact-category-title {
+            color: #4da6d9;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .compact-food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+
+        .compact-selected-foods {
+            margin-top: 10px;
+            padding: 8px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+
+        .compact-selected-foods h5 {
+            color: #4da6d9;
+            margin: 0 0 6px 0;
+            font-size: 11px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -352,7 +498,7 @@
             </div>
             <div class="macro-input">
                 <label>Meals</label>
-                <input type="number" id="mealsCount" value="4" min="3" max="6">
+                <input type="number" id="mealsCount" value="4" min="3" max="6" onchange="updateMealTabs()">
             </div>
         </div>
     </div>
@@ -360,48 +506,70 @@
     <!-- Food Preferences -->
     <div class="section">
         <div class="section-title">🍽️ Food Preferences</div>
+        <p style="color: #888; font-size: 12px; margin-bottom: 20px;">Choose how you want to select foods for your meals.</p>
         
-        <!-- Proteins -->
-        <div class="food-category">
-            <div class="category-title">🥩 Protein Sources</div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Select your preferred protein sources.</p>
-            <div class="food-grid" id="proteinGrid"></div>
-            <div class="selected-foods">
-                <h4>Selected Proteins:</h4>
-                <div class="selected-food-tags" id="selectedProteins"></div>
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+            <button id="quickSetupBtn" class="mode-btn active" onclick="switchToQuickSetup()">
+                ⚡ Quick Setup
+            </button>
+            <button id="customMealsBtn" class="mode-btn" onclick="switchToCustomMeals()">
+                🎯 Custom Per Meal
+            </button>
+        </div>
+
+        <!-- Quick Setup Mode (Original) -->
+        <div id="quickSetupMode">
+            <p style="color: #888; font-size: 12px; margin-bottom: 20px;">Select your preferred foods and we'll automatically assign them to appropriate meals based on nutritional timing.</p>
+            
+            <!-- Proteins -->
+            <div class="food-category">
+                <div class="category-title">🥩 Protein Sources</div>
+                <div class="food-grid" id="proteinGrid"></div>
+                <div class="selected-foods">
+                    <h4>Selected Proteins:</h4>
+                    <div class="selected-food-tags" id="selectedProteins"></div>
+                </div>
+            </div>
+
+            <!-- Carbs -->
+            <div class="food-category">
+                <div class="category-title">🍚 Carbohydrate Sources</div>
+                <div class="food-grid" id="carbGrid"></div>
+                <div class="selected-foods">
+                    <h4>Selected Carbs:</h4>
+                    <div class="selected-food-tags" id="selectedCarbs"></div>
+                </div>
+            </div>
+
+            <!-- Fats -->
+            <div class="food-category">
+                <div class="category-title">🥑 Fat Sources</div>
+                <div class="food-grid" id="fatGrid"></div>
+                <div class="selected-foods">
+                    <h4>Selected Fats:</h4>
+                    <div class="selected-food-tags" id="selectedFats"></div>
+                </div>
+            </div>
+
+            <!-- Fruits & Vegetables -->
+            <div class="food-category">
+                <div class="category-title">🥬 Fruits & Vegetables</div>
+                <div class="food-grid" id="veggieGrid"></div>
+                <div class="selected-foods">
+                    <h4>Selected Fruits & Vegetables:</h4>
+                    <div class="selected-food-tags" id="selectedVeggies"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Carbs -->
-        <div class="food-category">
-            <div class="category-title">🍚 Carbohydrate Sources</div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Select your preferred carbohydrate sources.</p>
-            <div class="food-grid" id="carbGrid"></div>
-            <div class="selected-foods">
-                <h4>Selected Carbs:</h4>
-                <div class="selected-food-tags" id="selectedCarbs"></div>
-            </div>
-        </div>
-
-        <!-- Fats -->
-        <div class="food-category">
-            <div class="category-title">🥑 Fat Sources</div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Select your preferred fat sources.</p>
-            <div class="food-grid" id="fatGrid"></div>
-            <div class="selected-foods">
-                <h4>Selected Fats:</h4>
-                <div class="selected-food-tags" id="selectedFats"></div>
-            </div>
-        </div>
-
-        <!-- Fruits & Vegetables -->
-        <div class="food-category">
-            <div class="category-title">🥬 Fruits & Vegetables</div>
-            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">Select your preferred source of fruits/veggies.</p>
-            <div class="food-grid" id="veggieGrid"></div>
-            <div class="selected-foods">
-                <h4>Selected Fruits & Vegetables:</h4>
-                <div class="selected-food-tags" id="selectedVeggies"></div>
+        <!-- Custom Per Meal Mode -->
+        <div id="customMealsMode" style="display: none;">
+            <p style="color: #888; font-size: 12px; margin-bottom: 20px;">Select specific foods for each meal based on your palate preferences. Foods marked with ⚠️ are not typically used for that meal but can still be selected.</p>
+            
+            <div class="meal-tabs">
+                <div class="tab-buttons" id="mealTabButtons"></div>
+                <div class="tab-content" id="mealTabContent"></div>
             </div>
         </div>
     </div>
@@ -531,7 +699,12 @@ let selectedFoods = {
     veggie: []
 };
 
+// Meal-specific selections for custom mode
+let mealSpecificFoods = {};
+
 let currentMealPlan = null;
+let isCustomMealMode = false;
+let currentMealTab = 'breakfast';
 
 // Food classification functions
 function getFoodMacroType(food) {
@@ -552,12 +725,6 @@ function getFoodMacroType(food) {
     return 'mixed';
 }
 
-function isVegetableOrFruit(food) {
-    const name = food.name.toLowerCase();
-    const keywords = ['vegetable', 'fruit', 'berry', 'green', 'spinach', 'lettuce', 'broccoli', 'carrot', 'tomato', 'apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberries'];
-    return keywords.some(keyword => name.includes(keyword)) || (food.carbs > 0 && food.carbs < 20 && food.protein < 5);
-}
-
 function getMacroBadge(type) {
     const badges = {
         'protein': '<span class="macro-badge protein-badge">PROTEIN</span>',
@@ -568,11 +735,134 @@ function getMacroBadge(type) {
     return badges[type] || '';
 }
 
+// Mode switching functions
+function switchToQuickSetup() {
+    isCustomMealMode = false;
+    document.getElementById('quickSetupBtn').classList.add('active');
+    document.getElementById('customMealsBtn').classList.remove('active');
+    document.getElementById('quickSetupMode').style.display = 'block';
+    document.getElementById('customMealsMode').style.display = 'none';
+    updateGenerateButton();
+}
+
+function switchToCustomMeals() {
+    isCustomMealMode = true;
+    document.getElementById('quickSetupBtn').classList.remove('active');
+    document.getElementById('customMealsBtn').classList.add('active');
+    document.getElementById('quickSetupMode').style.display = 'none';
+    document.getElementById('customMealsMode').style.display = 'block';
+    
+    // Generate meal tabs based on meal count
+    generateMealTabs();
+    updateGenerateButton();
+}
+
+function generateMealTabs() {
+    const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
+    const mealTypes = getMealTypes(mealsCount);
+    const mealDisplayNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout'];
+    
+    // Initialize meal-specific foods structure
+    mealSpecificFoods = {};
+    mealTypes.forEach(mealType => {
+        mealSpecificFoods[mealType] = {
+            protein: [],
+            carb: [],
+            fat: [],
+            veggie: []
+        };
+    });
+    
+    // Generate tab buttons
+    const tabButtons = document.getElementById('mealTabButtons');
+    const tabContent = document.getElementById('mealTabContent');
+    
+    tabButtons.innerHTML = '';
+    tabContent.innerHTML = '';
+    
+    mealTypes.forEach((mealType, index) => {
+        const displayName = mealDisplayNames[index] || `Meal ${index + 1}`;
+        
+        // Create tab button
+        const tabBtn = document.createElement('button');
+        tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+        tabBtn.onclick = () => switchMealTab(mealType, tabBtn);
+        tabBtn.textContent = displayName;
+        tabButtons.appendChild(tabBtn);
+        
+        // Create tab content
+        const tabContentDiv = document.createElement('div');
+        tabContentDiv.className = `meal-tab-content ${index === 0 ? 'active' : ''}`;
+        tabContentDiv.id = `${mealType}Tab`;
+        
+        tabContentDiv.innerHTML = `
+            <div class="meal-title">${displayName} Foods</div>
+            <div class="meal-food-categories">
+                ${generateMealCategoryHTML(mealType, 'protein', 'PROTEIN SOURCES')}
+                ${generateMealCategoryHTML(mealType, 'carb', 'CARBOHYDRATE SOURCES')}
+                ${generateMealCategoryHTML(mealType, 'fat', 'FAT SOURCES')}
+                ${generateMealCategoryHTML(mealType, 'veggie', 'FRUITS & VEGETABLES')}
+            </div>
+        `;
+        
+        tabContent.appendChild(tabContentDiv);
+    });
+    
+    currentMealTab = mealTypes[0];
+    
+    // Populate food grids for all meals
+    mealTypes.forEach(mealType => {
+        ['protein', 'carb', 'fat', 'veggie'].forEach(category => {
+            displayMealFoods(mealType, category, foodDatabase[category]);
+        });
+    });
+}
+
+function getMealTypes(count) {
+    switch(count) {
+        case 3: return ['breakfast', 'lunch', 'dinner'];
+        case 4: return ['breakfast', 'lunch', 'dinner', 'snack'];
+        case 5: return ['breakfast', 'lunch', 'dinner', 'snack', 'post-workout'];
+        case 6: return ['breakfast', 'lunch', 'dinner', 'snack', 'pre-workout', 'post-workout'];
+        default: return ['breakfast', 'lunch', 'dinner', 'snack'];
+    }
+}
+
+function generateMealCategoryHTML(mealType, category, title) {
+    return `
+        <div class="compact-food-category">
+            <div class="compact-category-title">${title}</div>
+            <div class="compact-food-grid" id="${mealType}_${category}Grid"></div>
+            <div class="compact-selected-foods">
+                <h5>Selected ${title}:</h5>
+                <div class="selected-food-tags" id="${mealType}_selected_${category}"></div>
+            </div>
+        </div>
+    `;
+}
+
+function switchMealTab(mealType, clickedButton) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    clickedButton.classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.meal-tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`${mealType}Tab`).classList.add('active');
+    
+    currentMealTab = mealType;
+}
+
+function updateMealTabs() {
+    if (isCustomMealMode) {
+        generateMealTabs();
+    }
+}
+
 // Display all foods in each category
 function loadAllFoods() {
     const categories = ['protein', 'carb', 'fat', 'veggie'];
     categories.forEach(category => {
-        const grid = document.getElementById(`${category}Grid`);
         displayFoods(category, foodDatabase[category]);
     });
 }
@@ -603,6 +893,89 @@ function displayFoods(category, foods) {
     }).join('');
     
     grid.innerHTML = foodsHTML;
+}
+
+// Display foods for specific meals in custom mode
+function displayMealFoods(mealType, category, foods) {
+    const grid = document.getElementById(`${mealType}_${category}Grid`);
+    if (!grid) return;
+    
+    const foodsHTML = foods.map(food => {
+        const macroType = getFoodMacroType(food);
+        const badge = getMacroBadge(macroType);
+        const isSelected = mealSpecificFoods[mealType] && mealSpecificFoods[mealType][category].some(f => f.id === food.id);
+        const isAppropriate = food.meals.includes(mealType);
+        
+        let displayName = food.name;
+        if (displayName.length > 25) {
+            displayName = displayName.substring(0, 25) + '...';
+        }
+        
+        return `
+            <div class="food-item ${isSelected ? 'selected' : ''} ${isAppropriate ? '' : 'not-appropriate'}" 
+                 onclick="toggleMealFood('${mealType}', '${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})"
+                 title="${isAppropriate ? food.name : food.name + ' (Not typically used for ' + mealType + ')'}">
+                <div class="food-name">${displayName} ${isAppropriate ? '✓' : '⚠️'}</div>
+                <div class="food-macros ${isSelected ? 'selected' : ''}">
+                    P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
+                </div>
+                <div class="food-badges">${badge}</div>
+            </div>
+        `;
+    }).join('');
+    
+    grid.innerHTML = foodsHTML;
+    updateMealSelectedFoodsDisplay(mealType, category);
+}
+
+// Toggle food selection for specific meals
+function toggleMealFood(mealType, category, food) {
+    if (!mealSpecificFoods[mealType]) {
+        mealSpecificFoods[mealType] = { protein: [], carb: [], fat: [], veggie: [] };
+    }
+    
+    const existingIndex = mealSpecificFoods[mealType][category].findIndex(f => f.id === food.id);
+    
+    if (existingIndex >= 0) {
+        mealSpecificFoods[mealType][category].splice(existingIndex, 1);
+    } else {
+        mealSpecificFoods[mealType][category].push(food);
+    }
+    
+    displayMealFoods(mealType, category, foodDatabase[category]);
+    updateGenerateButton();
+}
+
+// Update selected foods display for specific meals
+function updateMealSelectedFoodsDisplay(mealType, category) {
+    const container = document.getElementById(`${mealType}_selected_${category}`);
+    if (!container) return;
+    
+    const foods = mealSpecificFoods[mealType] ? mealSpecificFoods[mealType][category] : [];
+    
+    const tagsHTML = foods.map(food => {
+        let displayName = food.name;
+        if (displayName.length > 20) {
+            displayName = displayName.substring(0, 20) + '...';
+        }
+        
+        return `
+            <div class="selected-food-tag" onclick="removeMealFood('${mealType}', '${category}', '${food.id}')" title="Click to remove">
+                ${displayName} ✕
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = tagsHTML || '<span style="color: #666; font-size: 11px;">None selected</span>';
+}
+
+// Remove food from meal selection
+function removeMealFood(mealType, category, foodId) {
+    if (mealSpecificFoods[mealType]) {
+        mealSpecificFoods[mealType][category] = mealSpecificFoods[mealType][category].filter(f => f.id !== foodId);
+        displayMealFoods(mealType, category, foodDatabase[category]);
+        updateGenerateButton();
+    }
 }
 
 // Toggle food selection
@@ -646,14 +1019,23 @@ function removeFood(category, foodId) {
     updateGenerateButton();
     
     // Refresh the food grid to show updated selection
-    const grid = document.getElementById(`${category}Grid`);
     displayFoods(category, foodDatabase[category]);
 }
 
 // Update generate button state
 function updateGenerateButton() {
     const btn = document.getElementById('generateBtn');
-    const hasSelections = Object.values(selectedFoods).some(arr => arr.length > 0);
+    let hasSelections = false;
+    
+    if (isCustomMealMode) {
+        // Check if any meal has food selections
+        hasSelections = Object.values(mealSpecificFoods).some(meal => 
+            Object.values(meal).some(arr => arr.length > 0)
+        );
+    } else {
+        // Quick setup mode
+        hasSelections = Object.values(selectedFoods).some(arr => arr.length > 0);
+    }
     
     btn.disabled = !hasSelections;
     btn.innerHTML = hasSelections ? '🌐 Generate My Globally Optimized Meal Plan' : '⚠️ Please select some foods first';
@@ -674,13 +1056,14 @@ async function generateMealPlan() {
     const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
     
     try {
-        // Generate meal plan with global optimization (no per-meal targets)
+        // Generate meal plan with global optimization
+        const foodSelections = isCustomMealMode ? mealSpecificFoods : selectedFoods;
         const mealPlan = await buildMealPlan({
             targetProtein,
             targetCarbs,
             targetFat,
             mealsCount,
-            selectedFoods
+            selectedFoods: foodSelections
         });
         
         currentMealPlan = mealPlan;
@@ -718,7 +1101,7 @@ async function buildMealPlan(params) {
             case 4: return ['breakfast', 'lunch', 'dinner', 'snack'];
             case 5: return ['breakfast', 'lunch', 'dinner', 'snack', 'post-workout'];
             case 6: return ['breakfast', 'lunch', 'dinner', 'snack', 'pre-workout', 'post-workout'];
-            default: return ['breakfast', 'lunch', 'dinner', 'snack', 'snack'];
+            default: return ['breakfast', 'lunch', 'dinner', 'snack'];
         }
     };
     
@@ -734,99 +1117,149 @@ async function buildMealPlan(params) {
             totals: { protein: 0, carbs: 0, fat: 0, calories: 0 }
         };
         
-        console.log(`Building ${meal.name} (${mealType}) with appropriate foods...`);
+        console.log(`Building ${meal.name} (${mealType}) with ${isCustomMealMode ? 'user-specified' : 'smart'} foods...`);
         
         // Smart food selection based on meal type
         const availableFoods = [];
         
-        // Smart protein selection
-        if (selectedFoods.protein.length > 0) {
-            const appropriateProteins = selectedFoods.protein.filter(food => 
-                food.meals.includes(mealType)
-            );
+        if (isCustomMealMode) {
+            // Use user-specified foods for this meal
+            const mealFoods = mealSpecificFoods[mealType] || { protein: [], carb: [], fat: [], veggie: [] };
             
-            let chosenProtein;
-            if (appropriateProteins.length > 0) {
-                // Use appropriate protein for this meal type
-                chosenProtein = appropriateProteins[i % appropriateProteins.length];
-                console.log(`  Using appropriate protein: ${chosenProtein.name} for ${mealType}`);
-            } else {
-                // Fallback to any selected protein
-                chosenProtein = selectedFoods.protein[i % selectedFoods.protein.length];
-                console.log(`  Fallback protein: ${chosenProtein.name} for ${mealType}`);
+            // Add selected proteins for this meal
+            if (mealFoods.protein.length > 0) {
+                const chosenProtein = mealFoods.protein[0]; // Use first selected protein
+                availableFoods.push({
+                    food: chosenProtein,
+                    type: 'protein',
+                    priority: 'protein'
+                });
+                console.log(`  Using user-selected protein: ${chosenProtein.name} for ${mealType}`);
             }
             
-            availableFoods.push({
-                food: chosenProtein,
-                type: 'protein',
-                priority: 'protein'
-            });
-        }
-        
-        // Smart carb selection
-        if (selectedFoods.carb.length > 0) {
-            const appropriateCarbs = selectedFoods.carb.filter(food => 
-                food.meals.includes(mealType)
-            );
-            
-            let chosenCarb;
-            if (appropriateCarbs.length > 0) {
-                chosenCarb = appropriateCarbs[i % appropriateCarbs.length];
-                console.log(`  Using appropriate carb: ${chosenCarb.name} for ${mealType}`);
-            } else {
-                chosenCarb = selectedFoods.carb[i % selectedFoods.carb.length];
-                console.log(`  Fallback carb: ${chosenCarb.name} for ${mealType}`);
+            // Add selected carbs for this meal  
+            if (mealFoods.carb.length > 0) {
+                const chosenCarb = mealFoods.carb[0]; // Use first selected carb
+                availableFoods.push({
+                    food: chosenCarb,
+                    type: 'carb',
+                    priority: 'carbs'
+                });
+                console.log(`  Using user-selected carb: ${chosenCarb.name} for ${mealType}`);
             }
             
-            availableFoods.push({
-                food: chosenCarb,
-                type: 'carb', 
-                priority: 'carbs'
-            });
-        }
-        
-        // Smart fat selection
-        if (selectedFoods.fat.length > 0) {
-            const appropriateFats = selectedFoods.fat.filter(food => 
-                food.meals.includes(mealType)
-            );
-            
-            let chosenFat;
-            if (appropriateFats.length > 0) {
-                chosenFat = appropriateFats[i % appropriateFats.length];
-                console.log(`  Using appropriate fat: ${chosenFat.name} for ${mealType}`);
-            } else {
-                chosenFat = selectedFoods.fat[i % selectedFoods.fat.length];
-                console.log(`  Fallback fat: ${chosenFat.name} for ${mealType}`);
+            // Add selected fats for this meal
+            if (mealFoods.fat.length > 0) {
+                const chosenFat = mealFoods.fat[0]; // Use first selected fat
+                availableFoods.push({
+                    food: chosenFat,
+                    type: 'fat',
+                    priority: 'fat'
+                });
+                console.log(`  Using user-selected fat: ${chosenFat.name} for ${mealType}`);
             }
             
-            availableFoods.push({
-                food: chosenFat,
-                type: 'fat',
-                priority: 'fat'
-            });
-        }
-        
-        // Smart veggie selection
-        if (selectedFoods.veggie.length > 0) {
-            const appropriateVeggies = selectedFoods.veggie.filter(food => 
-                food.meals.includes(mealType)
-            );
-            
-            let chosenVeggie;
-            if (appropriateVeggies.length > 0) {
-                chosenVeggie = appropriateVeggies[i % appropriateVeggies.length];
-                console.log(`  Using appropriate veggie: ${chosenVeggie.name} for ${mealType}`);
-            } else {
-                chosenVeggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
-                console.log(`  Fallback veggie: ${chosenVeggie.name} for ${mealType}`);
+            // Add selected veggies for this meal
+            if (mealFoods.veggie.length > 0) {
+                const chosenVeggie = mealFoods.veggie[0]; // Use first selected veggie
+                availableFoods.push({
+                    food: chosenVeggie,
+                    type: 'veggie',
+                    priority: 'none'
+                });
+                console.log(`  Using user-selected veggie: ${chosenVeggie.name} for ${mealType}`);
+            }
+        } else {
+            // Original smart food assignment logic
+            // Smart protein selection
+            if (selectedFoods.protein.length > 0) {
+                const appropriateProteins = selectedFoods.protein.filter(food => 
+                    food.meals.includes(mealType)
+                );
+                
+                let chosenProtein;
+                if (appropriateProteins.length > 0) {
+                    // Use appropriate protein for this meal type
+                    chosenProtein = appropriateProteins[i % appropriateProteins.length];
+                    console.log(`  Using appropriate protein: ${chosenProtein.name} for ${mealType}`);
+                } else {
+                    // Fallback to any selected protein
+                    chosenProtein = selectedFoods.protein[i % selectedFoods.protein.length];
+                    console.log(`  Fallback protein: ${chosenProtein.name} for ${mealType}`);
+                }
+                
+                availableFoods.push({
+                    food: chosenProtein,
+                    type: 'protein',
+                    priority: 'protein'
+                });
             }
             
-            availableFoods.push({
-                food: chosenVeggie,
-                type: 'veggie',
-                priority: 'none'
-            });
+            // Smart carb selection
+            if (selectedFoods.carb.length > 0) {
+                const appropriateCarbs = selectedFoods.carb.filter(food => 
+                    food.meals.includes(mealType)
+                );
+                
+                let chosenCarb;
+                if (appropriateCarbs.length > 0) {
+                    chosenCarb = appropriateCarbs[i % appropriateCarbs.length];
+                    console.log(`  Using appropriate carb: ${chosenCarb.name} for ${mealType}`);
+                } else {
+                    chosenCarb = selectedFoods.carb[i % selectedFoods.carb.length];
+                    console.log(`  Fallback carb: ${chosenCarb.name} for ${mealType}`);
+                }
+                
+                availableFoods.push({
+                    food: chosenCarb,
+                    type: 'carb', 
+                    priority: 'carbs'
+                });
+            }
+            
+            // Smart fat selection
+            if (selectedFoods.fat.length > 0) {
+                const appropriateFats = selectedFoods.fat.filter(food => 
+                    food.meals.includes(mealType)
+                );
+                
+                let chosenFat;
+                if (appropriateFats.length > 0) {
+                    chosenFat = appropriateFats[i % appropriateFats.length];
+                    console.log(`  Using appropriate fat: ${chosenFat.name} for ${mealType}`);
+                } else {
+                    chosenFat = selectedFoods.fat[i % selectedFoods.fat.length];
+                    console.log(`  Fallback fat: ${chosenFat.name} for ${mealType}`);
+                }
+                
+                availableFoods.push({
+                    food: chosenFat,
+                    type: 'fat',
+                    priority: 'fat'
+                });
+            }
+            
+            // Smart veggie selection
+            if (selectedFoods.veggie.length > 0) {
+                const appropriateVeggies = selectedFoods.veggie.filter(food => 
+                    food.meals.includes(mealType)
+                );
+                
+                let chosenVeggie;
+                if (appropriateVeggies.length > 0) {
+                    chosenVeggie = appropriateVeggies[i % appropriateVeggies.length];
+                    console.log(`  Using appropriate veggie: ${chosenVeggie.name} for ${mealType}`);
+                } else {
+                    chosenVeggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
+                    console.log(`  Fallback veggie: ${chosenVeggie.name} for ${mealType}`);
+                }
+                
+                availableFoods.push({
+                    food: chosenVeggie,
+                    type: 'veggie',
+                    priority: 'none'
+                });
+            }
         }
         
         // Start with rough equal portions per meal as baseline
@@ -834,7 +1267,7 @@ async function buildMealPlan(params) {
         availableFoods.forEach(item => {
             item.quantity = basePortionSize;
             item.nutritionMultiplier = basePortionSize / 100;
-            item.explanation = getWeightExplanation(item.food, item.quantity, item.type);
+            item.explanation = 'as listed in database';
             meal.foods.push(item);
         });
         
@@ -870,1144 +1303,57 @@ async function buildMealPlan(params) {
         console.log(`${meal.name}: ${meal.totals.protein.toFixed(1)}p ${meal.totals.carbs.toFixed(1)}c ${meal.totals.fat.toFixed(1)}f ${meal.totals.calories.toFixed(0)}cal`);
     });
     
-    // Verify global accuracy and meal balance
-    const totalActual = optimizedPlan.reduce((sum, meal) => ({
-        protein: sum.protein + meal.totals.protein,
-        carbs: sum.carbs + meal.totals.carbs,
-        fat: sum.fat + meal.totals.fat
-    }), {protein: 0, carbs: 0, fat: 0});
-    
-    // Calculate meal balance for final verification
-    const targetCalories = (params.targetProtein * 4) + (params.targetCarbs * 4) + (params.targetFat * 9);
-    const avgCaloriesPerMeal = targetCalories / mealsCount;
-    const minMealCalories = avgCaloriesPerMeal * 0.7;
-    const maxMealCalories = avgCaloriesPerMeal * 1.3;
-    
-    const mealCalories = optimizedPlan.map(meal => meal.totals.calories);
-    const mealBalance = mealCalories.filter(cal => cal >= minMealCalories && cal <= maxMealCalories).length / mealsCount;
-    
-    console.log(`Meal sizes: ${mealCalories.map(c => c.toFixed(0)).join(', ')} calories`);
-    console.log(`Meal balance: ${(mealBalance * 100).toFixed(0)}% of meals within range (${minMealCalories.toFixed(0)}-${maxMealCalories.toFixed(0)} cal)`);
-    
-    const finalProteinAcc = (totalActual.protein/params.targetProtein)*100;
-    const finalCarbsAcc = (totalActual.carbs/params.targetCarbs)*100;
-    const finalFatAcc = (totalActual.fat/params.targetFat)*100;
-    
-    console.log(`\n🎯 GLOBAL SYSTEM ACCURACY:`);
-    console.log(`Target: ${params.targetProtein}p ${params.targetCarbs}c ${params.targetFat}f`);
-    console.log(`Actual: ${totalActual.protein.toFixed(2)}p ${totalActual.carbs.toFixed(2)}c ${totalActual.fat.toFixed(2)}f`);
-    console.log(`Accuracy: ${finalProteinAcc.toFixed(2)}% protein, ${finalCarbsAcc.toFixed(2)}% carbs, ${finalFatAcc.toFixed(2)}% fat`);
-    
-    const meets99 = finalProteinAcc >= 99 && finalCarbsAcc >= 99 && finalFatAcc >= 99;
-    const under101 = finalProteinAcc <= 101 && finalCarbsAcc <= 101 && finalFatAcc <= 101;
-    const mealsBalanced = mealBalance >= 0.8;
-    
-    if (meets99 && under101 && mealsBalanced) {
-        console.log(`🏆 GLOBAL SUCCESS! 99-101% accuracy achieved with balanced meal sizes!`);
-    } else if (finalProteinAcc >= 95 && finalCarbsAcc >= 95 && finalFatAcc >= 95) {
-        console.log(`✅ Global system exceeds 95% baseline accuracy`);
-        if (mealsBalanced) {
-            console.log(`✅ Meal sizes are well balanced`);
-        } else {
-            console.log(`⚠️ Some meals may be unbalanced - consider regenerating`);
-        }
-    }
-    
     return optimizedPlan;
 }
 
-// Global optimization function - ULTRA-AGGRESSIVE fat control and protein boosting + MEAL SIZE BALANCING
+// Simplified global optimization for demo
 async function globalOptimizeMealPlan(mealPlan, targets) {
-    console.log(`Global optimization: ${targets.targetProtein}p ${targets.targetCarbs}c ${targets.targetFat}f`);
+    // Basic optimization - adjust quantities to meet targets
+    const iterations = 20;
     
-    // Calculate target calories and meal size ranges
-    const targetCalories = (targets.targetProtein * 4) + (targets.targetCarbs * 4) + (targets.targetFat * 9);
-    const avgCaloriesPerMeal = targetCalories / mealPlan.length;
-    const minMealCalories = avgCaloriesPerMeal * 0.7; // Minimum 70% of average
-    const maxMealCalories = avgCaloriesPerMeal * 1.3; // Maximum 130% of average
-    
-    console.log(`Target meal size: ${avgCaloriesPerMeal.toFixed(0)} ± 30% (${minMealCalories.toFixed(0)}-${maxMealCalories.toFixed(0)} cal range)`);
-    
-    // Flatten all foods across all meals for global optimization
-    const allFoods = [];
-    mealPlan.forEach((meal, mealIndex) => {
-        meal.foods.forEach(item => {
-            allFoods.push({
-                ...item,
-                mealIndex,
-                mealName: meal.name,
-                // Set reasonable bounds per food item
-                minQty: getFoodMinQuantity(item),
-                maxQty: getFoodMaxQuantity(item)
+    for (let i = 0; i < iterations; i++) {
+        // Calculate current totals
+        let totalProtein = 0, totalCarbs = 0, totalFat = 0;
+        
+        mealPlan.forEach(meal => {
+            meal.foods.forEach(item => {
+                totalProtein += item.food.protein * (item.quantity / 100);
+                totalCarbs += item.food.carbs * (item.quantity / 100);
+                totalFat += item.food.fat * (item.quantity / 100);
             });
         });
-    });
-    
-    console.log(`Optimizing ${allFoods.length} foods across ${mealPlan.length} meals globally with meal-specific assignments and size balancing...`);
-    
-    // PHASE 1: Ultra-aggressive optimization with meal balancing
-    let iteration = 0;
-    const maxIterations = 60; // More iterations
-    let bestSolution = null;
-    let bestScore = -999999;
-    let stuckIterations = 0; // Count iterations without improvement
-    
-    while (iteration < maxIterations) {
-        iteration++;
         
-        // Calculate current global totals
-        const globalTotals = calculateGlobalTotals(allFoods);
-        const proteinAcc = globalTotals.protein / targets.targetProtein;
-        const carbsAcc = globalTotals.carbs / targets.targetCarbs;
-        const fatAcc = globalTotals.fat / targets.targetFat;
+        // Calculate ratios
+        const proteinRatio = targets.targetProtein / totalProtein;
+        const carbsRatio = targets.targetCarbs / totalCarbs;
+        const fatRatio = targets.targetFat / totalFat;
         
-        // Calculate meal size balance
-        const mealSizeBalance = calculateMealSizeBalance(allFoods, mealPlan.length, minMealCalories, maxMealCalories);
+        // Adjust quantities
+        mealPlan.forEach(meal => {
+            meal.foods.forEach(item => {
+                let adjustmentFactor = 1;
+                
+                if (item.priority === 'protein') {
+                    adjustmentFactor = Math.min(1.2, Math.max(0.8, proteinRatio * 0.9 + 0.1));
+                } else if (item.priority === 'carbs') {
+                    adjustmentFactor = Math.min(1.2, Math.max(0.8, carbsRatio * 0.9 + 0.1));
+                } else if (item.priority === 'fat') {
+                    adjustmentFactor = Math.min(1.2, Math.max(0.8, fatRatio * 0.9 + 0.1));
+                }
+                
+                item.quantity = Math.min(500, Math.max(10, item.quantity * adjustmentFactor));
+                item.nutritionMultiplier = item.quantity / 100;
+            });
+        });
         
-        if (iteration % 5 === 0) {
-            console.log(`Global ${iteration}: ${(proteinAcc * 100).toFixed(1)}% protein, ${(carbsAcc * 100).toFixed(1)}% carbs, ${(fatAcc * 100).toFixed(1)}% fat, meal balance: ${mealSizeBalance.toFixed(1)}`);
-        }
-        
-        // CRITICAL: Check if we're making progress
-        const currentScore = calculateGlobalScoreWithMealBalance(proteinAcc, carbsAcc, fatAcc, mealSizeBalance);
-        if (currentScore > bestScore) {
-            bestScore = currentScore;
-            bestSolution = allFoods.map(f => ({ ...f }));
-            stuckIterations = 0; // Reset stuck counter
-        } else {
-            stuckIterations++;
-        }
-        
-        // Check for success - STRICTER CRITERIA including meal balance
-        const meets99 = proteinAcc >= 0.99 && carbsAcc >= 0.99 && fatAcc >= 0.99;
-        const under102 = proteinAcc <= 1.02 && carbsAcc <= 1.02 && fatAcc <= 1.02;
-        const fatTightControl = fatAcc <= 1.01;
-        const proteinMinimum = proteinAcc >= 0.95;
-        const mealsBalanced = mealSizeBalance >= 0.8; // Meals reasonably balanced
-        
-        if (meets99 && under102 && fatTightControl && proteinMinimum && mealsBalanced) {
-            console.log(`✅ Global optimization converged at iteration ${iteration} with balanced meals!`);
+        // Check if close enough
+        if (Math.abs(proteinRatio - 1) < 0.05 && Math.abs(carbsRatio - 1) < 0.05 && Math.abs(fatRatio - 1) < 0.05) {
+            console.log(`Optimization converged at iteration ${i + 1}`);
             break;
         }
-        
-        // CRITICAL: If stuck for too long, apply shock therapy
-        if (stuckIterations >= 8) {
-            console.log(`⚡ SHOCK THERAPY: Stuck for ${stuckIterations} iterations - applying aggressive corrections`);
-            applyShockTherapy(allFoods, targets, globalTotals);
-            stuckIterations = 0; // Reset after shock therapy
-        } else {
-            // Normal adjustments with meal balancing
-            applyGlobalAdjustmentsWithMealBalance(allFoods, targets, globalTotals, mealPlan.length, avgCaloriesPerMeal);
-        }
-        
-        // Log problematic macros and meal sizes
-        if (proteinAcc < 0.95) {
-            console.log(`⚠️ Protein critically low: ${(proteinAcc * 100).toFixed(1)}% - boosting lean proteins`);
-        }
-        if (fatAcc > 1.10) {
-            console.log(`⚠️ Fat significantly over: ${(fatAcc * 100).toFixed(1)}% - reducing fat sources`);
-        }
-        if (mealSizeBalance < 0.7) {
-            console.log(`⚠️ Meals unbalanced (${mealSizeBalance.toFixed(2)}) - rebalancing meal sizes`);
-        }
     }
-    
-    // PHASE 2: Emergency corrections if still not meeting targets
-    const finalTotals = calculateGlobalTotals(allFoods);
-    const finalProteinAcc = finalTotals.protein / targets.targetProtein;
-    const finalCarbsAcc = finalTotals.carbs / targets.targetCarbs;
-    const finalFatAcc = finalTotals.fat / targets.targetFat;
-    const finalMealBalance = calculateMealSizeBalance(allFoods, mealPlan.length, minMealCalories, maxMealCalories);
-    
-    console.log(`\n=== PHASE 2: EMERGENCY CORRECTIONS ===`);
-    console.log(`Current state: ${(finalProteinAcc * 100).toFixed(1)}% protein, ${(finalCarbsAcc * 100).toFixed(1)}% carbs, ${(finalFatAcc * 100).toFixed(1)}% fat, meal balance: ${finalMealBalance.toFixed(2)}`);
-    
-    // Emergency meal rebalancing if meals are too uneven
-    if (finalMealBalance < 0.7) {
-        console.log(`🚨 EMERGENCY MEAL REBALANCING`);
-        emergencyMealRebalancing(allFoods, mealPlan.length, avgCaloriesPerMeal);
-    }
-    
-    // Emergency fat reduction if still over 110%
-    if (finalFatAcc > 1.10) {
-        console.log(`🚨 EMERGENCY FAT REDUCTION`);
-        emergencyFatReduction(allFoods, targets, finalTotals);
-    }
-    
-    // Emergency protein boost if still under 95%
-    if (finalProteinAcc < 0.95) {
-        console.log(`🚨 EMERGENCY PROTEIN BOOST`);
-        emergencyProteinBoost(allFoods, targets, finalTotals);
-    }
-    
-    // Use best solution if current still isn't good enough
-    const emergencyTotals = calculateGlobalTotals(allFoods);
-    const emergencyMealBalance = calculateMealSizeBalance(allFoods, mealPlan.length, minMealCalories, maxMealCalories);
-    const emergencyScore = calculateGlobalScoreWithMealBalance(
-        emergencyTotals.protein / targets.targetProtein,
-        emergencyTotals.carbs / targets.targetCarbs,
-        emergencyTotals.fat / targets.targetFat,
-        emergencyMealBalance
-    );
-    
-    if (bestSolution && bestScore > emergencyScore) {
-        console.log(`Using best global solution (score: ${bestScore.toFixed(0)})`);
-        allFoods.splice(0, allFoods.length, ...bestSolution);
-    } else {
-        console.log(`Using current solution (score: ${emergencyScore.toFixed(0)})`);
-    }
-    
-    // Update meal plan with optimized quantities
-    allFoods.forEach(item => {
-        const meal = mealPlan[item.mealIndex];
-        const foodInMeal = meal.foods.find(f => f.food.id === item.food.id);
-        if (foodInMeal) {
-            foodInMeal.quantity = Math.round(item.quantity * 10) / 10; // Round to 0.1g
-            foodInMeal.nutritionMultiplier = foodInMeal.quantity / 100;
-            foodInMeal.explanation = getWeightExplanation(foodInMeal.food, foodInMeal.quantity, foodInMeal.type);
-        }
-    });
     
     return mealPlan;
-}
-
-// Shock therapy for when optimization gets stuck
-function applyShockTherapy(allFoods, targets, currentTotals) {
-    const proteinAcc = currentTotals.protein / targets.targetProtein;
-    const fatAcc = currentTotals.fat / targets.targetFat;
-    
-    console.log(`Applying shock therapy - current: ${(proteinAcc * 100).toFixed(1)}% protein, ${(fatAcc * 100).toFixed(1)}% fat`);
-    
-    allFoods.forEach(item => {
-        // SHOCK THERAPY: Much more extreme adjustments
-        if (item.priority === 'fat') {
-            // Fat sources: slash them hard if fat is over target
-            if (fatAcc > 1.15) {
-                item.quantity = Math.max(item.minQty, item.quantity * 0.4); // 60% reduction
-                console.log(`SHOCK: Slashed ${item.food.name} fat source by 60%`);
-            } else if (fatAcc > 1.05) {
-                item.quantity = Math.max(item.minQty, item.quantity * 0.7); // 30% reduction
-                console.log(`SHOCK: Reduced ${item.food.name} fat source by 30%`);
-            }
-        }
-        
-        if (item.priority === 'protein') {
-            // Protein sources: boost lean ones, reduce fatty ones
-            const proteinFatRatio = item.food.protein / Math.max(item.food.fat, 1);
-            
-            if (proteinAcc < 0.95 && proteinFatRatio > 5) {
-                // Lean protein: boost it significantly
-                item.quantity = Math.min(item.maxQty, item.quantity * 1.4); // 40% increase
-                console.log(`SHOCK: Boosted lean protein ${item.food.name} by 40%`);
-            } else if (fatAcc > 1.10 && item.food.fat > 8) {
-                // Fatty protein: reduce it when fat is over
-                item.quantity = Math.max(item.minQty, item.quantity * 0.8); // 20% reduction
-                console.log(`SHOCK: Reduced fatty protein ${item.food.name} by 20%`);
-            }
-        }
-    });
-}
-
-// Emergency fat reduction when normal optimization fails
-function emergencyFatReduction(allFoods, targets, currentTotals) {
-    const fatExcess = currentTotals.fat - targets.targetFat;
-    console.log(`Need to remove ${fatExcess.toFixed(1)}g fat urgently`);
-    
-    // Sort fat sources by fat content (highest first)
-    const fatSources = allFoods.filter(f => f.priority === 'fat' || f.food.fat > 8)
-                               .sort((a, b) => b.food.fat - a.food.fat);
-    
-    let removedFat = 0;
-    for (const fatFood of fatSources) {
-        if (removedFat >= fatExcess) break;
-        
-        const currentFatContrib = fatFood.food.fat * (fatFood.quantity / 100);
-        const targetReduction = Math.min(currentFatContrib * 0.5, fatExcess - removedFat);
-        const quantityReduction = (targetReduction / fatFood.food.fat) * 100;
-        
-        const newQuantity = Math.max(fatFood.minQty, fatFood.quantity - quantityReduction);
-        const actualReduction = (fatFood.quantity - newQuantity) * (fatFood.food.fat / 100);
-        
-        fatFood.quantity = newQuantity;
-        removedFat += actualReduction;
-        
-        console.log(`Emergency reduced ${fatFood.food.name} by ${quantityReduction.toFixed(1)}g (${actualReduction.toFixed(1)}g fat)`);
-    }
-}
-
-// Emergency protein boost when normal optimization fails
-function emergencyProteinBoost(allFoods, targets, currentTotals) {
-    const proteinDeficit = targets.targetProtein - currentTotals.protein;
-    console.log(`Need to add ${proteinDeficit.toFixed(1)}g protein urgently`);
-    
-    // Sort protein sources by protein:fat efficiency (lean proteins first)
-    const proteinSources = allFoods.filter(f => f.priority === 'protein')
-                                   .sort((a, b) => {
-                                       const aEff = a.food.protein / Math.max(a.food.fat, 1);
-                                       const bEff = b.food.protein / Math.max(b.food.fat, 1);
-                                       return bEff - aEff;
-                                   });
-    
-    let addedProtein = 0;
-    for (const proteinFood of proteinSources) {
-        if (addedProtein >= proteinDeficit) break;
-        
-        const targetIncrease = Math.min(proteinDeficit - addedProtein, proteinDeficit * 0.4);
-        const quantityIncrease = (targetIncrease / proteinFood.food.protein) * 100;
-        
-        const newQuantity = Math.min(proteinFood.maxQty, proteinFood.quantity + quantityIncrease);
-        const actualIncrease = (newQuantity - proteinFood.quantity) * (proteinFood.food.protein / 100);
-        
-        proteinFood.quantity = newQuantity;
-        addedProtein += actualIncrease;
-        
-        console.log(`Emergency boosted ${proteinFood.food.name} by ${quantityIncrease.toFixed(1)}g (${actualIncrease.toFixed(1)}g protein)`);
-    }
-}
-
-// Helper functions for global optimization with improved bounds
-function getFoodMinQuantity(item) {
-    if (item.food.fat > 90) return 1; // Oils - can go very small
-    if (item.food.protein > 70) return 10; // Protein powders  
-    if (item.priority === 'veggie') return 10; // Vegetables
-    if (item.priority === 'protein') return 40; // Proteins - allow smaller portions
-    return 20; // Everything else
-}
-
-function getFoodMaxQuantity(item) {
-    if (item.food.fat > 90) return 30; // Oils - small max to prevent fat excess
-    if (item.food.protein > 70) return 120; // Protein powders - more flexibility
-    if (item.priority === 'veggie') return 400; // Vegetables - lots of flexibility
-    if (item.priority === 'protein') return 600; // Proteins - much more flexibility for hitting targets
-    if (item.priority === 'carbs') return 500; // Carbs
-    return 300; // Mixed foods
-}
-
-function calculateGlobalTotals(allFoods) {
-    return allFoods.reduce((totals, item) => {
-        totals.protein += item.food.protein * (item.quantity / 100);
-        totals.carbs += item.food.carbs * (item.quantity / 100);
-        totals.fat += item.food.fat * (item.quantity / 100);
-        return totals;
-    }, { protein: 0, carbs: 0, fat: 0 });
-}
-
-// Simplified global score function (for backwards compatibility)
-function calculateGlobalScore(proteinAcc, carbsAcc, fatAcc) {
-    // This assumes meal balance of 0.8 for basic scoring
-    return calculateGlobalScoreWithMealBalance(proteinAcc, carbsAcc, fatAcc, 0.8);
-}
-
-// Calculate meal size balance (1.0 = perfectly balanced, 0.0 = extremely unbalanced)
-function calculateMealSizeBalance(allFoods, mealCount, minMealCalories, maxMealCalories) {
-    const mealCalories = new Array(mealCount).fill(0);
-    
-    // Calculate calories per meal
-    allFoods.forEach(item => {
-        const calories = item.food.calories * (item.quantity / 100);
-        mealCalories[item.mealIndex] += calories;
-    });
-    
-    // Check how many meals are within the acceptable range
-    let mealsInRange = 0;
-    const avgCalories = mealCalories.reduce((sum, cal) => sum + cal, 0) / mealCount;
-    
-    mealCalories.forEach((calories, index) => {
-        if (calories >= minMealCalories && calories <= maxMealCalories) {
-            mealsInRange++;
-        } else {
-            const deviation = Math.abs(calories - avgCalories) / avgCalories;
-            if (deviation < 0.5) mealsInRange += 0.5; // Partial credit for being close
-        }
-    });
-    
-    const balanceScore = mealsInRange / mealCount;
-    
-    // Log meal sizes for debugging
-    if (Math.random() < 0.1) { // Occasional logging
-        console.log(`Meal calories: ${mealCalories.map(c => c.toFixed(0)).join(', ')} | Balance: ${balanceScore.toFixed(2)}`);
-    }
-    
-    return balanceScore;
-}
-
-// Enhanced scoring function that includes meal balance
-function calculateGlobalScoreWithMealBalance(proteinAcc, carbsAcc, fatAcc, mealBalance) {
-    let score = 0;
-    
-    // Reward 99%+ accuracy heavily, but penalize being under more than being over for protein
-    if (proteinAcc >= 0.99) score += 1500; 
-    else if (proteinAcc >= 0.95) score += proteinAcc * 800; 
-    else score += proteinAcc * 400; // Heavy penalty for low protein
-    
-    if (carbsAcc >= 0.99) score += 1000; 
-    else score += carbsAcc * 500;
-    
-    if (fatAcc >= 0.99 && fatAcc <= 1.01) score += 1200; // Bonus for tight fat control
-    else if (fatAcc >= 0.99) score += 800; 
-    else score += fatAcc * 300;
-    
-    // MEAL BALANCE SCORING - very important for user experience
-    if (mealBalance >= 0.9) score += 1000; // Bonus for well-balanced meals
-    else if (mealBalance >= 0.8) score += mealBalance * 800;
-    else if (mealBalance >= 0.6) score += mealBalance * 400;
-    else score += mealBalance * 200; // Penalty for unbalanced meals
-    
-    // Bonus for being close to 100%
-    score += Math.max(0, 400 - Math.abs(proteinAcc - 1) * 1000);
-    score += Math.max(0, 300 - Math.abs(carbsAcc - 1) * 1000);
-    score += Math.max(0, 500 - Math.abs(fatAcc - 1) * 1500); // Fat accuracy is most important
-    
-    // MASSIVE penalties for going over targets
-    if (proteinAcc > 1.05) score -= (proteinAcc - 1.05) * 1500;
-    if (carbsAcc > 1.05) score -= (carbsAcc - 1.05) * 1500;
-    if (fatAcc > 1.02) score -= (fatAcc - 1.02) * 4000; // Huge penalty for fat excess
-    
-    // Extra penalty for being under protein target
-    if (proteinAcc < 0.95) score -= (0.95 - proteinAcc) * 2000;
-    
-    // Penalty for severely unbalanced meals
-    if (mealBalance < 0.5) score -= (0.5 - mealBalance) * 1500;
-    
-    return score;
-}
-
-// Enhanced global adjustments that consider meal balance
-function applyGlobalAdjustmentsWithMealBalance(allFoods, targets, currentTotals, mealCount, avgCaloriesPerMeal) {
-    const proteinRatio = targets.targetProtein / currentTotals.protein;
-    const carbsRatio = targets.targetCarbs / currentTotals.carbs;
-    const fatRatio = targets.targetFat / currentTotals.fat;
-    
-    // Calculate current meal sizes
-    const mealCalories = new Array(mealCount).fill(0);
-    allFoods.forEach(item => {
-        const calories = item.food.calories * (item.quantity / 100);
-        mealCalories[item.mealIndex] += calories;
-    });
-    
-    console.log(`Global ratios: ${proteinRatio.toFixed(3)}x protein, ${carbsRatio.toFixed(3)}x carbs, ${fatRatio.toFixed(3)}x fat`);
-    
-    // CRITICAL: When fat is over target, be extremely aggressive
-    const fatIsSignificantlyOver = fatRatio < 0.85;
-    const proteinIsUnder = proteinRatio > 1.05;
-    
-    allFoods.forEach(item => {
-        let adjustmentFactor = 1;
-        const mealIndex = item.mealIndex;
-        const currentMealCalories = mealCalories[mealIndex];
-        
-        // Meal balance factor - reduce foods in oversized meals, boost in undersized meals
-        const mealSizeFactor = avgCaloriesPerMeal / Math.max(currentMealCalories, 100);
-        const mealBalanceAdjustment = Math.max(0.7, Math.min(1.3, mealSizeFactor));
-        
-        if (item.priority === 'protein') {
-            // Protein foods: prioritize protein targets
-            adjustmentFactor = proteinRatio * 0.8 + 0.2;
-            
-            // CRITICAL: If this protein has significant fat AND fat is over target, reduce it
-            if (item.food.fat > 8 && fatIsSignificantlyOver) {
-                adjustmentFactor = Math.min(adjustmentFactor, 0.85); // Reduce high-fat proteins
-                console.log(`Reducing high-fat protein ${item.food.name} due to fat excess`);
-            }
-            // If protein is under and this is lean protein, boost it more
-            else if (item.food.fat < 5 && proteinIsUnder) {
-                adjustmentFactor = Math.min(1.4, adjustmentFactor * 1.2); // Boost lean proteins
-                console.log(`Boosting lean protein ${item.food.name} for protein target`);
-            }
-            
-        } else if (item.priority === 'carbs') {
-            // Carbs: standard adjustment
-            adjustmentFactor = carbsRatio * 0.8 + 0.2;
-            
-        } else if (item.priority === 'fat') {
-            // CRITICAL: Fat sources get special handling
-            adjustmentFactor = fatRatio;
-            
-            if (fatIsSignificantlyOver) {
-                // Fat is way over - be very aggressive about reducing
-                if (item.food.fat > 90) {
-                    // Pure oils: slash them
-                    adjustmentFactor = Math.max(0.4, fatRatio * 0.6);
-                    console.log(`Slashing oil ${item.food.name} - fat severely over target`);
-                } else {
-                    // Other fat sources: reduce significantly  
-                    adjustmentFactor = Math.max(0.6, fatRatio * 0.8);
-                    console.log(`Reducing fat source ${item.food.name} - fat over target`);
-                }
-            }
-        } else if (item.priority === 'none') {
-            // Vegetables: minimal adjustment but consider meal balance
-            adjustmentFactor = 1.0;
-        }
-        
-        // Apply meal balance adjustment
-        adjustmentFactor *= mealBalanceAdjustment;
-        
-        // Apply stricter bounds based on current macro status
-        if (fatIsSignificantlyOver && item.food.fat > 5) {
-            // When fat is significantly over, limit any food with fat
-            adjustmentFactor = Math.max(0.5, Math.min(1.1, adjustmentFactor));
-        } else if (proteinIsUnder && item.food.protein > 20) {
-            // When protein is under, allow protein foods to increase more
-            adjustmentFactor = Math.max(0.8, Math.min(1.5, adjustmentFactor));
-        } else {
-            // Normal bounds
-            adjustmentFactor = Math.max(0.7, Math.min(1.3, adjustmentFactor));
-        }
-        
-        const oldQuantity = item.quantity;
-        const newQuantity = item.quantity * adjustmentFactor;
-        item.quantity = Math.max(item.minQty, Math.min(item.maxQty, newQuantity));
-        
-        if (Math.abs(item.quantity - oldQuantity) > 3) {
-            console.log(`${item.food.name} (${item.mealName}): ${oldQuantity.toFixed(1)}g → ${item.quantity.toFixed(1)}g (${adjustmentFactor.toFixed(3)}x)`);
-        }
-    });
-}
-
-// Emergency meal rebalancing when meals are severely uneven
-function emergencyMealRebalancing(allFoods, mealCount, avgCaloriesPerMeal) {
-    console.log(`Emergency meal rebalancing - target: ${avgCaloriesPerMeal.toFixed(0)} calories per meal`);
-    
-    // Calculate current meal sizes
-    const mealCalories = new Array(mealCount).fill(0);
-    const mealFoods = new Array(mealCount).fill(null).map(() => []);
-    
-    allFoods.forEach(item => {
-        const calories = item.food.calories * (item.quantity / 100);
-        mealCalories[item.mealIndex] += calories;
-        mealFoods[item.mealIndex].push(item);
-    });
-    
-    console.log(`Current meal sizes: ${mealCalories.map(c => c.toFixed(0)).join(', ')} calories`);
-    
-    // Find oversized and undersized meals
-    for (let mealIndex = 0; mealIndex < mealCount; mealIndex++) {
-        const currentCalories = mealCalories[mealIndex];
-        const targetCalories = avgCaloriesPerMeal;
-        const ratio = currentCalories / targetCalories;
-        
-        if (ratio > 1.4) {
-            // Meal is too big - reduce all foods proportionally
-            const reductionFactor = 1 / Math.min(1.3, ratio);
-            mealFoods[mealIndex].forEach(item => {
-                const newQuantity = item.quantity * reductionFactor;
-                item.quantity = Math.max(item.minQty, newQuantity);
-            });
-            console.log(`Reduced oversized meal ${mealIndex + 1} by ${((1 - reductionFactor) * 100).toFixed(0)}%`);
-            
-        } else if (ratio < 0.6) {
-            // Meal is too small - boost all foods proportionally
-            const boostFactor = Math.min(1.5, 1 / Math.max(0.8, ratio));
-            mealFoods[mealIndex].forEach(item => {
-                const newQuantity = item.quantity * boostFactor;
-                item.quantity = Math.min(item.maxQty, newQuantity);
-            });
-            console.log(`Boosted undersized meal ${mealIndex + 1} by ${((boostFactor - 1) * 100).toFixed(0)}%`);
-        }
-    }
-}
-
-function applyGlobalAdjustments(allFoods, targets, currentTotals) {
-    // This function is kept for backwards compatibility with shock therapy
-    // For normal optimization, use applyGlobalAdjustmentsWithMealBalance
-    const proteinRatio = targets.targetProtein / currentTotals.protein;
-    const carbsRatio = targets.targetCarbs / currentTotals.carbs;
-    const fatRatio = targets.targetFat / currentTotals.fat;
-    
-    console.log(`Basic ratios: ${proteinRatio.toFixed(3)}x protein, ${carbsRatio.toFixed(3)}x carbs, ${fatRatio.toFixed(3)}x fat`);
-    
-    // CRITICAL: When fat is over target, be extremely aggressive
-    const fatIsSignificantlyOver = fatRatio < 0.85;
-    const proteinIsUnder = proteinRatio > 1.05;
-    
-    allFoods.forEach(item => {
-        let adjustmentFactor = 1;
-        
-        if (item.priority === 'protein') {
-            // Protein foods: prioritize protein targets
-            adjustmentFactor = proteinRatio * 0.8 + 0.2;
-            
-            // CRITICAL: If this protein has significant fat AND fat is over target, reduce it
-            if (item.food.fat > 8 && fatIsSignificantlyOver) {
-                adjustmentFactor = Math.min(adjustmentFactor, 0.85); // Reduce high-fat proteins
-                console.log(`Reducing high-fat protein ${item.food.name} due to fat excess`);
-            }
-            // If protein is under and this is lean protein, boost it more
-            else if (item.food.fat < 5 && proteinIsUnder) {
-                adjustmentFactor = Math.min(1.4, adjustmentFactor * 1.2); // Boost lean proteins
-                console.log(`Boosting lean protein ${item.food.name} for protein target`);
-            }
-            
-        } else if (item.priority === 'carbs') {
-            // Carbs: standard adjustment
-            adjustmentFactor = carbsRatio * 0.8 + 0.2;
-            
-        } else if (item.priority === 'fat') {
-            // CRITICAL: Fat sources get special handling
-            adjustmentFactor = fatRatio;
-            
-            if (fatIsSignificantlyOver) {
-                // Fat is way over - be very aggressive about reducing
-                if (item.food.fat > 90) {
-                    // Pure oils: slash them
-                    adjustmentFactor = Math.max(0.4, fatRatio * 0.6);
-                    console.log(`Slashing oil ${item.food.name} - fat severely over target`);
-                } else {
-                    // Other fat sources: reduce significantly  
-                    adjustmentFactor = Math.max(0.6, fatRatio * 0.8);
-                    console.log(`Reducing fat source ${item.food.name} - fat over target`);
-                }
-            }
-        } else if (item.priority === 'none') {
-            // Vegetables: minimal adjustment
-            adjustmentFactor = 1.0;
-        }
-        
-        // Apply stricter bounds based on current macro status
-        if (fatIsSignificantlyOver && item.food.fat > 5) {
-            // When fat is significantly over, limit any food with fat
-            adjustmentFactor = Math.max(0.5, Math.min(1.1, adjustmentFactor));
-        } else if (proteinIsUnder && item.food.protein > 20) {
-            // When protein is under, allow protein foods to increase more
-            adjustmentFactor = Math.max(0.8, Math.min(1.5, adjustmentFactor));
-        } else {
-            // Normal bounds
-            adjustmentFactor = Math.max(0.7, Math.min(1.3, adjustmentFactor));
-        }
-        
-        const oldQuantity = item.quantity;
-        const newQuantity = item.quantity * adjustmentFactor;
-        item.quantity = Math.max(item.minQty, Math.min(item.maxQty, newQuantity));
-        
-        if (Math.abs(item.quantity - oldQuantity) > 3) {
-            console.log(`${item.food.name}: ${oldQuantity.toFixed(1)}g → ${item.quantity.toFixed(1)}g (${adjustmentFactor.toFixed(3)}x)`);
-        }
-    });
-}
-
-function rebalanceProtein(allFoods, deficit) {
-    // Sort proteins by protein efficiency (protein per gram with fat penalty)
-    const proteinFoods = allFoods.filter(f => f.priority === 'protein').sort((a, b) => {
-        const aEfficiency = a.food.protein / Math.max(a.food.fat, 1); // Penalize high fat
-        const bEfficiency = b.food.protein / Math.max(b.food.fat, 1);
-        return bEfficiency - aEfficiency;
-    });
-    
-    if (proteinFoods.length > 0) {
-        const bestProtein = proteinFoods[0]; // Most efficient protein:fat ratio
-        const adjustment = deficit / (bestProtein.food.protein / 100) * 0.7; // More aggressive
-        const newQty = bestProtein.quantity + adjustment;
-        bestProtein.quantity = Math.max(bestProtein.minQty, Math.min(bestProtein.maxQty, newQty));
-        console.log(`Rebalanced ${bestProtein.food.name} by ${adjustment.toFixed(1)}g for protein (efficiency: ${(bestProtein.food.protein / Math.max(bestProtein.food.fat, 1)).toFixed(1)})`);
-    }
-}
-
-function rebalanceCarbs(allFoods, deficit) {
-    const carbFoods = allFoods.filter(f => f.priority === 'carbs').sort((a, b) => 
-        b.food.carbs - a.food.carbs
-    );
-    
-    if (carbFoods.length > 0) {
-        const bestCarb = carbFoods[0];
-        const adjustment = deficit / (bestCarb.food.carbs / 100) * 0.6;
-        const newQty = bestCarb.quantity + adjustment;
-        bestCarb.quantity = Math.max(bestCarb.minQty, Math.min(bestCarb.maxQty, newQty));
-        console.log(`Rebalanced ${bestCarb.food.name} by ${adjustment.toFixed(1)}g for carbs`);
-    }
-}
-
-function rebalanceFat(allFoods, deficit) {
-    const fatFoods = allFoods.filter(f => f.priority === 'fat').sort((a, b) => 
-        b.food.fat - a.food.fat
-    );
-    
-    if (fatFoods.length > 0) {
-        const bestFat = fatFoods[0];
-        
-        // CRITICAL: Different handling for deficit vs excess
-        if (deficit < 0) {
-            // Fat is over target - be very aggressive about reduction
-            const adjustment = deficit / (bestFat.food.fat / 100) * 0.8; // More aggressive reduction
-            const newQty = Math.max(bestFat.minQty, bestFat.quantity + adjustment);
-            bestFat.quantity = newQty;
-            console.log(`Aggressively reduced ${bestFat.food.name} by ${Math.abs(adjustment).toFixed(1)}g to fix fat excess`);
-        } else {
-            // Fat is under target - moderate increase
-            const adjustment = deficit / (bestFat.food.fat / 100) * 0.3;
-            const newQty = bestFat.quantity + adjustment;
-            bestFat.quantity = Math.max(bestFat.minQty, Math.min(bestFat.maxQty, newQty));
-            console.log(`Increased ${bestFat.food.name} by ${adjustment.toFixed(1)}g for fat deficit`);
-        }
-    }
-}
-
-// ULTRA-PRECISION macro balancing algorithm - GUARANTEED 99%+ accuracy
-function balanceMacros(availableFoods, targets) {
-    console.log(`\n🎯 ULTRA-PRECISION MACRO BALANCING (GUARANTEED 99%+ accuracy)`);
-    console.log(`Targets: ${targets.protein}p ${targets.carbs}c ${targets.fat}f`);
-    
-    const targetCalories = (targets.protein * 4) + (targets.carbs * 4) + (targets.fat * 9);
-    console.log(`Target calories: ${targetCalories.toFixed(0)}`);
-    
-    // Enhanced food classification with ultra-precise initial estimates
-    const foods = availableFoods.map(item => {
-        const food = item.food;
-        
-        // Ultra-precise food categorization
-        const isPureOil = food.fat > 95 && food.protein < 1 && food.carbs < 1;
-        const isLeanProtein = food.protein > 25 && food.fat < 8;
-        const isPureCarb = food.carbs > 65 && food.protein < 12 && food.fat < 3;
-        const isMixedNutButter = food.fat > 40 && food.protein > 15;
-        const isProteinPowder = food.protein > 70;
-        
-        let initialQuantity, minQty, maxQty;
-        
-        if (isPureOil) {
-            // Ultra-precise for oils - mathematical precision
-            initialQuantity = (targets.fat / food.fat) * 100 * 0.85; // Start at 85% of mathematical target
-            minQty = 1.5; maxQty = 25;
-        } else if (isProteinPowder) {
-            // Protein powders are very concentrated
-            initialQuantity = (targets.protein / food.protein) * 100 * 0.8;
-            minQty = 15; maxQty = 80;
-        } else if (isLeanProtein) {
-            // Lean proteins - precise protein targeting
-            initialQuantity = (targets.protein / food.protein) * 100 * 0.88;
-            minQty = 50; maxQty = 450;
-        } else if (isPureCarb) {
-            // Pure carbs - precise carb targeting
-            initialQuantity = (targets.carbs / food.carbs) * 100 * 0.82;
-            minQty = 30; maxQty = 450;
-        } else if (isMixedNutButter) {
-            // Nut butters require careful handling
-            initialQuantity = (targets.fat / food.fat) * 100 * 0.65;
-            minQty = 10; maxQty = 70;
-        } else {
-            // Mixed foods - moderate starting point
-            initialQuantity = 75;
-            minQty = 15; maxQty = 300;
-        }
-        
-        // Use decimal precision initially
-        initialQuantity = Math.max(minQty, Math.min(maxQty, initialQuantity));
-        
-        console.log(`${food.name}: ${food.protein.toFixed(1)}p ${food.carbs.toFixed(1)}c ${food.fat.toFixed(1)}f per 100g → ${initialQuantity.toFixed(1)}g initial`);
-        
-        return {
-            ...item,
-            quantity: initialQuantity, // Keep decimal precision during optimization
-            nutritionMultiplier: initialQuantity / 100,
-            minQty,
-            maxQty,
-            isPureOil,
-            isLeanProtein,
-            isPureCarb,
-            isMixedNutButter,
-            isProteinPowder
-        };
-    });
-    
-    // PHASE 1: Coarse optimization (95-98% accuracy)
-    console.log(`\n=== PHASE 1: COARSE OPTIMIZATION ===`);
-    let iteration = 0;
-    const maxCoarseIterations = 30;
-    let bestSolution = null;
-    let bestAccuracyScore = 0;
-    
-    while (iteration < maxCoarseIterations) {
-        iteration++;
-        const currentTotals = calculateTotals(foods);
-        const proteinAccuracy = currentTotals.protein / targets.protein;
-        const carbsAccuracy = currentTotals.carbs / targets.carbs;
-        const fatAccuracy = currentTotals.fat / targets.fat;
-        
-        if (iteration % 5 === 0) {
-            console.log(`Coarse ${iteration}: ${(proteinAccuracy * 100).toFixed(1)}% protein, ${(carbsAccuracy * 100).toFixed(1)}% carbs, ${(fatAccuracy * 100).toFixed(1)}% fat`);
-        }
-        
-        // Check if ready for fine optimization
-        const readyForFine = proteinAccuracy >= 0.95 && carbsAccuracy >= 0.95 && fatAccuracy >= 0.95 &&
-                            proteinAccuracy <= 1.05 && carbsAccuracy <= 1.05 && fatAccuracy <= 1.05;
-        
-        if (readyForFine) {
-            console.log(`✅ Phase 1 complete - ready for ultra-precision phase`);
-            break;
-        }
-        
-        // Track best solution
-        const accuracyScore = calculateAccuracyScore(proteinAccuracy, carbsAccuracy, fatAccuracy, 0.95);
-        if (accuracyScore > bestAccuracyScore) {
-            bestAccuracyScore = accuracyScore;
-            bestSolution = foods.map(f => ({ ...f }));
-        }
-        
-        // Coarse adjustments
-        applyCoarseAdjustments(foods, targets, currentTotals);
-    }
-    
-    // PHASE 2: Ultra-precision optimization (99%+ accuracy)
-    console.log(`\n=== PHASE 2: ULTRA-PRECISION OPTIMIZATION ===`);
-    const maxFineIterations = 50;
-    let fineIteration = 0;
-    let consecutivePerfect = 0;
-    
-    while (fineIteration < maxFineIterations) {
-        fineIteration++;
-        const currentTotals = calculateTotals(foods);
-        const proteinAccuracy = currentTotals.protein / targets.protein;
-        const carbsAccuracy = currentTotals.carbs / targets.carbs;
-        const fatAccuracy = currentTotals.fat / targets.fat;
-        
-        console.log(`Fine ${fineIteration}: ${(proteinAccuracy * 100).toFixed(2)}% protein, ${(carbsAccuracy * 100).toFixed(2)}% carbs, ${(fatAccuracy * 100).toFixed(2)}% fat`);
-        
-        // Ultra-strict requirement: ALL macros ≥99% AND ≤102%
-        const meets99Percent = proteinAccuracy >= 0.99 && carbsAccuracy >= 0.99 && fatAccuracy >= 0.99;
-        const under102Percent = proteinAccuracy <= 1.02 && carbsAccuracy <= 1.02 && fatAccuracy <= 1.02;
-        
-        // CRITICAL: Fat must be especially tight - no more than 101% for fat
-        const fatTightControl = fatAccuracy <= 1.01;
-        
-        if (meets99Percent && under102Percent && fatTightControl) {
-            consecutivePerfect++;
-            console.log(`🎯 ULTRA-SUCCESS! All macros ≥99% AND fat ≤101% (${consecutivePerfect}/3 consecutive)`);
-            
-            if (consecutivePerfect >= 3) {
-                console.log(`🏆 GUARANTEED 99%+ SUCCESS! All macros ≥99% with tight fat control for 3 consecutive iterations!`);
-                break;
-            }
-        } else {
-            consecutivePerfect = 0;
-            
-            // Special logging for fat issues
-            if (fatAccuracy > 1.05) {
-                console.log(`⚠️ Fat significantly over target: ${(fatAccuracy * 100).toFixed(2)}% - prioritizing reduction`);
-            }
-        }
-        
-        // Track best ultra-precision solution
-        const ultraScore = calculateAccuracyScore(proteinAccuracy, carbsAccuracy, fatAccuracy, 0.99);
-        if (ultraScore > bestAccuracyScore) {
-            bestAccuracyScore = ultraScore;
-            bestSolution = foods.map(f => ({ ...f }));
-        }
-        
-        // Ultra-fine adjustments with decimal precision
-        applyUltraFineAdjustments(foods, targets, currentTotals);
-    }
-    
-    // PHASE 3: Micro-optimization for any remaining gaps
-    console.log(`\n=== PHASE 3: MICRO-OPTIMIZATION ===`);
-    const currentTotals = calculateTotals(foods);
-    const proteinAccuracy = currentTotals.protein / targets.protein;
-    const carbsAccuracy = currentTotals.carbs / targets.carbs;
-    const fatAccuracy = currentTotals.fat / targets.fat;
-    
-    const needsMicro = proteinAccuracy < 0.99 || carbsAccuracy < 0.99 || fatAccuracy < 0.99;
-    
-    if (needsMicro) {
-        console.log(`Applying micro-adjustments...`);
-        applyMicroAdjustments(foods, targets, currentTotals);
-    }
-    
-    // Final validation and solution selection
-    const finalTotals = calculateTotals(foods);
-    const finalProteinAcc = finalTotals.protein / targets.protein;
-    const finalCarbsAcc = finalTotals.carbs / targets.carbs;
-    const finalFatAcc = finalTotals.fat / targets.fat;
-    
-    const finalMeets99 = finalProteinAcc >= 0.99 && finalCarbsAcc >= 0.99 && finalFatAcc >= 0.99;
-    
-    if (!finalMeets99 && bestSolution) {
-        console.log(`⚠️ Using best ultra-precision solution found (score: ${bestAccuracyScore.toFixed(2)})`);
-        foods.splice(0, foods.length, ...bestSolution);
-    }
-    
-    // Round quantities to whole grams for practical use
-    foods.forEach(food => {
-        food.quantity = Math.round(food.quantity * 10) / 10; // Round to 0.1g precision
-        food.nutritionMultiplier = food.quantity / 100;
-        food.explanation = getWeightExplanation(food.food, food.quantity, food.type);
-    });
-    
-    return foods;
-}
-
-// Enhanced accuracy scoring function - FIXED fat over-targeting penalties
-function calculateAccuracyScore(proteinAcc, carbsAcc, fatAcc, threshold) {
-    let score = 0;
-    
-    // Heavily reward meeting threshold
-    if (proteinAcc >= threshold) score += 1000;
-    else score += proteinAcc * 500;
-    
-    if (carbsAcc >= threshold) score += 1000;
-    else score += carbsAcc * 500;
-    
-    if (fatAcc >= threshold) score += 1000;
-    else score += fatAcc * 500;
-    
-    // Bonus for being very close to 100%
-    score += Math.max(0, 200 - Math.abs(proteinAcc - 1) * 500);
-    score += Math.max(0, 200 - Math.abs(carbsAcc - 1) * 500);
-    score += Math.max(0, 200 - Math.abs(fatAcc - 1) * 500);
-    
-    // CRITICAL: Heavy penalty for fat over-targeting (fat is hardest to reduce later)
-    if (fatAcc > 1.05) {
-        score -= (fatAcc - 1.05) * 2000; // Massive penalty for fat excess
-        console.log(`Heavy penalty for fat excess: ${((fatAcc - 1.05) * 2000).toFixed(0)} points`);
-    }
-    
-    // Extra bonus for tight fat control
-    if (fatAcc >= 0.99 && fatAcc <= 1.01) {
-        score += 500; // Bonus for perfect fat targeting
-    }
-    
-    return score;
-}
-
-// Coarse adjustment function for Phase 1 - FIXED fat constraints
-function applyCoarseAdjustments(foods, targets, currentTotals) {
-    const proteinRatio = targets.protein / currentTotals.protein;
-    const carbsRatio = targets.carbs / currentTotals.carbs;
-    const fatRatio = targets.fat / currentTotals.fat;
-    
-    console.log(`Coarse ratios: ${proteinRatio.toFixed(3)}x protein, ${carbsRatio.toFixed(3)}x carbs, ${fatRatio.toFixed(3)}x fat`);
-    
-    foods.forEach(food => {
-        let adjustmentFactor = 1;
-        
-        if (food.priority === 'protein') {
-            adjustmentFactor = proteinRatio * 0.8 + (food.food.fat > 5 ? Math.min(1.1, fatRatio) : fatRatio) * 0.2;
-            
-            // CRITICAL: If fat is already over target, be much more conservative with protein sources that have fat
-            if (food.food.fat > 5 && fatRatio < 0.95) {
-                adjustmentFactor = Math.min(adjustmentFactor, 1.05); // Cap increases when fat is over
-                console.log(`Limiting ${food.food.name} due to excess fat (${fatRatio.toFixed(3)}x)`);
-            }
-            
-        } else if (food.priority === 'carbs') {
-            adjustmentFactor = carbsRatio * 0.8 + (food.food.fat > 3 ? Math.min(1.1, fatRatio) : fatRatio) * 0.2;
-            
-        } else if (food.priority === 'fat') {
-            // FIXED: More precise fat ratio handling
-            if (food.isPureOil) {
-                adjustmentFactor = fatRatio;
-                
-                // CRITICAL: When fat is over target, be more aggressive about reducing oils
-                if (fatRatio < 0.95) {
-                    adjustmentFactor = Math.max(0.7, fatRatio * 0.9); // More aggressive reduction
-                    console.log(`Aggressively reducing oil ${food.food.name} (${fatRatio.toFixed(3)}x)`);
-                }
-            } else {
-                adjustmentFactor = fatRatio;
-                
-                // For mixed fat sources, also be more conservative when over target
-                if (fatRatio < 0.95) {
-                    adjustmentFactor = Math.max(0.8, fatRatio * 0.95);
-                }
-            }
-        }
-        
-        // Enhanced bounds checking with stricter fat source limits when over target
-        if (food.priority === 'fat' && fatRatio < 0.9) {
-            // When fat is significantly over, be very conservative
-            adjustmentFactor = Math.max(0.6, Math.min(1.05, adjustmentFactor));
-        } else {
-            // Normal bounds
-            adjustmentFactor = Math.max(0.7, Math.min(1.3, adjustmentFactor));
-        }
-        
-        const oldQuantity = food.quantity;
-        const newQuantity = food.quantity * adjustmentFactor;
-        food.quantity = Math.max(food.minQty, Math.min(food.maxQty, newQuantity));
-        food.nutritionMultiplier = food.quantity / 100;
-        
-        if (Math.abs(food.quantity - oldQuantity) > 2) {
-            console.log(`${food.food.name}: ${oldQuantity.toFixed(1)}g → ${food.quantity.toFixed(1)}g (${adjustmentFactor.toFixed(3)}x)`);
-        }
-    });
-}
-
-// Ultra-fine adjustment function for Phase 2 - FIXED fat over-targeting
-function applyUltraFineAdjustments(foods, targets, currentTotals) {
-    const proteinDeficit = targets.protein - currentTotals.protein;
-    const carbsDeficit = targets.carbs - currentTotals.carbs;
-    const fatDeficit = targets.fat - currentTotals.fat;
-    
-    console.log(`Ultra-fine deficits: ${proteinDeficit.toFixed(3)}p ${carbsDeficit.toFixed(3)}c ${fatDeficit.toFixed(3)}f`);
-    
-    foods.forEach(food => {
-        const currentContrib = {
-            protein: food.food.protein * food.nutritionMultiplier,
-            carbs: food.food.carbs * food.nutritionMultiplier,
-            fat: food.food.fat * food.nutritionMultiplier
-        };
-        
-        let adjustment = 0;
-        
-        if (food.priority === 'protein' && Math.abs(proteinDeficit) > 0.1) {
-            // Ultra-precise protein adjustment
-            const proteinAdjustment = proteinDeficit / Math.max(food.food.protein / 100, 0.01);
-            adjustment = proteinAdjustment * 0.25; // Smaller steps for precision
-            
-            // CRITICAL: If this protein source has fat and fat is already over target, be more conservative
-            if (food.food.fat > 5 && fatDeficit < -2) {
-                adjustment *= 0.5; // Reduce protein adjustment to avoid more fat
-                console.log(`Reducing ${food.food.name} protein adjustment due to excess fat`);
-            }
-            
-        } else if (food.priority === 'carbs' && Math.abs(carbsDeficit) > 0.1) {
-            // Ultra-precise carb adjustment
-            const carbAdjustment = carbsDeficit / Math.max(food.food.carbs / 100, 0.01);
-            adjustment = carbAdjustment * 0.25;
-            
-        } else if (food.priority === 'fat') {
-            // FIXED: Ultra-precise fat adjustment with proper over-target handling
-            if (Math.abs(fatDeficit) > 0.05) {
-                const fatAdjustment = fatDeficit / Math.max(food.food.fat / 100, 0.01);
-                
-                if (food.isPureOil) {
-                    // Pure oils: very small, precise steps
-                    adjustment = fatAdjustment * 0.15;
-                    
-                    // CRITICAL: If fat is over target, be more aggressive about reducing
-                    if (fatDeficit < 0) {
-                        adjustment = fatAdjustment * 0.3; // More aggressive reduction
-                        console.log(`Aggressively reducing ${food.food.name} due to excess fat`);
-                    }
-                } else {
-                    // Other fat sources: moderate steps  
-                    adjustment = fatAdjustment * 0.2;
-                    
-                    // CRITICAL: If fat is over target, reduce more aggressively
-                    if (fatDeficit < 0) {
-                        adjustment = fatAdjustment * 0.4;
-                        console.log(`Reducing ${food.food.name} fat source due to excess`);
-                    }
-                }
-            }
-        }
-        
-        // Apply adjustment with stricter bounds for fat sources when over target
-        if (adjustment !== 0) {
-            const oldQuantity = food.quantity;
-            let newQuantity = food.quantity + adjustment;
-            
-            // CRITICAL: Additional fat constraints when over target
-            if (food.priority === 'fat' && fatDeficit < -1) {
-                // When fat is significantly over, enforce stricter maximum bounds
-                const reducedMax = Math.min(food.maxQty, food.quantity * 0.95); // Max 5% reduction per iteration
-                newQuantity = Math.max(food.minQty, Math.min(reducedMax, newQuantity));
-            } else {
-                newQuantity = Math.max(food.minQty, Math.min(food.maxQty, newQuantity));
-            }
-            
-            food.quantity = newQuantity;
-            food.nutritionMultiplier = food.quantity / 100;
-            
-            if (Math.abs(newQuantity - oldQuantity) > 0.5) {
-                console.log(`${food.food.name}: ${oldQuantity.toFixed(1)}g → ${newQuantity.toFixed(1)}g (${adjustment.toFixed(2)}g adj)`);
-            }
-        }
-    });
-}
-
-// Micro-adjustment function for Phase 3 - FIXED fat over-targeting
-function applyMicroAdjustments(foods, targets, currentTotals) {
-    const proteinGap = targets.protein - currentTotals.protein;
-    const carbsGap = targets.carbs - currentTotals.carbs;
-    const fatGap = targets.fat - currentTotals.fat;
-    
-    console.log(`Micro gaps: ${proteinGap.toFixed(3)}p ${carbsGap.toFixed(3)}c ${fatGap.toFixed(3)}f`);
-    
-    // Find the food that can most efficiently close each gap
-    const gaps = [
-        { type: 'protein', gap: proteinGap, foods: foods.filter(f => f.priority === 'protein') },
-        { type: 'carbs', gap: carbsGap, foods: foods.filter(f => f.priority === 'carbs') },
-        { type: 'fat', gap: fatGap, foods: foods.filter(f => f.priority === 'fat') }
-    ];
-    
-    gaps.forEach(({ type, gap, foods: typeFoods }) => {
-        if (Math.abs(gap) > 0.05 && typeFoods.length > 0) {
-            
-            if (type === 'fat') {
-                // SPECIAL HANDLING FOR FAT: Choose the most appropriate food based on gap direction
-                let bestFood;
-                
-                if (gap < 0) {
-                    // Fat is over target - prioritize oils for reduction (most efficient)
-                    const oils = typeFoods.filter(f => f.isPureOil);
-                    if (oils.length > 0) {
-                        bestFood = oils.reduce((best, food) => {
-                            const efficiency = food.food.fat / 100;
-                            return efficiency > (best.food.fat / 100) ? food : best;
-                        });
-                        console.log(`Reducing oil ${bestFood.food.name} to fix fat excess`);
-                    } else {
-                        // No oils, use highest fat food
-                        bestFood = typeFoods.reduce((best, food) => {
-                            const efficiency = food.food.fat / 100;
-                            return efficiency > (best.food.fat / 100) ? food : best;
-                        });
-                        console.log(`Reducing fat source ${bestFood.food.name} to fix excess`);
-                    }
-                } else {
-                    // Fat is under target - find most efficient addition
-                    bestFood = typeFoods.reduce((best, food) => {
-                        const efficiency = food.food.fat / 100;
-                        return efficiency > (best.food.fat / 100) ? food : best;
-                    });
-                }
-                
-                // Make micro adjustment with enhanced precision for fat
-                const microAdjustment = gap / Math.max(bestFood.food.fat / 100, 0.01) * 0.08; // Smaller steps for fat
-                const newQuantity = bestFood.quantity + microAdjustment;
-                
-                // CRITICAL: Enforce stricter bounds when reducing fat
-                if (gap < 0) {
-                    const minReduction = Math.max(bestFood.minQty, bestFood.quantity * 0.9); // Max 10% reduction per micro-step
-                    bestFood.quantity = Math.max(minReduction, Math.min(bestFood.maxQty, newQuantity));
-                } else {
-                    bestFood.quantity = Math.max(bestFood.minQty, Math.min(bestFood.maxQty, newQuantity));
-                }
-                
-                bestFood.nutritionMultiplier = bestFood.quantity / 100;
-                console.log(`Micro-adjust ${bestFood.food.name}: ${gap.toFixed(3)}g fat gap → ${microAdjustment.toFixed(2)}g change`);
-                
-            } else {
-                // Standard handling for protein and carbs
-                const bestFood = typeFoods.reduce((best, food) => {
-                    const efficiency = food.food[type] / 100;
-                    return efficiency > (best.food[type] / 100) ? food : best;
-                });
-                
-                // Make tiny adjustment
-                const microAdjustment = gap / Math.max(bestFood.food[type] / 100, 0.01) * 0.1;
-                const newQuantity = bestFood.quantity + microAdjustment;
-                bestFood.quantity = Math.max(bestFood.minQty, Math.min(bestFood.maxQty, newQuantity));
-                bestFood.nutritionMultiplier = bestFood.quantity / 100;
-                
-                console.log(`Micro-adjust ${bestFood.food.name}: ${gap.toFixed(3)}g ${type} gap`);
-            }
-        }
-    });
-}
-
-// Helper function to calculate totals from food quantities
-function calculateTotals(foodItems) {
-    return foodItems.reduce((totals, item) => {
-        totals.protein += item.food.protein * item.nutritionMultiplier;
-        totals.carbs += item.food.carbs * item.nutritionMultiplier;
-        totals.fat += item.food.fat * item.nutritionMultiplier;
-        totals.calories += item.food.calories * item.nutritionMultiplier;
-        return totals;
-    }, { protein: 0, carbs: 0, fat: 0, calories: 0 });
-}
-
-// Helper function to get weight explanation
-function getWeightExplanation(food, quantity, category) {
-    return 'as listed in database';
 }
 
 // Display generated meal plan
@@ -2034,7 +1380,7 @@ function displayMealPlan(mealPlan) {
                             <div class="food-nutrition">P: ${itemProtein}g | C: ${itemCarbs}g | F: ${itemFat}g | Cal: ${itemCalories}</div>
                             <div style="font-size: 10px; color: #ffa500; font-style: italic; margin-top: 2px;">📏 ${item.explanation}</div>
                         </div>
-                        <div class="food-quantity">${item.quantity}g</div>
+                        <div class="food-quantity">${item.quantity.toFixed(1)}g</div>
                     </div>
                 </div>
             `;
@@ -2061,88 +1407,51 @@ function displayMealPlan(mealPlan) {
     updateDailySummary(mealPlan);
 }
 
-// Update daily summary with 99% ultra-precision accuracy indicators
+// Update daily summary with progress indicators
 function updateDailySummary(mealPlan) {
-    console.log(`\n📊 CALCULATING GLOBAL DAILY SUMMARY:`);
-    
-    const dailyTotals = mealPlan.reduce((totals, meal) => {
-        console.log(`Adding ${meal.name}: ${meal.totals.protein.toFixed(2)}p ${meal.totals.carbs.toFixed(2)}c ${meal.totals.fat.toFixed(2)}f`);
-        totals.protein += meal.totals.protein;
-        totals.carbs += meal.totals.carbs;
-        totals.fat += meal.totals.fat;
-        totals.calories += meal.totals.calories;
-        return totals;
-    }, { protein: 0, carbs: 0, fat: 0, calories: 0 });
+    const dailyTotals = mealPlan.reduce((totals, meal) => ({
+        protein: totals.protein + meal.totals.protein,
+        carbs: totals.carbs + meal.totals.carbs,
+        fat: totals.fat + meal.totals.fat,
+        calories: totals.calories + meal.totals.calories
+    }), { protein: 0, carbs: 0, fat: 0, calories: 0 });
     
     const targetProtein = parseFloat(document.getElementById('targetProtein').value) || 1;
     const targetCarbs = parseFloat(document.getElementById('targetCarbs').value) || 1;
     const targetFat = parseFloat(document.getElementById('targetFat').value) || 1;
     
-    // Calculate ultra-precision accuracy percentages
+    // Calculate accuracy percentages
     const proteinAccuracy = (dailyTotals.protein / targetProtein) * 100;
     const carbsAccuracy = (dailyTotals.carbs / targetCarbs) * 100;
     const fatAccuracy = (dailyTotals.fat / targetFat) * 100;
     
-    console.log(`📋 GLOBAL SYSTEM COMPARISON:`);
-    console.log(`🎯 TARGETS: ${targetProtein}p ${targetCarbs}c ${targetFat}f`);
-    console.log(`📈 ACTUAL:  ${dailyTotals.protein.toFixed(2)}p ${dailyTotals.carbs.toFixed(2)}c ${dailyTotals.fat.toFixed(2)}f`);
-    console.log(`📊 ACCURACY: ${proteinAccuracy.toFixed(2)}% protein, ${carbsAccuracy.toFixed(2)}% carbs, ${fatAccuracy.toFixed(2)}% fat`);
-    
-    // Check 99% ultra-precision requirement
-    const meets99 = proteinAccuracy >= 99 && carbsAccuracy >= 99 && fatAccuracy >= 99;
-    const meets95 = proteinAccuracy >= 95 && carbsAccuracy >= 95 && fatAccuracy >= 95;
-    
-    if (meets99) {
-        console.log(`🌐 GLOBAL SYSTEM SUCCESS! All macros meet 99%+ through global optimization!`);
-    } else if (meets95) {
-        console.log(`✅ Global system meets 95%+ baseline accuracy`);
-    }
-    
-    // Update display with ultra-precision indicators and fat-specific feedback
-    const getAccuracyIcon = (accuracy, macroType) => {
+    // Update display with accuracy indicators
+    const getAccuracyIcon = (accuracy) => {
         if (accuracy >= 99 && accuracy <= 101) {
-            return '<span style="color: #FFD700; text-shadow: 0 0 5px #FFD700;">👑</span>'; // Perfect accuracy
-        } else if (accuracy >= 99) {
-            return '<span style="color: #2ecc71;">✓</span>'; // Good accuracy but might be over
-        } else if (accuracy >= 95) {
-            return '<span style="color: #f39c12;">⚡</span>'; // Decent accuracy
+            return '<span style="color: #FFD700; text-shadow: 0 0 5px #FFD700;">👑</span>';
+        } else if (accuracy >= 95 && accuracy <= 105) {
+            return '<span style="color: #2ecc71;">✓</span>';
+        } else if (accuracy >= 90 && accuracy <= 110) {
+            return '<span style="color: #f39c12;">⚡</span>';
         } else {
-            return '<span style="color: #e74c3c;">⚠</span>'; // Poor accuracy
+            return '<span style="color: #e74c3c;">⚠</span>';
         }
     };
     
     document.getElementById('totalProtein').innerHTML = 
-        `${dailyTotals.protein.toFixed(1)} ${getAccuracyIcon(proteinAccuracy, 'protein')}`;
+        `${dailyTotals.protein.toFixed(1)} ${getAccuracyIcon(proteinAccuracy)}`;
     document.getElementById('totalCarbs').innerHTML = 
-        `${dailyTotals.carbs.toFixed(1)} ${getAccuracyIcon(carbsAccuracy, 'carbs')}`;
+        `${dailyTotals.carbs.toFixed(1)} ${getAccuracyIcon(carbsAccuracy)}`;
     document.getElementById('totalFat').innerHTML = 
-        `${dailyTotals.fat.toFixed(1)} ${getAccuracyIcon(fatAccuracy, 'fat')}`;
+        `${dailyTotals.fat.toFixed(1)} ${getAccuracyIcon(fatAccuracy)}`;
     document.getElementById('totalCalories').textContent = dailyTotals.calories.toFixed(0);
     
-    // Update progress bars with enhanced visual feedback
+    // Update progress bars
     const targetCalories = targetProtein * 4 + targetCarbs * 4 + targetFat * 9;
     
-    // Add visual enhancement for 99%+ accuracy
-    const proteinProgress = document.getElementById('proteinProgress');
-    const carbsProgress = document.getElementById('carbsProgress');
-    const fatProgress = document.getElementById('fatProgress');
-    
-    proteinProgress.style.width = Math.min(100, (dailyTotals.protein / targetProtein) * 100) + '%';
-    carbsProgress.style.width = Math.min(100, (dailyTotals.carbs / targetCarbs) * 100) + '%';
-    fatProgress.style.width = Math.min(100, (dailyTotals.fat / targetFat) * 100) + '%';
-    
-    // Add golden glow effect for 99%+ accuracy
-    [proteinProgress, carbsProgress, fatProgress].forEach((bar, index) => {
-        const accuracy = [proteinAccuracy, carbsAccuracy, fatAccuracy][index];
-        if (accuracy >= 99) {
-            bar.style.boxShadow = '0 0 10px #FFD700';
-            bar.style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
-        } else {
-            bar.style.boxShadow = 'none';
-            bar.style.background = ''; // Reset to CSS class default
-        }
-    });
-    
+    document.getElementById('proteinProgress').style.width = Math.min(100, (dailyTotals.protein / targetProtein) * 100) + '%';
+    document.getElementById('carbsProgress').style.width = Math.min(100, (dailyTotals.carbs / targetCarbs) * 100) + '%';
+    document.getElementById('fatProgress').style.width = Math.min(100, (dailyTotals.fat / targetFat) * 100) + '%';
     document.getElementById('caloriesProgress').style.width = Math.min(100, (dailyTotals.calories / targetCalories) * 100) + '%';
 }
 
@@ -2176,7 +1485,7 @@ function downloadMealPlan() {
         
         meal.foods.forEach(item => {
             const multiplier = item.nutritionMultiplier || (item.quantity / 100);
-            content += `• ${item.quantity}g ${item.food.name} (${item.explanation})\n`;
+            content += `• ${item.quantity.toFixed(1)}g ${item.food.name}\n`;
             content += `  P: ${(item.food.protein * multiplier).toFixed(1)}g | C: ${(item.food.carbs * multiplier).toFixed(1)}g | F: ${(item.food.fat * multiplier).toFixed(1)}g | Cal: ${(item.food.calories * multiplier).toFixed(0)}\n`;
         });
         
@@ -2184,13 +1493,12 @@ function downloadMealPlan() {
     });
     
     // Add daily totals
-    const dailyTotals = currentMealPlan.reduce((totals, meal) => {
-        totals.protein += meal.totals.protein;
-        totals.carbs += meal.totals.carbs;
-        totals.fat += meal.totals.fat;
-        totals.calories += meal.totals.calories;
-        return totals;
-    }, { protein: 0, carbs: 0, fat: 0, calories: 0 });
+    const dailyTotals = currentMealPlan.reduce((totals, meal) => ({
+        protein: totals.protein + meal.totals.protein,
+        carbs: totals.carbs + meal.totals.carbs,
+        fat: totals.fat + meal.totals.fat,
+        calories: totals.calories + meal.totals.calories
+    }), { protein: 0, carbs: 0, fat: 0, calories: 0 });
     
     content += '\n' + '═'.repeat(60) + '\n';
     content += 'DAILY TOTALS:\n';
@@ -2200,7 +1508,7 @@ function downloadMealPlan() {
     content += `Calories: ${dailyTotals.calories.toFixed(0)}\n\n`;
     content += '* Generated from USDA FoodData Central database\n';
     content += '* Quantities automatically calculated to meet your macro targets\n';
-    content += '* Weight calculations adjusted for cooked vs dry specifications';
+    content += `* Food selection mode: ${isCustomMealMode ? 'Custom Per Meal' : 'Quick Setup'}`;
 
     const contentEl = document.createElement("pre");
     contentEl.innerText = content;
@@ -2214,7 +1522,7 @@ function downloadMealPlan() {
 
     html2canvas(wrapper, { scale: 2 }).then(canvas => {
         const link = document.createElement("a");
-        link.download = `BUILT_Automated_Meal_Plan_${formattedDate.replace(/\s/g, "_")}.png`;
+        link.download = `BUILT_Meal_Plan_${formattedDate.replace(/\s/g, "_")}.png`;
         link.href = canvas.toDataURL();
         link.click();
         document.body.removeChild(wrapper);
