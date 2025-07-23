@@ -1089,7 +1089,7 @@
     <!-- Weight Instructions at Bottom -->
     <div class="weight-instructions">
         <div class="weight-instructions-title">📏 Food Weighing Guide</div>
-        Foods are marked with their measurement state: <strong>cooked</strong>, <strong>raw</strong>, <strong>dry</strong> (before cooking), <strong>ready</strong> (as-is), <strong>liquid</strong> (by volume), etc. Always weigh/measure foods in the state indicated for accurate macros.
+        Foods are marked with their measurement state: <strong>cooked</strong>, <strong>raw</strong>, <strong>dry</strong> (before cooking), <strong>ready</strong> (as-is), <strong>liquid</strong> (by volume), etc. Always weigh/measure foods in the state indicated for accurate macros. <strong>Whole eggs are counted individually (1 egg, 2 eggs, etc.)</strong>
     </div>
 </div>
 
@@ -1111,7 +1111,7 @@ let foodDatabase = {
         { id: 'p12', name: '2% Greek Yogurt (plain)', protein: 10.0, carbs: 3.9, fat: 2.0, calories: 81, state: 'ready', meals: ['breakfast', 'snack'] },
         { id: 'p13', name: '0% Greek Yogurt (plain)', protein: 10.3, carbs: 3.6, fat: 0.4, calories: 59, state: 'ready', meals: ['breakfast', 'snack'] },
         { id: 'p14', name: 'Liquid Egg Whites', protein: 10.9, carbs: 0.7, fat: 0.2, calories: 52, state: 'liquid', meals: ['breakfast'] },
-        { id: 'p15', name: 'Whole Egg', protein: 12.6, carbs: 0.7, fat: 9.9, calories: 147, state: 'cooked', meals: ['breakfast'] },
+        { id: 'p15', name: 'Whole Egg', protein: 6.3, carbs: 0.4, fat: 5.0, calories: 74, state: 'cooked', meals: ['breakfast'], unit: 'egg', unitSize: 1 },
         { id: 'p16', name: 'Whey Isolate Protein Powder', protein: 90.0, carbs: 0.0, fat: 0.5, calories: 375, state: 'powder', meals: ['breakfast', 'snack', 'pre-workout', 'post-workout'] },
         { id: 'p17', name: 'Vegan Protein Powder', protein: 75.0, carbs: 8.0, fat: 2.5, calories: 370, state: 'powder', meals: ['breakfast', 'snack', 'pre-workout', 'post-workout'] }
     ],
@@ -1232,6 +1232,28 @@ function getStateDescription(state) {
         'frozen': 'weigh frozen'
     };
     return descriptions[state] || 'weigh as indicated';
+}
+
+// Helper function to check if food uses custom units
+function isUnitFood(food) {
+    return food.unit && food.unitSize;
+}
+
+// Helper function to get display text for quantity
+function getQuantityDisplay(food, quantity) {
+    if (isUnitFood(food)) {
+        const units = Math.round(quantity / food.unitSize);
+        return units === 1 ? `${units} ${food.unit}` : `${units} ${food.unit}s`;
+    }
+    return `${quantity.toFixed(1)}g`;
+}
+
+// Helper function to get explanation text
+function getExplanationText(food) {
+    if (isUnitFood(food)) {
+        return `count individual ${food.unit}s`;
+    }
+    return `weigh ${food.state}`;
 }
 
 // Mode switching functions
@@ -1381,16 +1403,19 @@ function displayFoods(category, foods) {
             displayName = displayName.substring(0, 30) + '...';
         }
         
+        // Special handling for unit foods in display
+        const stateDesc = isUnitFood(food) ? `count individual ${food.unit}s` : getStateDescription(food.state);
+        
         return `
             <div class="food-item ${isSelected ? 'selected' : ''}" 
                  onclick="toggleFood('${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})"
-                 title="${food.name} - ${getStateDescription(food.state)}">
+                 title="${food.name} - ${stateDesc}">
                 <div class="food-name">${displayName}</div>
                 <div class="food-macros ${isSelected ? 'selected' : ''}">
                     P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
                 </div>
                 <div class="food-state ${isSelected ? 'selected' : ''}">
-                    📏 ${getStateDescription(food.state)}
+                    📏 ${stateDesc}
                 </div>
                 <div class="food-badges">${badge} ${stateBadge}</div>
             </div>
@@ -1417,16 +1442,19 @@ function displayMealFoods(mealType, category, foods) {
             displayName = displayName.substring(0, 22) + '...';
         }
         
+        // Special handling for unit foods in display
+        const stateDesc = isUnitFood(food) ? `count individual ${food.unit}s` : getStateDescription(food.state);
+        
         return `
             <div class="food-item ${isSelected ? 'selected' : ''} ${isAppropriate ? '' : 'not-appropriate'}" 
                  onclick="toggleMealFood('${mealType}', '${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})"
-                 title="${food.name} - ${getStateDescription(food.state)}${isAppropriate ? '' : ' (Not typically used for ' + mealType + ')'}">
+                 title="${food.name} - ${stateDesc}${isAppropriate ? '' : ' (Not typically used for ' + mealType + ')'}">
                 <div class="food-name">${displayName} ${isAppropriate ? '✓' : '⚠️'}</div>
                 <div class="food-macros ${isSelected ? 'selected' : ''}">
                     P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
                 </div>
                 <div class="food-state ${isSelected ? 'selected' : ''}">
-                    📏 ${getStateDescription(food.state)}
+                    📏 ${stateDesc}
                 </div>
                 <div class="food-badges">${badge} ${stateBadge}</div>
             </div>
@@ -1468,8 +1496,10 @@ function updateMealSelectedFoodsDisplay(mealType, category) {
             displayName = displayName.substring(0, 20) + '...';
         }
         
+        const stateInfo = isUnitFood(food) ? `per ${food.unit}` : food.state;
+        
         return `
-            <div class="selected-food-tag" onclick="removeMealFood('${mealType}', '${category}', '${food.id}')" title="Click to remove - ${food.name} (${food.state})">
+            <div class="selected-food-tag" onclick="removeMealFood('${mealType}', '${category}', '${food.id}')" title="Click to remove - ${food.name} (${stateInfo})">
                 ${displayName} ✕
             </div>
         `;
@@ -1511,8 +1541,10 @@ function updateSelectedFoodsDisplay(category) {
             displayName = displayName.substring(0, 25) + '...';
         }
         
+        const stateInfo = isUnitFood(food) ? `per ${food.unit}` : food.state;
+        
         return `
-            <div class="selected-food-tag" onclick="removeFood('${category}', '${food.id}')" title="Click to remove - ${food.name} (${food.state})">
+            <div class="selected-food-tag" onclick="removeFood('${category}', '${food.id}')" title="Click to remove - ${food.name} (${stateInfo})">
                 ${displayName} ✕
             </div>
         `;
@@ -1772,11 +1804,19 @@ async function buildMealPlan(params) {
         }
         
         // Start with rough equal portions per meal as baseline
-        const basePortionSize = 100; // grams
         availableFoods.forEach(item => {
-            item.quantity = basePortionSize;
-            item.nutritionMultiplier = basePortionSize / 100;
-            item.explanation = `weigh ${item.food.state}`;
+            if (isUnitFood(item.food)) {
+                // For unit foods (like eggs), start with a reasonable number
+                item.quantity = item.food.unitSize * 2; // Start with 2 units
+                item.nutritionMultiplier = (item.quantity / item.food.unitSize);
+                item.explanation = getExplanationText(item.food);
+            } else {
+                // For weight-based foods, use 100g baseline
+                const basePortionSize = 100; // grams
+                item.quantity = basePortionSize;
+                item.nutritionMultiplier = basePortionSize / 100;
+                item.explanation = getExplanationText(item.food);
+            }
             meal.foods.push(item);
         });
         
@@ -1815,7 +1855,7 @@ async function buildMealPlan(params) {
     return optimizedPlan;
 }
 
-// Enhanced global optimization with calorie balancing
+// Enhanced global optimization with calorie balancing and unit food handling
 async function globalOptimizeMealPlan(mealPlan, targets) {
     const iterations = 30;
     const targetCaloriesPerMeal = (targets.targetProtein * 4 + targets.targetCarbs * 4 + targets.targetFat * 9) / mealPlan.length;
@@ -1830,10 +1870,10 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
         mealPlan.forEach(meal => {
             let mealCals = 0;
             meal.foods.forEach(item => {
-                const protein = item.food.protein * (item.quantity / 100);
-                const carbs = item.food.carbs * (item.quantity / 100);
-                const fat = item.food.fat * (item.quantity / 100);
-                const calories = item.food.calories * (item.quantity / 100);
+                const protein = item.food.protein * item.nutritionMultiplier;
+                const carbs = item.food.carbs * item.nutritionMultiplier;
+                const fat = item.food.fat * item.nutritionMultiplier;
+                const calories = item.food.calories * item.nutritionMultiplier;
                 
                 totalProtein += protein;
                 totalCarbs += carbs;
@@ -1868,8 +1908,16 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
                     adjustmentFactor *= Math.min(1.1, Math.max(0.9, fatRatio * 0.8 + 0.2));
                 }
                 
-                item.quantity = Math.min(500, Math.max(10, item.quantity * adjustmentFactor));
-                item.nutritionMultiplier = item.quantity / 100;
+                if (isUnitFood(item.food)) {
+                    // For unit foods, round to nearest whole unit and ensure minimum of 1
+                    const targetUnits = Math.max(1, Math.round((item.quantity / item.food.unitSize) * adjustmentFactor));
+                    item.quantity = targetUnits * item.food.unitSize;
+                    item.nutritionMultiplier = targetUnits;
+                } else {
+                    // For weight-based foods, apply normal adjustment
+                    item.quantity = Math.min(500, Math.max(10, item.quantity * adjustmentFactor));
+                    item.nutritionMultiplier = item.quantity / 100;
+                }
             });
         });
         
@@ -1895,7 +1943,7 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
     return mealPlan;
 }
 
-// Display generated meal plan with state information
+// Display generated meal plan with unit food handling
 function displayMealPlan(mealPlan) {
     const container = document.getElementById('generatedMeals');
     
@@ -1913,11 +1961,10 @@ function displayMealPlan(mealPlan) {
             const stateBadge = getStateBadge(item.food.state);
             
             // Use nutritionMultiplier for accurate macro calculations
-            const multiplier = item.nutritionMultiplier || (item.quantity / 100);
-            const itemProtein = (item.food.protein * multiplier).toFixed(1);
-            const itemCarbs = (item.food.carbs * multiplier).toFixed(1);
-            const itemFat = (item.food.fat * multiplier).toFixed(1);
-            const itemCalories = (item.food.calories * multiplier).toFixed(0);
+            const itemProtein = (item.food.protein * item.nutritionMultiplier).toFixed(1);
+            const itemCarbs = (item.food.carbs * item.nutritionMultiplier).toFixed(1);
+            const itemFat = (item.food.fat * item.nutritionMultiplier).toFixed(1);
+            const itemCalories = (item.food.calories * item.nutritionMultiplier).toFixed(0);
             
             return `
                 <div class="meal-food">
@@ -1927,7 +1974,7 @@ function displayMealPlan(mealPlan) {
                             <div class="food-nutrition">P: ${itemProtein}g | C: ${itemCarbs}g | F: ${itemFat}g | Cal: ${itemCalories}</div>
                             <div class="food-state-info">📏 ${item.explanation}</div>
                         </div>
-                        <div class="food-quantity">${item.quantity.toFixed(1)}g</div>
+                        <div class="food-quantity">${getQuantityDisplay(item.food, item.quantity)}</div>
                     </div>
                 </div>
             `;
@@ -2016,7 +2063,7 @@ function updateDailySummary(mealPlan, calorieVariance = null) {
     }
 }
 
-// Download meal plan with state information
+// Download meal plan with unit food handling
 function downloadMealPlan() {
     if (!currentMealPlan) return;
     
@@ -2039,16 +2086,21 @@ function downloadMealPlan() {
 
     let content = '';
     
-    // Add meal plan content with state information
+    // Add meal plan content with unit food handling
     currentMealPlan.forEach((meal, index) => {
         content += `\nMEAL ${index + 1}\n`;
         content += '─'.repeat(50) + '\n';
         
         meal.foods.forEach(item => {
-            const multiplier = item.nutritionMultiplier || (item.quantity / 100);
-            content += `• ${item.quantity.toFixed(1)}g ${item.food.name} (${item.food.state})\n`;
-            content += `  P: ${(item.food.protein * multiplier).toFixed(1)}g | C: ${(item.food.carbs * multiplier).toFixed(1)}g | F: ${(item.food.fat * multiplier).toFixed(1)}g | Cal: ${(item.food.calories * multiplier).toFixed(0)}\n`;
-            content += `  📏 Weigh/measure ${getStateDescription(item.food.state)}\n`;
+            const quantityDisplay = getQuantityDisplay(item.food, item.quantity);
+            content += `• ${quantityDisplay} ${item.food.name} (${item.food.state})\n`;
+            content += `  P: ${(item.food.protein * item.nutritionMultiplier).toFixed(1)}g | C: ${(item.food.carbs * item.nutritionMultiplier).toFixed(1)}g | F: ${(item.food.fat * item.nutritionMultiplier).toFixed(1)}g | Cal: ${(item.food.calories * item.nutritionMultiplier).toFixed(0)}\n`;
+            
+            if (isUnitFood(item.food)) {
+                content += `  📏 Count individual ${item.food.unit}s\n`;
+            } else {
+                content += `  📏 Weigh/measure ${getStateDescription(item.food.state)}\n`;
+            }
         });
         
         content += `\nMeal Totals: P: ${meal.totals.protein.toFixed(1)}g | C: ${meal.totals.carbs.toFixed(1)}g | F: ${meal.totals.fat.toFixed(1)}g | Cal: ${meal.totals.calories.toFixed(0)}\n\n`;
@@ -2071,6 +2123,7 @@ function downloadMealPlan() {
     content += '* Generated from USDA FoodData Central database\n';
     content += '* Quantities automatically calculated to meet your macro targets\n';
     content += '* Always weigh/measure foods in the state indicated for accurate macros\n';
+    content += '* Whole eggs are counted individually (1 egg, 2 eggs, etc.)\n';
     content += `* Food selection mode: ${isCustomMealMode ? 'Custom Per Meal' : 'Quick Setup'}`;
 
     const contentEl = document.createElement("pre");
@@ -2101,6 +2154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Loaded built-in food database with', 
         Object.values(foodDatabase).reduce((sum, cat) => sum + cat.length, 0), 'foods');
+    console.log('🥚 Whole eggs will be counted as individual units');
 });
 </script>
 </body>
