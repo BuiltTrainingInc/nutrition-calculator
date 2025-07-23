@@ -961,7 +961,7 @@
             </div>
             <div class="macro-input">
                 <label>MEALS</label>
-                <input type="number" id="mealsCount" value="4" min="3" max="6" onchange="updateMealTabs()">
+                <input type="number" id="mealsCount" value="5" min="3" max="6" onchange="updateMealTabs()">
             </div>
         </div>
     </div>
@@ -1084,6 +1084,12 @@
         <div style="text-align: center; margin-top: 20px;">
             <button class="download-btn" onclick="downloadMealPlan()">📥 DOWNLOAD MEAL PLAN</button>
         </div>
+    </div>
+
+    <!-- Weight Instructions at Bottom -->
+    <div class="weight-instructions">
+        <div class="weight-instructions-title">📏 Food Weighing Guide</div>
+        Foods are marked with their measurement state: <strong>cooked</strong>, <strong>raw</strong>, <strong>dry</strong> (before cooking), <strong>ready</strong> (as-is), <strong>liquid</strong> (by volume), etc. Always weigh/measure foods in the state indicated for accurate macros.
     </div>
 </div>
 
@@ -1251,7 +1257,7 @@ function switchToCustomMeals() {
 }
 
 function generateMealTabs() {
-    const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
+    const mealsCount = parseInt(document.getElementById('mealsCount').value) || 5;
     const mealTypes = getMealTypes(mealsCount);
     const mealDisplayNames = Array.from({length: 6}, (_, i) => `Meal ${i + 1}`);
     
@@ -1289,7 +1295,7 @@ function generateMealTabs() {
         tabContentDiv.id = `${mealType}Tab`;
         
         tabContentDiv.innerHTML = `
-            <div class="meal-title">${displayName} Foods</div>
+            <div class="meal-title">Meal ${index + 1} Foods</div>
             <div class="meal-food-categories">
                 ${generateMealCategoryHTML(mealType, 'protein', 'PROTEIN SOURCES')}
                 ${generateMealCategoryHTML(mealType, 'carb', 'CARBOHYDRATE SOURCES')}
@@ -1317,7 +1323,7 @@ function getMealTypes(count) {
         case 4: return ['breakfast', 'lunch', 'dinner', 'snack'];
         case 5: return ['breakfast', 'lunch', 'dinner', 'snack', 'post-workout'];
         case 6: return ['breakfast', 'lunch', 'dinner', 'snack', 'pre-workout', 'post-workout'];
-        default: return ['breakfast', 'lunch', 'dinner', 'snack'];
+        default: return ['breakfast', 'lunch', 'dinner', 'snack', 'post-workout'];
     }
 }
 
@@ -1556,7 +1562,7 @@ async function generateMealPlan() {
     const targetProtein = parseFloat(document.getElementById('targetProtein').value) || 150;
     const targetCarbs = parseFloat(document.getElementById('targetCarbs').value) || 200;
     const targetFat = parseFloat(document.getElementById('targetFat').value) || 60;
-    const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
+    const mealsCount = parseInt(document.getElementById('mealsCount').value) || 5;
     
     try {
         // Generate meal plan with global optimization
@@ -1604,7 +1610,7 @@ async function buildMealPlan(params) {
             case 4: return ['breakfast', 'lunch', 'dinner', 'snack'];
             case 5: return ['breakfast', 'lunch', 'dinner', 'snack', 'post-workout'];
             case 6: return ['breakfast', 'lunch', 'dinner', 'snack', 'pre-workout', 'post-workout'];
-            default: return ['breakfast', 'lunch', 'dinner', 'snack'];
+            default: return ['breakfast', 'lunch', 'dinner', 'snack', 'post-workout'];
         }
     };
     
