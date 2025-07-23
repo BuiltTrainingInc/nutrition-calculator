@@ -2,10 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>BUILT Automated Meal Plan Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        /* Global Mobile Touch Optimizations */
+        * {
+            -webkit-tap-highlight-color: rgba(220, 38, 38, 0.2);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+            
+            .section {
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+                margin-bottom: 12px;
+            }
+            
+            .meal-section {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            
+            .meal-header {
+                font-size: 15px;
+                margin-bottom: 12px;
+            }
+            
+            .meal-food {
+                padding: 14px;
+                margin-bottom: 8px;
+            }
+            
+            .daily-summary {
+                padding: 20px;
+                margin-top: 20px;
+            }
+            
+            .summary-item {
+                padding: 16px;
+            }
+            
+            .summary-number {
+                font-size: 24px;
+            }
+            
+            .summary-label {
+                font-size: 11px;
+                margin-top: 6px;
+            }
+        }
+
         .container {
             max-width: 1000px;
             margin: auto;
@@ -14,6 +80,15 @@
             background-color: #1A1A1A;
             color: #FFFFFF;
             border-radius: 8px;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 0;
+                border-radius: 0;
+            }
         }
 
         .section {
@@ -43,6 +118,20 @@
             margin-bottom: 20px;
         }
 
+        @media (max-width: 768px) {
+            .macro-inputs {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .macro-inputs {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
         .macro-input {
             text-align: center;
         }
@@ -68,6 +157,20 @@
             font-size: 16px;
             font-weight: bold;
             transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            .macro-input label {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            
+            .macro-input input {
+                padding: 14px;
+                font-size: 18px;
+                border-radius: 6px;
+            }
         }
 
         .macro-input input:focus {
@@ -101,6 +204,15 @@
             background: #1A1A1A;
         }
 
+        @media (max-width: 768px) {
+            .food-grid {
+                grid-template-columns: 1fr;
+                max-height: 250px;
+                padding: 12px;
+                gap: 8px;
+            }
+        }
+
         .food-item {
             background: #000000;
             padding: 12px;
@@ -124,6 +236,26 @@
             color: #FFFFFF;
             border-color: #DC2626;
             box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .food-item {
+                padding: 16px;
+                font-size: 13px;
+                border-radius: 6px;
+                min-height: 80px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+            
+            .food-item:hover {
+                transform: none;
+            }
+            
+            .food-item:active {
+                transform: scale(0.98);
+            }
         }
 
         .food-item.not-appropriate {
@@ -155,10 +287,24 @@
             color: #FFFFFF;
         }
 
+        .food-state {
+            font-size: 9px;
+            color: #FFA500;
+            font-weight: 600;
+            font-style: italic;
+            margin-top: 3px;
+            text-transform: lowercase;
+        }
+
+        .selected .food-state {
+            color: #FFE4B5;
+        }
+
         .food-badges {
             display: flex;
             gap: 5px;
             margin-top: 6px;
+            align-items: center;
         }
 
         .macro-badge {
@@ -168,6 +314,17 @@
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .state-badge {
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 7px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            background: #FFA500;
+            color: #000000;
         }
 
         .protein-badge { background: #DC2626; color: #FFFFFF; }
@@ -217,6 +374,29 @@
             transform: translateY(-1px);
         }
 
+        @media (max-width: 768px) {
+            .selected-food-tag {
+                padding: 10px 16px;
+                font-size: 12px;
+                border-radius: 6px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .selected-food-tag:hover {
+                transform: none;
+                border: none;
+                background: #000000;
+            }
+            
+            .selected-food-tag:active {
+                transform: scale(0.95);
+            }
+        }
+
         .generate-btn {
             width: 100%;
             padding: 20px;
@@ -249,6 +429,24 @@
             transform: none;
             box-shadow: none;
             border: none;
+        }
+
+        @media (max-width: 768px) {
+            .generate-btn {
+                padding: 22px;
+                font-size: 16px;
+                border-radius: 6px;
+                margin: 20px 0;
+                letter-spacing: 0.5px;
+            }
+            
+            .generate-btn:hover {
+                transform: none;
+            }
+            
+            .generate-btn:active {
+                transform: scale(0.98);
+            }
         }
 
         .meal-plan-output {
@@ -309,10 +507,31 @@
             font-size: 16px;
         }
 
+        @media (max-width: 768px) {
+            .food-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .food-quantity {
+                font-size: 18px;
+                align-self: flex-end;
+            }
+        }
+
         .food-nutrition {
             font-size: 12px;
             color: #6B7280;
             margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .food-state-info {
+            font-size: 10px;
+            color: #FFA500;
+            font-style: italic;
+            margin-top: 2px;
             font-weight: 600;
         }
 
@@ -340,6 +559,20 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
         }
 
         .summary-item {
@@ -406,6 +639,24 @@
             transform: translateY(-2px);
         }
 
+        @media (max-width: 768px) {
+            .download-btn {
+                width: 100%;
+                padding: 18px;
+                font-size: 15px;
+                border-radius: 6px;
+                margin-top: 16px;
+            }
+            
+            .download-btn:hover {
+                transform: none;
+            }
+            
+            .download-btn:active {
+                transform: scale(0.98);
+            }
+        }
+
         /* Mode Toggle Styles */
         .mode-toggle {
             display: flex;
@@ -445,6 +696,28 @@
             background: #FFFFFF;
             color: #DC2626;
             border-color: #DC2626;
+        }
+
+        @media (max-width: 768px) {
+            .mode-toggle {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .mode-btn {
+                padding: 18px;
+                font-size: 13px;
+                border-radius: 6px;
+            }
+            
+            .mode-btn:hover {
+                transform: none;
+            }
+            
+            .mode-btn:active {
+                transform: scale(0.98);
+            }
         }
 
         /* Meal Tabs Styles */
@@ -491,6 +764,34 @@
             background: #FFFFFF;
             color: #DC2626;
             border-color: #DC2626;
+        }
+
+        @media (max-width: 768px) {
+            .tab-buttons {
+                gap: 8px;
+                padding-bottom: 12px;
+            }
+            
+            .tab-btn {
+                padding: 14px 16px;
+                font-size: 12px;
+                border-radius: 6px;
+                flex: 1;
+                text-align: center;
+                min-width: 0;
+            }
+            
+            .tab-btn:hover {
+                background: #1A1A1A;
+                color: #6B7280;
+                border-color: #6B7280;
+            }
+            
+            .tab-btn.active:hover {
+                background: #DC2626;
+                color: #FFFFFF;
+                border-color: #DC2626;
+            }
         }
 
         .meal-tab-content {
@@ -549,6 +850,15 @@
             border: 2px solid #6B7280;
         }
 
+        @media (max-width: 768px) {
+            .compact-food-grid {
+                grid-template-columns: 1fr;
+                max-height: 180px;
+                padding: 12px;
+                gap: 8px;
+            }
+        }
+
         .compact-selected-foods {
             margin-top: 15px;
             padding: 12px;
@@ -565,12 +875,73 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        .weight-instructions {
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid #FFA500;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #FFA500;
+            font-weight: 600;
+        }
+
+        .weight-instructions-title {
+            font-weight: 900;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .weight-instructions {
+                padding: 16px;
+                font-size: 13px;
+                border-radius: 6px;
+                margin-bottom: 16px;
+            }
+            
+            .weight-instructions-title {
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h2 style="text-align: center; color: #FFFFFF; margin-bottom: 10px; font-weight: 900; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">BUILT AUTOMATED MEAL PLAN GENERATOR</h2>
     <p style="text-align: center; margin-bottom: 30px; color: #6B7280; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Professional meal planning with 54 USDA-verified foods • <span style="color: #DC2626; font-weight: 900; text-shadow: 0 0 5px #DC2626;">SMART MEAL ASSIGNMENT - 99%+ ACCURACY 🧠</span></p>
+
+    <style>
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 24px !important;
+                letter-spacing: 1px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .container > p {
+                font-size: 12px !important;
+                margin-bottom: 20px !important;
+                letter-spacing: 0.5px !important;
+                line-height: 1.4 !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 20px !important;
+                letter-spacing: 0.5px !important;
+                line-height: 1.2 !important;
+            }
+            
+            .container > p {
+                font-size: 11px !important;
+            }
+        }
+    </style>
 
     <!-- Macro Targets -->
     <div class="section">
@@ -827,6 +1198,36 @@ function getMacroBadge(type) {
     return badges[type] || '';
 }
 
+function getStateBadge(state) {
+    const stateMap = {
+        'cooked': 'COOKED',
+        'raw': 'RAW',
+        'dry': 'DRY',
+        'ready': 'READY',
+        'liquid': 'LIQUID',
+        'powder': 'POWDER',
+        'spread': 'SPREAD',
+        'solid': 'SOLID',
+        'frozen': 'FROZEN'
+    };
+    return `<span class="state-badge">${stateMap[state] || state.toUpperCase()}</span>`;
+}
+
+function getStateDescription(state) {
+    const descriptions = {
+        'cooked': 'weigh after cooking',
+        'raw': 'weigh before cooking/preparation',
+        'dry': 'weigh dry before adding liquid',
+        'ready': 'weigh as-is/ready to eat',
+        'liquid': 'measure by volume (mL/cups)',
+        'powder': 'measure dry powder',
+        'spread': 'weigh as spread/paste',
+        'solid': 'weigh solid form',
+        'frozen': 'weigh frozen'
+    };
+    return descriptions[state] || 'weigh as indicated';
+}
+
 // Mode switching functions
 function switchToQuickSetup() {
     isCustomMealMode = false;
@@ -852,7 +1253,7 @@ function switchToCustomMeals() {
 function generateMealTabs() {
     const mealsCount = parseInt(document.getElementById('mealsCount').value) || 4;
     const mealTypes = getMealTypes(mealsCount);
-    const mealDisplayNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout'];
+    const mealDisplayNames = Array.from({length: 6}, (_, i) => `Meal ${i + 1}`);
     
     // Initialize meal-specific foods structure
     mealSpecificFoods = {};
@@ -959,13 +1360,14 @@ function loadAllFoods() {
     });
 }
 
-// Display foods in grid (clean interface, smart assignment behind the scenes)
+// Display foods in grid with state information
 function displayFoods(category, foods) {
     const grid = document.getElementById(`${category}Grid`);
     
     const foodsHTML = foods.map(food => {
         const macroType = getFoodMacroType(food);
         const badge = getMacroBadge(macroType);
+        const stateBadge = getStateBadge(food.state);
         const isSelected = selectedFoods[category].some(f => f.id === food.id);
         
         let displayName = food.name;
@@ -974,12 +1376,17 @@ function displayFoods(category, foods) {
         }
         
         return `
-            <div class="food-item ${isSelected ? 'selected' : ''}" onclick="toggleFood('${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})">
+            <div class="food-item ${isSelected ? 'selected' : ''}" 
+                 onclick="toggleFood('${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})"
+                 title="${food.name} - ${getStateDescription(food.state)}">
                 <div class="food-name">${displayName}</div>
                 <div class="food-macros ${isSelected ? 'selected' : ''}">
                     P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
                 </div>
-                <div class="food-badges">${badge}</div>
+                <div class="food-state ${isSelected ? 'selected' : ''}">
+                    📏 ${getStateDescription(food.state)}
+                </div>
+                <div class="food-badges">${badge} ${stateBadge}</div>
             </div>
         `;
     }).join('');
@@ -995,23 +1402,27 @@ function displayMealFoods(mealType, category, foods) {
     const foodsHTML = foods.map(food => {
         const macroType = getFoodMacroType(food);
         const badge = getMacroBadge(macroType);
+        const stateBadge = getStateBadge(food.state);
         const isSelected = mealSpecificFoods[mealType] && mealSpecificFoods[mealType][category].some(f => f.id === food.id);
         const isAppropriate = food.meals.includes(mealType);
         
         let displayName = food.name;
-        if (displayName.length > 25) {
-            displayName = displayName.substring(0, 25) + '...';
+        if (displayName.length > 22) {
+            displayName = displayName.substring(0, 22) + '...';
         }
         
         return `
             <div class="food-item ${isSelected ? 'selected' : ''} ${isAppropriate ? '' : 'not-appropriate'}" 
                  onclick="toggleMealFood('${mealType}', '${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})"
-                 title="${isAppropriate ? food.name : food.name + ' (Not typically used for ' + mealType + ')'}">
+                 title="${food.name} - ${getStateDescription(food.state)}${isAppropriate ? '' : ' (Not typically used for ' + mealType + ')'}">
                 <div class="food-name">${displayName} ${isAppropriate ? '✓' : '⚠️'}</div>
                 <div class="food-macros ${isSelected ? 'selected' : ''}">
                     P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
                 </div>
-                <div class="food-badges">${badge}</div>
+                <div class="food-state ${isSelected ? 'selected' : ''}">
+                    📏 ${getStateDescription(food.state)}
+                </div>
+                <div class="food-badges">${badge} ${stateBadge}</div>
             </div>
         `;
     }).join('');
@@ -1052,7 +1463,7 @@ function updateMealSelectedFoodsDisplay(mealType, category) {
         }
         
         return `
-            <div class="selected-food-tag" onclick="removeMealFood('${mealType}', '${category}', '${food.id}')" title="Click to remove">
+            <div class="selected-food-tag" onclick="removeMealFood('${mealType}', '${category}', '${food.id}')" title="Click to remove - ${food.name} (${food.state})">
                 ${displayName} ✕
             </div>
         `;
@@ -1095,7 +1506,7 @@ function updateSelectedFoodsDisplay(category) {
         }
         
         return `
-            <div class="selected-food-tag" onclick="removeFood('${category}', '${food.id}')" title="Click to remove">
+            <div class="selected-food-tag" onclick="removeFood('${category}', '${food.id}')" title="Click to remove - ${food.name} (${food.state})">
                 ${displayName} ✕
             </div>
         `;
@@ -1180,7 +1591,7 @@ async function buildMealPlan(params) {
     console.log(`Building ${mealsCount} meals as one integrated system`);
     console.log(`Daily targets: ${params.targetProtein}p ${params.targetCarbs}c ${params.targetFat}f`);
     
-    const mealNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout'];
+    const mealNames = Array.from({length: 6}, (_, i) => `Meal ${i + 1}`);
     
     // STEP 1: Generate initial meal structure with SMART FOOD ASSIGNMENT
     console.log(`\n=== STEP 1: SMART MEAL STRUCTURE WITH FOOD APPROPRIATENESS ===`);
@@ -1198,7 +1609,7 @@ async function buildMealPlan(params) {
     };
     
     const mealTypes = getMealTypes(mealsCount);
-    const mealDisplayNames = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout'];
+    const mealDisplayNames = Array.from({length: 6}, (_, i) => `Meal ${i + 1}`);
     
     for (let i = 0; i < mealsCount; i++) {
         const mealType = mealTypes[i];
@@ -1226,7 +1637,7 @@ async function buildMealPlan(params) {
                     type: 'protein',
                     priority: 'protein'
                 });
-                console.log(`  Using user-selected protein: ${chosenProtein.name} for ${mealType}`);
+                console.log(`  Using user-selected protein: ${chosenProtein.name} (${chosenProtein.state}) for ${mealType}`);
             }
             
             // Add selected carbs for this meal  
@@ -1237,7 +1648,7 @@ async function buildMealPlan(params) {
                     type: 'carb',
                     priority: 'carbs'
                 });
-                console.log(`  Using user-selected carb: ${chosenCarb.name} for ${mealType}`);
+                console.log(`  Using user-selected carb: ${chosenCarb.name} (${chosenCarb.state}) for ${mealType}`);
             }
             
             // Add selected fats for this meal
@@ -1248,7 +1659,7 @@ async function buildMealPlan(params) {
                     type: 'fat',
                     priority: 'fat'
                 });
-                console.log(`  Using user-selected fat: ${chosenFat.name} for ${mealType}`);
+                console.log(`  Using user-selected fat: ${chosenFat.name} (${chosenFat.state}) for ${mealType}`);
             }
             
             // Add selected veggies for this meal
@@ -1259,7 +1670,7 @@ async function buildMealPlan(params) {
                     type: 'veggie',
                     priority: 'none'
                 });
-                console.log(`  Using user-selected veggie: ${chosenVeggie.name} for ${mealType}`);
+                console.log(`  Using user-selected veggie: ${chosenVeggie.name} (${chosenVeggie.state}) for ${mealType}`);
             }
         } else {
             // Original smart food assignment logic
@@ -1273,11 +1684,11 @@ async function buildMealPlan(params) {
                 if (appropriateProteins.length > 0) {
                     // Use appropriate protein for this meal type
                     chosenProtein = appropriateProteins[i % appropriateProteins.length];
-                    console.log(`  Using appropriate protein: ${chosenProtein.name} for ${mealType}`);
+                    console.log(`  Using appropriate protein: ${chosenProtein.name} (${chosenProtein.state}) for ${mealType}`);
                 } else {
                     // Fallback to any selected protein
                     chosenProtein = selectedFoods.protein[i % selectedFoods.protein.length];
-                    console.log(`  Fallback protein: ${chosenProtein.name} for ${mealType}`);
+                    console.log(`  Fallback protein: ${chosenProtein.name} (${chosenProtein.state}) for ${mealType}`);
                 }
                 
                 availableFoods.push({
@@ -1296,10 +1707,10 @@ async function buildMealPlan(params) {
                 let chosenCarb;
                 if (appropriateCarbs.length > 0) {
                     chosenCarb = appropriateCarbs[i % appropriateCarbs.length];
-                    console.log(`  Using appropriate carb: ${chosenCarb.name} for ${mealType}`);
+                    console.log(`  Using appropriate carb: ${chosenCarb.name} (${chosenCarb.state}) for ${mealType}`);
                 } else {
                     chosenCarb = selectedFoods.carb[i % selectedFoods.carb.length];
-                    console.log(`  Fallback carb: ${chosenCarb.name} for ${mealType}`);
+                    console.log(`  Fallback carb: ${chosenCarb.name} (${chosenCarb.state}) for ${mealType}`);
                 }
                 
                 availableFoods.push({
@@ -1318,10 +1729,10 @@ async function buildMealPlan(params) {
                 let chosenFat;
                 if (appropriateFats.length > 0) {
                     chosenFat = appropriateFats[i % appropriateFats.length];
-                    console.log(`  Using appropriate fat: ${chosenFat.name} for ${mealType}`);
+                    console.log(`  Using appropriate fat: ${chosenFat.name} (${chosenFat.state}) for ${mealType}`);
                 } else {
                     chosenFat = selectedFoods.fat[i % selectedFoods.fat.length];
-                    console.log(`  Fallback fat: ${chosenFat.name} for ${mealType}`);
+                    console.log(`  Fallback fat: ${chosenFat.name} (${chosenFat.state}) for ${mealType}`);
                 }
                 
                 availableFoods.push({
@@ -1340,10 +1751,10 @@ async function buildMealPlan(params) {
                 let chosenVeggie;
                 if (appropriateVeggies.length > 0) {
                     chosenVeggie = appropriateVeggies[i % appropriateVeggies.length];
-                    console.log(`  Using appropriate veggie: ${chosenVeggie.name} for ${mealType}`);
+                    console.log(`  Using appropriate veggie: ${chosenVeggie.name} (${chosenVeggie.state}) for ${mealType}`);
                 } else {
                     chosenVeggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
-                    console.log(`  Fallback veggie: ${chosenVeggie.name} for ${mealType}`);
+                    console.log(`  Fallback veggie: ${chosenVeggie.name} (${chosenVeggie.state}) for ${mealType}`);
                 }
                 
                 availableFoods.push({
@@ -1359,7 +1770,7 @@ async function buildMealPlan(params) {
         availableFoods.forEach(item => {
             item.quantity = basePortionSize;
             item.nutritionMultiplier = basePortionSize / 100;
-            item.explanation = 'as listed in database';
+            item.explanation = `weigh ${item.food.state}`;
             meal.foods.push(item);
         });
         
@@ -1398,39 +1809,57 @@ async function buildMealPlan(params) {
     return optimizedPlan;
 }
 
-// Simplified global optimization for demo
+// Enhanced global optimization with calorie balancing
 async function globalOptimizeMealPlan(mealPlan, targets) {
-    // Basic optimization - adjust quantities to meet targets
-    const iterations = 20;
+    const iterations = 30;
+    const targetCaloriesPerMeal = (targets.targetProtein * 4 + targets.targetCarbs * 4 + targets.targetFat * 9) / mealPlan.length;
+    
+    console.log(`Target calories per meal: ${targetCaloriesPerMeal.toFixed(0)} (${mealPlan.length} meals)`);
     
     for (let i = 0; i < iterations; i++) {
         // Calculate current totals
         let totalProtein = 0, totalCarbs = 0, totalFat = 0;
+        let mealCalories = [];
         
         mealPlan.forEach(meal => {
+            let mealCals = 0;
             meal.foods.forEach(item => {
-                totalProtein += item.food.protein * (item.quantity / 100);
-                totalCarbs += item.food.carbs * (item.quantity / 100);
-                totalFat += item.food.fat * (item.quantity / 100);
+                const protein = item.food.protein * (item.quantity / 100);
+                const carbs = item.food.carbs * (item.quantity / 100);
+                const fat = item.food.fat * (item.quantity / 100);
+                const calories = item.food.calories * (item.quantity / 100);
+                
+                totalProtein += protein;
+                totalCarbs += carbs;
+                totalFat += fat;
+                mealCals += calories;
             });
+            mealCalories.push(mealCals);
         });
         
-        // Calculate ratios
+        // Calculate macro ratios
         const proteinRatio = targets.targetProtein / totalProtein;
         const carbsRatio = targets.targetCarbs / totalCarbs;
         const fatRatio = targets.targetFat / totalFat;
         
-        // Adjust quantities
-        mealPlan.forEach(meal => {
+        // Calculate calorie balance factor for each meal
+        const avgCalories = mealCalories.reduce((sum, cal) => sum + cal, 0) / mealCalories.length;
+        
+        // Adjust quantities with both macro and calorie balancing
+        mealPlan.forEach((meal, mealIndex) => {
+            const mealCalorieRatio = targetCaloriesPerMeal / mealCalories[mealIndex];
+            const calorieBalanceFactor = Math.min(1.15, Math.max(0.85, mealCalorieRatio * 0.7 + 0.3));
+            
             meal.foods.forEach(item => {
-                let adjustmentFactor = 1;
+                let adjustmentFactor = calorieBalanceFactor; // Start with calorie balancing
                 
+                // Apply macro-specific adjustments
                 if (item.priority === 'protein') {
-                    adjustmentFactor = Math.min(1.2, Math.max(0.8, proteinRatio * 0.9 + 0.1));
+                    adjustmentFactor *= Math.min(1.1, Math.max(0.9, proteinRatio * 0.8 + 0.2));
                 } else if (item.priority === 'carbs') {
-                    adjustmentFactor = Math.min(1.2, Math.max(0.8, carbsRatio * 0.9 + 0.1));
+                    adjustmentFactor *= Math.min(1.1, Math.max(0.9, carbsRatio * 0.8 + 0.2));
                 } else if (item.priority === 'fat') {
-                    adjustmentFactor = Math.min(1.2, Math.max(0.8, fatRatio * 0.9 + 0.1));
+                    adjustmentFactor *= Math.min(1.1, Math.max(0.9, fatRatio * 0.8 + 0.2));
                 }
                 
                 item.quantity = Math.min(500, Math.max(10, item.quantity * adjustmentFactor));
@@ -1438,9 +1867,21 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
             });
         });
         
-        // Check if close enough
-        if (Math.abs(proteinRatio - 1) < 0.05 && Math.abs(carbsRatio - 1) < 0.05 && Math.abs(fatRatio - 1) < 0.05) {
-            console.log(`Optimization converged at iteration ${i + 1}`);
+        // Check convergence
+        const macroConverged = Math.abs(proteinRatio - 1) < 0.08 && Math.abs(carbsRatio - 1) < 0.08 && Math.abs(fatRatio - 1) < 0.08;
+        
+        // Check calorie balance (20-30% variance is acceptable)
+        const maxCalories = Math.max(...mealCalories);
+        const minCalories = Math.min(...mealCalories);
+        const calorieVariance = ((maxCalories - minCalories) / avgCalories) * 100;
+        const caloriesBalanced = calorieVariance <= 30;
+        
+        if (i % 10 === 0 || (macroConverged && caloriesBalanced)) {
+            console.log(`Iteration ${i + 1}: Macro ratios P:${proteinRatio.toFixed(2)} C:${carbsRatio.toFixed(2)} F:${fatRatio.toFixed(2)}, Calorie variance: ${calorieVariance.toFixed(1)}%`);
+        }
+        
+        if (macroConverged && caloriesBalanced) {
+            console.log(`✅ Optimization converged at iteration ${i + 1} with ${calorieVariance.toFixed(1)}% calorie variance`);
             break;
         }
     }
@@ -1448,14 +1889,22 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
     return mealPlan;
 }
 
-// Display generated meal plan
+// Display generated meal plan with state information
 function displayMealPlan(mealPlan) {
     const container = document.getElementById('generatedMeals');
+    
+    // Calculate calorie variance for display
+    const mealCalories = mealPlan.map(meal => meal.totals.calories);
+    const avgCalories = mealCalories.reduce((sum, cal) => sum + cal, 0) / mealCalories.length;
+    const maxCalories = Math.max(...mealCalories);
+    const minCalories = Math.min(...mealCalories);
+    const calorieVariance = ((maxCalories - minCalories) / avgCalories) * 100;
     
     const mealsHTML = mealPlan.map((meal, index) => {
         const foodsHTML = meal.foods.map(item => {
             const macroType = getFoodMacroType(item.food);
             const badge = getMacroBadge(macroType);
+            const stateBadge = getStateBadge(item.food.state);
             
             // Use nutritionMultiplier for accurate macro calculations
             const multiplier = item.nutritionMultiplier || (item.quantity / 100);
@@ -1468,9 +1917,9 @@ function displayMealPlan(mealPlan) {
                 <div class="meal-food">
                     <div class="food-details">
                         <div class="food-info">
-                            <div style="font-weight: bold;">${item.food.name} ${badge}</div>
+                            <div style="font-weight: bold;">${item.food.name} ${badge} ${stateBadge}</div>
                             <div class="food-nutrition">P: ${itemProtein}g | C: ${itemCarbs}g | F: ${itemFat}g | Cal: ${itemCalories}</div>
-                            <div style="font-size: 10px; color: #ffa500; font-style: italic; margin-top: 2px;">📏 ${item.explanation}</div>
+                            <div class="food-state-info">📏 ${item.explanation}</div>
                         </div>
                         <div class="food-quantity">${item.quantity.toFixed(1)}g</div>
                     </div>
@@ -1478,9 +1927,13 @@ function displayMealPlan(mealPlan) {
             `;
         }).join('');
         
+        // Calculate calorie balance indicator for this meal
+        const mealCalorieDeviation = ((meal.totals.calories - avgCalories) / avgCalories) * 100;
+        const balanceIcon = Math.abs(mealCalorieDeviation) <= 15 ? '⚖️' : Math.abs(mealCalorieDeviation) <= 25 ? '📊' : '⚠️';
+        
         return `
             <div class="meal-section">
-                <div class="meal-header">Meal ${index + 1}: ${meal.name} (${meal.totals.calories.toFixed(0)} calories)</div>
+                <div class="meal-header">Meal ${index + 1} ${balanceIcon} (${meal.totals.calories.toFixed(0)} calories)</div>
                 ${foodsHTML}
                 <div class="meal-totals">
                     <strong>Meal Totals:</strong> 
@@ -1496,11 +1949,11 @@ function displayMealPlan(mealPlan) {
     container.innerHTML = mealsHTML;
     
     // Update daily summary
-    updateDailySummary(mealPlan);
+    updateDailySummary(mealPlan, calorieVariance);
 }
 
 // Update daily summary with progress indicators
-function updateDailySummary(mealPlan) {
+function updateDailySummary(mealPlan, calorieVariance = null) {
     const dailyTotals = mealPlan.reduce((totals, meal) => ({
         protein: totals.protein + meal.totals.protein,
         carbs: totals.carbs + meal.totals.carbs,
@@ -1545,9 +1998,19 @@ function updateDailySummary(mealPlan) {
     document.getElementById('carbsProgress').style.width = Math.min(100, (dailyTotals.carbs / targetCarbs) * 100) + '%';
     document.getElementById('fatProgress').style.width = Math.min(100, (dailyTotals.fat / targetFat) * 100) + '%';
     document.getElementById('caloriesProgress').style.width = Math.min(100, (dailyTotals.calories / targetCalories) * 100) + '%';
+    
+    // Update summary text with calorie balance info
+    if (calorieVariance !== null) {
+        const summaryText = document.querySelector('.daily-summary p');
+        if (summaryText) {
+            const balanceStatus = calorieVariance <= 20 ? 'EXCELLENT BALANCE' : calorieVariance <= 30 ? 'GOOD BALANCE' : 'FAIR BALANCE';
+            const balanceIcon = calorieVariance <= 20 ? '⚖️' : calorieVariance <= 30 ? '📊' : '⚠️';
+            summaryText.innerHTML = `MEALS BALANCED TO ±${calorieVariance.toFixed(1)}% CALORIE VARIANCE • ${balanceStatus} ${balanceIcon} • FOODS INTELLIGENTLY ASSIGNED BY MEAL TYPE`;
+        }
+    }
 }
 
-// Download meal plan
+// Download meal plan with state information
 function downloadMealPlan() {
     if (!currentMealPlan) return;
     
@@ -1570,15 +2033,16 @@ function downloadMealPlan() {
 
     let content = '';
     
-    // Add meal plan content
+    // Add meal plan content with state information
     currentMealPlan.forEach((meal, index) => {
-        content += `\nMEAL ${index + 1}: ${meal.name.toUpperCase()}\n`;
+        content += `\nMEAL ${index + 1}\n`;
         content += '─'.repeat(50) + '\n';
         
         meal.foods.forEach(item => {
             const multiplier = item.nutritionMultiplier || (item.quantity / 100);
-            content += `• ${item.quantity.toFixed(1)}g ${item.food.name}\n`;
+            content += `• ${item.quantity.toFixed(1)}g ${item.food.name} (${item.food.state})\n`;
             content += `  P: ${(item.food.protein * multiplier).toFixed(1)}g | C: ${(item.food.carbs * multiplier).toFixed(1)}g | F: ${(item.food.fat * multiplier).toFixed(1)}g | Cal: ${(item.food.calories * multiplier).toFixed(0)}\n`;
+            content += `  📏 Weigh/measure ${getStateDescription(item.food.state)}\n`;
         });
         
         content += `\nMeal Totals: P: ${meal.totals.protein.toFixed(1)}g | C: ${meal.totals.carbs.toFixed(1)}g | F: ${meal.totals.fat.toFixed(1)}g | Cal: ${meal.totals.calories.toFixed(0)}\n\n`;
@@ -1600,6 +2064,7 @@ function downloadMealPlan() {
     content += `Calories: ${dailyTotals.calories.toFixed(0)}\n\n`;
     content += '* Generated from USDA FoodData Central database\n';
     content += '* Quantities automatically calculated to meet your macro targets\n';
+    content += '* Always weigh/measure foods in the state indicated for accurate macros\n';
     content += `* Food selection mode: ${isCustomMealMode ? 'Custom Per Meal' : 'Quick Setup'}`;
 
     const contentEl = document.createElement("pre");
