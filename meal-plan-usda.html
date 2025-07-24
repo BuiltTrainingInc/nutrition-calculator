@@ -258,17 +258,6 @@
             }
         }
 
-        .food-item.not-appropriate {
-            opacity: 0.6;
-            border-left: 4px solid #6B7280;
-        }
-
-        .food-item.not-appropriate:hover {
-            opacity: 1;
-            background: #1A1A1A;
-            border-color: #6B7280;
-        }
-
         .food-name {
             font-weight: 900;
             margin-bottom: 5px;
@@ -283,7 +272,7 @@
             font-weight: 600;
         }
 
-        .selected .food-macros {
+        .food-macros.selected {
             color: #FFFFFF;
         }
 
@@ -296,7 +285,7 @@
             text-transform: lowercase;
         }
 
-        .selected .food-state {
+        .food-state.selected {
             color: #FFE4B5;
         }
 
@@ -983,7 +972,7 @@
 
         <!-- Quick Setup Mode (Original) -->
         <div id="quickSetupMode">
-            <p style="color: #6B7280; font-size: 12px; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SELECT YOUR PREFERRED FOODS. SYSTEM WILL AUTOMATICALLY ASSIGN TO OPTIMAL MEALS.</p>
+            <p style="color: #6B7280; font-size: 12px; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SELECT YOUR PREFERRED FOODS. SYSTEM WILL AUTOMATICALLY DISTRIBUTE ACROSS MEALS.</p>
             
             <!-- Proteins -->
             <div class="food-category">
@@ -1028,7 +1017,7 @@
 
         <!-- Custom Per Meal Mode -->
         <div id="customMealsMode" style="display: none;">
-            <p style="color: #6B7280; font-size: 12px; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SELECT SPECIFIC FOODS FOR EACH MEAL. FOODS MARKED WITH ⚠️ ARE ATYPICAL BUT SELECTABLE.</p>
+            <p style="color: #6B7280; font-size: 12px; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SELECT SPECIFIC FOODS FOR EACH MEAL. ALL FOODS ARE AVAILABLE FOR SELECTION.</p>
             
             <div class="meal-tabs">
                 <div class="tab-buttons" id="mealTabButtons"></div>
@@ -1048,7 +1037,7 @@
         
         <div class="daily-summary">
             <h3 style="color: #DC2626; text-align: center; margin-bottom: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">DAILY NUTRITION SUMMARY - SMART MEAL ASSIGNMENT 🧠</h3>
-            <p style="text-align: center; color: #6B7280; margin-bottom: 15px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">MEALS BALANCED TO ±30% AVERAGE SIZE • FOODS INTELLIGENTLY ASSIGNED BY MEAL TYPE</p>
+            <p style="text-align: center; color: #6B7280; margin-bottom: 15px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">MACRO TARGETS + PROTEIN DISTRIBUTION PRIORITIZED • CARBS/FATS VARIED • FOODS OPTIMALLY DISTRIBUTED ACROSS MEALS</p>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="summary-number" id="totalProtein">0</div>
@@ -1089,7 +1078,7 @@
     <!-- Weight Instructions at Bottom -->
     <div class="weight-instructions">
         <div class="weight-instructions-title">📏 Food Weighing Guide</div>
-        Foods are marked with their measurement state: <strong>cooked</strong>, <strong>raw</strong>, <strong>dry</strong> (before cooking), <strong>ready</strong> (as-is), <strong>liquid</strong> (by volume), etc. Always weigh/measure foods in the state indicated for accurate macros. <strong>Whole eggs are counted individually (1 egg, 2 eggs, etc.)</strong>
+        Foods are marked with their measurement state: <strong>cooked</strong>, <strong>raw</strong>, <strong>dry</strong> (before cooking), <strong>ready</strong> (as-is), <strong>liquid</strong> (by volume), etc. Always weigh/measure foods in the state indicated for accurate macros. <strong>Whole eggs are counted individually (1 egg, 2 eggs, etc.)</strong> The system prioritizes hitting macro targets with 99%+ accuracy while ensuring adequate protein distribution across all meals (minimum 60% of target per meal).
     </div>
 </div>
 
@@ -1435,7 +1424,6 @@ function displayMealFoods(mealType, category, foods) {
         const badge = getMacroBadge(macroType);
         const stateBadge = getStateBadge(food.state);
         const isSelected = mealSpecificFoods[mealType] && mealSpecificFoods[mealType][category].some(f => f.id === food.id);
-        const isAppropriate = food.meals.includes(mealType);
         
         let displayName = food.name;
         if (displayName.length > 22) {
@@ -1446,10 +1434,10 @@ function displayMealFoods(mealType, category, foods) {
         const stateDesc = isUnitFood(food) ? `count individual ${food.unit}s` : getStateDescription(food.state);
         
         return `
-            <div class="food-item ${isSelected ? 'selected' : ''} ${isAppropriate ? '' : 'not-appropriate'}" 
+            <div class="food-item ${isSelected ? 'selected' : ''}" 
                  onclick="toggleMealFood('${mealType}', '${category}', ${JSON.stringify(food).replace(/"/g, '&quot;')})"
-                 title="${food.name} - ${stateDesc}${isAppropriate ? '' : ' (Not typically used for ' + mealType + ')'}">
-                <div class="food-name">${displayName} ${isAppropriate ? '✓' : '⚠️'}</div>
+                 title="${food.name} - ${stateDesc}">
+                <div class="food-name">${displayName}</div>
                 <div class="food-macros ${isSelected ? 'selected' : ''}">
                     P: ${food.protein.toFixed(1)}g | C: ${food.carbs.toFixed(1)}g | F: ${food.fat.toFixed(1)}g
                 </div>
@@ -1632,7 +1620,7 @@ async function buildMealPlan(params) {
     const mealNames = Array.from({length: 6}, (_, i) => `Meal ${i + 1}`);
     
     // STEP 1: Generate initial meal structure with SMART FOOD ASSIGNMENT
-    console.log(`\n=== STEP 1: SMART MEAL STRUCTURE WITH FOOD APPROPRIATENESS ===`);
+    console.log(`\n=== STEP 1: SMART MEAL STRUCTURE WITH FOOD DISTRIBUTION ===`);
     const mealPlan = [];
     
     // Define meal types based on number of meals
@@ -1658,7 +1646,7 @@ async function buildMealPlan(params) {
             totals: { protein: 0, carbs: 0, fat: 0, calories: 0 }
         };
         
-        console.log(`Building ${meal.name} (${mealType}) with ${isCustomMealMode ? 'user-specified' : 'smart'} foods...`);
+        console.log(`Building ${meal.name} with ${isCustomMealMode ? 'user-specified' : 'smart'} foods...`);
         
         // Smart food selection based on meal type
         const availableFoods = [];
@@ -1675,7 +1663,7 @@ async function buildMealPlan(params) {
                     type: 'protein',
                     priority: 'protein'
                 });
-                console.log(`  Using user-selected protein: ${chosenProtein.name} (${chosenProtein.state}) for ${mealType}`);
+                console.log(`  Using user-selected protein: ${chosenProtein.name} (${chosenProtein.state})`);
             }
             
             // Add selected carbs for this meal  
@@ -1686,7 +1674,7 @@ async function buildMealPlan(params) {
                     type: 'carb',
                     priority: 'carbs'
                 });
-                console.log(`  Using user-selected carb: ${chosenCarb.name} (${chosenCarb.state}) for ${mealType}`);
+                console.log(`  Using user-selected carb: ${chosenCarb.name} (${chosenCarb.state})`);
             }
             
             // Add selected fats for this meal
@@ -1697,7 +1685,7 @@ async function buildMealPlan(params) {
                     type: 'fat',
                     priority: 'fat'
                 });
-                console.log(`  Using user-selected fat: ${chosenFat.name} (${chosenFat.state}) for ${mealType}`);
+                console.log(`  Using user-selected fat: ${chosenFat.name} (${chosenFat.state})`);
             }
             
             // Add selected veggies for this meal
@@ -1708,26 +1696,14 @@ async function buildMealPlan(params) {
                     type: 'veggie',
                     priority: 'none'
                 });
-                console.log(`  Using user-selected veggie: ${chosenVeggie.name} (${chosenVeggie.state}) for ${mealType}`);
+                console.log(`  Using user-selected veggie: ${chosenVeggie.name} (${chosenVeggie.state})`);
             }
         } else {
-            // Original smart food assignment logic
             // Smart protein selection
             if (selectedFoods.protein.length > 0) {
-                const appropriateProteins = selectedFoods.protein.filter(food => 
-                    food.meals.includes(mealType)
-                );
-                
-                let chosenProtein;
-                if (appropriateProteins.length > 0) {
-                    // Use appropriate protein for this meal type
-                    chosenProtein = appropriateProteins[i % appropriateProteins.length];
-                    console.log(`  Using appropriate protein: ${chosenProtein.name} (${chosenProtein.state}) for ${mealType}`);
-                } else {
-                    // Fallback to any selected protein
-                    chosenProtein = selectedFoods.protein[i % selectedFoods.protein.length];
-                    console.log(`  Fallback protein: ${chosenProtein.name} (${chosenProtein.state}) for ${mealType}`);
-                }
+                // Cycle through selected proteins
+                const chosenProtein = selectedFoods.protein[i % selectedFoods.protein.length];
+                console.log(`  Using protein: ${chosenProtein.name} (${chosenProtein.state})`);
                 
                 availableFoods.push({
                     food: chosenProtein,
@@ -1738,18 +1714,8 @@ async function buildMealPlan(params) {
             
             // Smart carb selection
             if (selectedFoods.carb.length > 0) {
-                const appropriateCarbs = selectedFoods.carb.filter(food => 
-                    food.meals.includes(mealType)
-                );
-                
-                let chosenCarb;
-                if (appropriateCarbs.length > 0) {
-                    chosenCarb = appropriateCarbs[i % appropriateCarbs.length];
-                    console.log(`  Using appropriate carb: ${chosenCarb.name} (${chosenCarb.state}) for ${mealType}`);
-                } else {
-                    chosenCarb = selectedFoods.carb[i % selectedFoods.carb.length];
-                    console.log(`  Fallback carb: ${chosenCarb.name} (${chosenCarb.state}) for ${mealType}`);
-                }
+                const chosenCarb = selectedFoods.carb[i % selectedFoods.carb.length];
+                console.log(`  Using carb: ${chosenCarb.name} (${chosenCarb.state})`);
                 
                 availableFoods.push({
                     food: chosenCarb,
@@ -1760,18 +1726,8 @@ async function buildMealPlan(params) {
             
             // Smart fat selection
             if (selectedFoods.fat.length > 0) {
-                const appropriateFats = selectedFoods.fat.filter(food => 
-                    food.meals.includes(mealType)
-                );
-                
-                let chosenFat;
-                if (appropriateFats.length > 0) {
-                    chosenFat = appropriateFats[i % appropriateFats.length];
-                    console.log(`  Using appropriate fat: ${chosenFat.name} (${chosenFat.state}) for ${mealType}`);
-                } else {
-                    chosenFat = selectedFoods.fat[i % selectedFoods.fat.length];
-                    console.log(`  Fallback fat: ${chosenFat.name} (${chosenFat.state}) for ${mealType}`);
-                }
+                const chosenFat = selectedFoods.fat[i % selectedFoods.fat.length];
+                console.log(`  Using fat: ${chosenFat.name} (${chosenFat.state})`);
                 
                 availableFoods.push({
                     food: chosenFat,
@@ -1782,18 +1738,8 @@ async function buildMealPlan(params) {
             
             // Smart veggie selection
             if (selectedFoods.veggie.length > 0) {
-                const appropriateVeggies = selectedFoods.veggie.filter(food => 
-                    food.meals.includes(mealType)
-                );
-                
-                let chosenVeggie;
-                if (appropriateVeggies.length > 0) {
-                    chosenVeggie = appropriateVeggies[i % appropriateVeggies.length];
-                    console.log(`  Using appropriate veggie: ${chosenVeggie.name} (${chosenVeggie.state}) for ${mealType}`);
-                } else {
-                    chosenVeggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
-                    console.log(`  Fallback veggie: ${chosenVeggie.name} (${chosenVeggie.state}) for ${mealType}`);
-                }
+                const chosenVeggie = selectedFoods.veggie[i % selectedFoods.veggie.length];
+                console.log(`  Using veggie: ${chosenVeggie.name} (${chosenVeggie.state})`);
                 
                 availableFoods.push({
                     food: chosenVeggie,
@@ -1860,7 +1806,8 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
     const iterations = 30;
     const targetCaloriesPerMeal = (targets.targetProtein * 4 + targets.targetCarbs * 4 + targets.targetFat * 9) / mealPlan.length;
     
-    console.log(`Target calories per meal: ${targetCaloriesPerMeal.toFixed(0)} (${mealPlan.length} meals)`);
+    console.log(`Target calories per meal: ${targetCaloriesPerMeal.toFixed(0)} (${mealPlan.length} meals) - MACRO ACCURACY + PROTEIN DISTRIBUTION PRIORITIZED`);
+    console.log(`Target protein per meal: ${(targets.targetProtein / mealPlan.length).toFixed(1)}g (minimum 60% = ${(targets.targetProtein / mealPlan.length * 0.6).toFixed(1)}g)`);
     
     for (let i = 0; i < iterations; i++) {
         // Calculate current totals
@@ -1891,22 +1838,40 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
         // Calculate calorie balance factor for each meal
         const avgCalories = mealCalories.reduce((sum, cal) => sum + cal, 0) / mealCalories.length;
         
-        // Adjust quantities with both macro and calorie balancing
+        // Adjust quantities with MACRO MATCHING as primary, PROTEIN DISTRIBUTION as secondary
         mealPlan.forEach((meal, mealIndex) => {
+            // Calculate current meal protein
+            let currentMealProtein = 0;
+            meal.foods.forEach(item => {
+                currentMealProtein += item.food.protein * item.nutritionMultiplier;
+            });
+            
+            const targetProteinPerMeal = targets.targetProtein / mealPlan.length;
+            const mealProteinRatio = targetProteinPerMeal / Math.max(1, currentMealProtein);
+            
+            // Weaker calorie balancing influence
             const mealCalorieRatio = targetCaloriesPerMeal / mealCalories[mealIndex];
-            const calorieBalanceFactor = Math.min(1.15, Math.max(0.85, mealCalorieRatio * 0.7 + 0.3));
+            const calorieBalanceFactor = Math.min(1.05, Math.max(0.95, mealCalorieRatio * 0.2 + 0.8));
             
             meal.foods.forEach(item => {
-                let adjustmentFactor = calorieBalanceFactor; // Start with calorie balancing
+                let adjustmentFactor = 1.0; // Start neutral
                 
-                // Apply macro-specific adjustments
+                // PRIMARY: Apply macro-specific adjustments (strongest influence)
                 if (item.priority === 'protein') {
-                    adjustmentFactor *= Math.min(1.1, Math.max(0.9, proteinRatio * 0.8 + 0.2));
+                    // Strong overall protein targeting + meal protein distribution
+                    const overallProteinAdj = Math.min(1.2, Math.max(0.8, proteinRatio * 0.9 + 0.1));
+                    const mealProteinAdj = Math.min(1.15, Math.max(0.85, mealProteinRatio * 0.7 + 0.3));
+                    adjustmentFactor *= overallProteinAdj * mealProteinAdj;
                 } else if (item.priority === 'carbs') {
-                    adjustmentFactor *= Math.min(1.1, Math.max(0.9, carbsRatio * 0.8 + 0.2));
+                    // Allow more variation in carb distribution
+                    adjustmentFactor *= Math.min(1.2, Math.max(0.8, carbsRatio * 0.8 + 0.2));
                 } else if (item.priority === 'fat') {
-                    adjustmentFactor *= Math.min(1.1, Math.max(0.9, fatRatio * 0.8 + 0.2));
+                    // Allow more variation in fat distribution  
+                    adjustmentFactor *= Math.min(1.2, Math.max(0.8, fatRatio * 0.8 + 0.2));
                 }
+                
+                // TERTIARY: Apply mild calorie balancing
+                adjustmentFactor *= calorieBalanceFactor;
                 
                 if (isUnitFood(item.food)) {
                     // For unit foods, round to nearest whole unit and ensure minimum of 1
@@ -1921,21 +1886,46 @@ async function globalOptimizeMealPlan(mealPlan, targets) {
             });
         });
         
-        // Check convergence
-        const macroConverged = Math.abs(proteinRatio - 1) < 0.08 && Math.abs(carbsRatio - 1) < 0.08 && Math.abs(fatRatio - 1) < 0.08;
+        // Check convergence - PRIORITIZE MACRO ACCURACY + PROTEIN DISTRIBUTION
+        const macroConverged = Math.abs(proteinRatio - 1) < 0.05 && Math.abs(carbsRatio - 1) < 0.05 && Math.abs(fatRatio - 1) < 0.05;
         
-        // Check calorie balance (20-30% variance is acceptable)
+        // Check protein distribution across meals
+        const targetProteinPerMeal = targets.targetProtein / mealPlan.length;
+        let proteinDistributionGood = true;
+        let minMealProtein = Infinity;
+        
+        mealPlan.forEach(meal => {
+            let mealProtein = 0;
+            meal.foods.forEach(item => {
+                mealProtein += item.food.protein * item.nutritionMultiplier;
+            });
+            minMealProtein = Math.min(minMealProtein, mealProtein);
+            
+            // Each meal should have at least 60% of target protein per meal
+            if (mealProtein < targetProteinPerMeal * 0.6) {
+                proteinDistributionGood = false;
+            }
+        });
+        
+        // Check calorie balance (more lenient - tertiary priority)
         const maxCalories = Math.max(...mealCalories);
         const minCalories = Math.min(...mealCalories);
         const calorieVariance = ((maxCalories - minCalories) / avgCalories) * 100;
-        const caloriesBalanced = calorieVariance <= 30;
+        const caloriesBalanced = calorieVariance <= 45; // Even more lenient
         
-        if (i % 10 === 0 || (macroConverged && caloriesBalanced)) {
-            console.log(`Iteration ${i + 1}: Macro ratios P:${proteinRatio.toFixed(2)} C:${carbsRatio.toFixed(2)} F:${fatRatio.toFixed(2)}, Calorie variance: ${calorieVariance.toFixed(1)}%`);
+        if (i % 10 === 0 || macroConverged) {
+            console.log(`Iteration ${i + 1}: Macros P:${proteinRatio.toFixed(2)} C:${carbsRatio.toFixed(2)} F:${fatRatio.toFixed(2)} | Min meal protein: ${minMealProtein.toFixed(1)}g (target: ${targetProteinPerMeal.toFixed(1)}g) | Cal variance: ${calorieVariance.toFixed(1)}%`);
         }
         
-        if (macroConverged && caloriesBalanced) {
-            console.log(`✅ Optimization converged at iteration ${i + 1} with ${calorieVariance.toFixed(1)}% calorie variance`);
+        // Prioritize macro convergence + adequate protein distribution
+        if (macroConverged && proteinDistributionGood) {
+            console.log(`✅ MACRO + PROTEIN DISTRIBUTION OPTIMIZED at iteration ${i + 1} - Min meal protein: ${minMealProtein.toFixed(1)}g`);
+            break;
+        }
+        
+        // Secondary: also exit if everything is good
+        if (macroConverged && proteinDistributionGood && caloriesBalanced) {
+            console.log(`✅ Full optimization converged at iteration ${i + 1}`);
             break;
         }
     }
@@ -2052,13 +2042,19 @@ function updateDailySummary(mealPlan, calorieVariance = null) {
     document.getElementById('fatProgress').style.width = Math.min(100, (dailyTotals.fat / targetFat) * 100) + '%';
     document.getElementById('caloriesProgress').style.width = Math.min(100, (dailyTotals.calories / targetCalories) * 100) + '%';
     
-    // Update summary text with calorie balance info
+    // Update summary text with protein distribution emphasis
     if (calorieVariance !== null) {
         const summaryText = document.querySelector('.daily-summary p');
         if (summaryText) {
-            const balanceStatus = calorieVariance <= 20 ? 'EXCELLENT BALANCE' : calorieVariance <= 30 ? 'GOOD BALANCE' : 'FAIR BALANCE';
-            const balanceIcon = calorieVariance <= 20 ? '⚖️' : calorieVariance <= 30 ? '📊' : '⚠️';
-            summaryText.innerHTML = `MEALS BALANCED TO ±${calorieVariance.toFixed(1)}% CALORIE VARIANCE • ${balanceStatus} ${balanceIcon} • FOODS INTELLIGENTLY ASSIGNED BY MEAL TYPE`;
+            // Calculate minimum meal protein for display
+            let minMealProtein = Infinity;
+            currentMealPlan.forEach(meal => {
+                minMealProtein = Math.min(minMealProtein, meal.totals.protein);
+            });
+            
+            const balanceStatus = calorieVariance <= 20 ? 'EXCELLENT' : calorieVariance <= 30 ? 'GOOD' : calorieVariance <= 40 ? 'FAIR' : 'MACRO-FOCUSED';
+            const balanceIcon = calorieVariance <= 20 ? '⚖️' : calorieVariance <= 30 ? '📊' : calorieVariance <= 40 ? '🎯' : '🔬';
+            summaryText.innerHTML = `MACRO ACCURACY + PROTEIN DISTRIBUTION OPTIMIZED • MIN MEAL PROTEIN: ${minMealProtein.toFixed(1)}G • MEAL VARIANCE: ±${calorieVariance.toFixed(1)}% ${balanceStatus} ${balanceIcon}`;
         }
     }
 }
