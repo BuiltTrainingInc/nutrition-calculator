@@ -2,265 +2,880 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>BUILT Fuel Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Global Mobile Touch Optimizations */
+        * {
+            -webkit-tap-highlight-color: rgba(220, 38, 38, 0.2);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        input, textarea, select {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+            
+            .section {
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+                margin-bottom: 12px;
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            font-family: 'Arial Black', Arial, sans-serif;
+            padding: 20px;
+            background-color: #1A1A1A;
+            color: #FFFFFF;
+            border-radius: 8px;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 0;
+                border-radius: 0;
+            }
+        }
+
+        .section {
+            background: #000000;
+            padding: 25px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #6B7280;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .section-title {
+            color: #FFFFFF;
+            font-weight: 900;
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #DC2626;
+            padding-bottom: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #FFFFFF;
+            margin-bottom: 5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: #1A1A1A;
+            color: #FFFFFF;
+            border: 2px solid #6B7280;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 14px;
+                font-size: 18px;
+                border-radius: 6px;
+            }
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #DC2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+        }
+
+        .form-group option {
+            background: #1A1A1A;
+            color: #FFFFFF;
+        }
+
+        .height-inputs,
+        .weight-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .height-inputs input,
+        .weight-inputs input {
+            flex: 1;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .height-cm-input {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6B7280;
+            font-weight: 700;
+        }
+
+        .height-cm-input input {
+            width: 80px;
+            padding: 5px;
+            background: #1A1A1A;
+            color: #FFFFFF;
+            border: 1px solid #6B7280;
+            border-radius: 3px;
+            margin-left: 5px;
+            display: inline;
+        }
+
+        /* Radio Button Styling */
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .radio-item {
+            background: #1A1A1A;
+            border: 2px solid #6B7280;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .radio-item:hover {
+            background: #FFFFFF;
+            color: #1A1A1A;
+            border-color: #FFFFFF;
+        }
+
+        .radio-item input[type="radio"] {
+            display: none;
+        }
+
+        .radio-item input[type="radio"]:checked + .radio-label,
+        .radio-item:has(input[type="radio"]:checked) {
+            background: #DC2626;
+            color: #FFFFFF;
+            border-color: #DC2626;
+        }
+
+        @media (max-width: 768px) {
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .radio-item {
+                padding: 16px;
+                font-size: 13px;
+                border-radius: 6px;
+                text-align: center;
+            }
+        }
+
+        /* Checkbox Styling */
+        .checkbox-group {
+            background: #1A1A1A;
+            border: 2px solid #6B7280;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-group:hover {
+            border-color: #FFFFFF;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            background: #DC2626;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 900;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+        }
+
+        .calculate-btn:hover {
+            background: #FFFFFF;
+            color: #DC2626;
+            border: 2px solid #DC2626;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+        }
+
+        .calculate-btn:disabled {
+            background: #6B7280;
+            color: #1A1A1A;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .calculate-btn {
+                padding: 22px;
+                font-size: 16px;
+                border-radius: 6px;
+                margin: 20px 0;
+                letter-spacing: 0.5px;
+            }
+            
+            .calculate-btn:hover {
+                transform: none;
+            }
+            
+            .calculate-btn:active {
+                transform: scale(0.98);
+            }
+        }
+
+        /* Results Section */
+        .results-output {
+            display: none;
+            background: #000000;
+            padding: 25px;
+            border-radius: 4px;
+            border: 2px solid #DC2626;
+            margin-top: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+        }
+
+        .results-output.active {
+            display: block;
+        }
+
+        .results-title {
+            color: #FFFFFF;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 20px;
+        }
+
+        .macro-summary {
+            background: #1A1A1A;
+            padding: 25px;
+            border-radius: 4px;
+            margin-top: 25px;
+            border: 2px solid #6B7280;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        .summary-item {
+            background: #000000;
+            padding: 20px;
+            border-radius: 4px;
+            border: 2px solid #6B7280;
+        }
+
+        .summary-number {
+            font-size: 28px;
+            font-weight: 900;
+            color: #FFFFFF;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-bar {
+            background: #1A1A1A;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+            border: 1px solid #6B7280;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .protein-fill { background: #DC2626; }
+        .carbs-fill { background: #6B7280; }
+        .fat-fill { background: #FFFFFF; }
+        .calories-fill { background: #6B7280; }
+
+        .notes-section {
+            background: #1A1A1A;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+            border-left: 4px solid #DC2626;
+            border: 1px solid #6B7280;
+        }
+
+        .notes-section h4 {
+            color: #FFFFFF;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .notes-section ul {
+            color: #6B7280;
+            line-height: 1.7;
+            padding-left: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .notes-section li {
+            margin-bottom: 8px;
+        }
+
+        .download-btn {
+            background: #DC2626;
+            color: #FFFFFF;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .download-btn:hover {
+            background: #FFFFFF;
+            color: #DC2626;
+            border: 2px solid #DC2626;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .download-btn {
+                padding: 18px;
+                font-size: 15px;
+                border-radius: 6px;
+                margin-top: 16px;
+            }
+            
+            .download-btn:hover {
+                transform: none;
+            }
+            
+            .download-btn:active {
+                transform: scale(0.98);
+            }
+        }
+
+        .disclaimer {
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid #FFA500;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #FFA500;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .disclaimer-title {
+            font-weight: 900;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .disclaimer {
+                padding: 16px;
+                font-size: 13px;
+                border-radius: 6px;
+                margin-top: 16px;
+            }
+            
+            .disclaimer-title {
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div style="max-width: 700px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #1a1a1a; color: #f5f5f5; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
-    <h2 style="text-align: center;">BUILT Fuel Calculator</h2>
-    <p style="text-align: center; margin-bottom: 30px; opacity: 0.9;">Calculate the BEST maintenance macros for your LIFE.</p>
+<div class="container">
+    <h2 style="text-align: center; color: #FFFFFF; margin-bottom: 10px; font-weight: 900; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">BUILT FUEL CALCULATOR</h2>
+    <p style="text-align: center; margin-bottom: 30px; color: #6B7280; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">CALCULATE THE BEST MAINTENANCE MACROS FOR YOUR LIFE • <span style="color: #DC2626; font-weight: 900; text-shadow: 0 0 5px #DC2626;">BODYBUILDING WITHOUT BURNOUT 🔥</span></p>
+
+    <style>
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 24px !important;
+                letter-spacing: 1px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .container > p {
+                font-size: 12px !important;
+                margin-bottom: 20px !important;
+                letter-spacing: 0.5px !important;
+                line-height: 1.4 !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 20px !important;
+                letter-spacing: 0.5px !important;
+                line-height: 1.2 !important;
+            }
+            
+            .container > p {
+                font-size: 11px !important;
+            }
+        }
+    </style>
 
     <form id="macroCalculator">
         <!-- Basic Information -->
-        <h3 style="color: #f5f5f5; margin: 25px 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 8px;">Basic Information</h3>
-        
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Age</label>
-                <input id="age" name="age" type="number" min="16" max="80" required placeholder="e.g. 25" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-            </div>
-            <div style="flex: 1;">
-                <label>Biological Sex</label>
-                <select id="gender" name="gender" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                </select>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Height</label>
-                <div style="display: flex; gap: 10px;">
-                    <input id="heightFeet" name="heightFeet" type="number" placeholder="Feet" min="4" max="7" style="flex:1; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px;">
-                    <input id="heightInches" name="heightInches" type="number" placeholder="Inches" min="0" max="11" style="flex:1; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px;">
+        <div class="section">
+            <div class="section-title">👤 BASIC INFORMATION</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>AGE</label>
+                    <input type="number" id="age" name="age" min="16" max="80" required placeholder="e.g. 25">
                 </div>
-                <div style="font-size: 12px; opacity: 0.7; margin-top: 5px;">Or cm: <input id="heightCm" name="heightCm" type="number" placeholder="cm" style="width: 60px; padding:5px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:3px; margin-left: 5px;"></div>
+                <div class="form-group">
+                    <label>BIOLOGICAL SEX</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
             </div>
-            <div style="flex: 1;">
-                <label>Current Weight</label>
-                <div style="display: flex; gap: 10px;">
-                    <input id="weightLbs" name="weightLbs" type="number" placeholder="lbs" step="0.1" style="flex:1; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px;">
-                    <input id="weightKg" name="weightKg" type="number" placeholder="kg" step="0.1" style="flex:1; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px;">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>HEIGHT</label>
+                    <div class="height-inputs">
+                        <input type="number" id="heightFeet" name="heightFeet" placeholder="Feet" min="4" max="7">
+                        <input type="number" id="heightInches" name="heightInches" placeholder="Inches" min="0" max="11">
+                    </div>
+                    <div class="height-cm-input">Or CM: <input type="number" id="heightCm" name="heightCm" placeholder="cm" min="120" max="220"></div>
+                </div>
+                <div class="form-group">
+                    <label>CURRENT WEIGHT</label>
+                    <div class="weight-inputs">
+                        <input type="number" id="weightLbs" name="weightLbs" placeholder="lbs" step="0.1">
+                        <input type="number" id="weightKg" name="weightKg" placeholder="kg" step="0.1">
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Body Composition -->
-        <h3 style="color: #f5f5f5; margin: 25px 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 8px;">Body Composition</h3>
-        
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Body Fat % (if known)</label>
-                <input id="bodyFat" name="bodyFat" type="number" step="0.1" placeholder="e.g. 12.5" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-            </div>
-            <div style="flex: 1;">
-                <label>Lean Mass (lbs - if known)</label>
-                <input id="leanMass" name="leanMass" type="number" step="0.1" placeholder="Optional" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+        <div class="section">
+            <div class="section-title">📊 BODY COMPOSITION</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>BODY FAT % (IF KNOWN)</label>
+                    <input type="number" id="bodyFat" name="bodyFat" step="0.1" placeholder="e.g. 12.5">
+                    <div class="info-text">LEAVE BLANK IF UNKNOWN</div>
+                </div>
+                <div class="form-group">
+                    <label>LEAN MASS (LBS - IF KNOWN)</label>
+                    <input type="number" id="leanMass" name="leanMass" step="0.1" placeholder="Optional">
+                    <div class="info-text">FROM DEXA SCAN, BODPOD, ETC.</div>
+                </div>
             </div>
         </div>
 
         <!-- Training Details -->
-        <h3 style="color: #f5f5f5; margin: 25px 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 8px;">Training Details</h3>
-        
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Training Days Per Week</label>
-                <select id="trainingDays" name="trainingDays" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="2">2 days</option>
-                    <option value="3">3 days</option>
-                    <option value="4">4 days</option>
-                    <option value="5">5 days</option>
-                    <option value="6">6 days</option>
-                    <option value="7">7 days</option>
-                </select>
+        <div class="section">
+            <div class="section-title">💪 TRAINING DETAILS</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>TRAINING DAYS PER WEEK</label>
+                    <select id="trainingDays" name="trainingDays" required>
+                        <option value="">Select</option>
+                        <option value="2">2 days</option>
+                        <option value="3">3 days</option>
+                        <option value="4">4 days</option>
+                        <option value="5">5 days</option>
+                        <option value="6">6 days</option>
+                        <option value="7">7 days</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>SESSION DURATION</label>
+                    <select id="sessionDuration" name="sessionDuration" required>
+                        <option value="">Select</option>
+                        <option value="30">30-45 min</option>
+                        <option value="60">45-75 min</option>
+                        <option value="90">75-105 min</option>
+                        <option value="120">105+ min</option>
+                    </select>
+                </div>
             </div>
-            <div style="flex: 1;">
-                <label>Session Duration</label>
-                <select id="sessionDuration" name="sessionDuration" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="30">30-45 min</option>
-                    <option value="60">45-75 min</option>
-                    <option value="90">75-105 min</option>
-                    <option value="120">105+ min</option>
-                </select>
-            </div>
-        </div>
 
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Training Intensity</label>
-                <select id="trainingIntensity" name="trainingIntensity" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="moderate">Moderate (RPE 6-7)</option>
-                    <option value="high">High (RPE 7-8)</option>
-                    <option value="veryHigh">Very High (RPE 8-9)</option>
-                    <option value="extreme">Extreme (RPE 9-10)</option>
-                </select>
-            </div>
-            <div style="flex: 1;">
-                <label>Training Experience</label>
-                <select id="experience" name="experience" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="beginner">< 2 years</option>
-                    <option value="intermediate">2-5 years</option>
-                    <option value="advanced">5-10 years</option>
-                    <option value="expert">10+ years</option>
-                </select>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>TRAINING INTENSITY</label>
+                    <select id="trainingIntensity" name="trainingIntensity" required>
+                        <option value="">Select</option>
+                        <option value="moderate">Moderate (RPE 6-7)</option>
+                        <option value="high">High (RPE 7-8)</option>
+                        <option value="veryHigh">Very High (RPE 8-9)</option>
+                        <option value="extreme">Extreme (RPE 9-10)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>TRAINING EXPERIENCE</label>
+                    <select id="experience" name="experience" required>
+                        <option value="">Select</option>
+                        <option value="beginner">< 2 years</option>
+                        <option value="intermediate">2-5 years</option>
+                        <option value="advanced">5-10 years</option>
+                        <option value="expert">10+ years</option>
+                    </select>
+                </div>
             </div>
         </div>
 
         <!-- Cardio Activity -->
-        <h3 style="color: #f5f5f5; margin: 25px 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 8px;">Cardio Activity</h3>
-        
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Cardio Sessions Per Week</label>
-                <select id="cardioFreq" name="cardioFreq" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="0">None</option>
-                    <option value="1">1-2 sessions</option>
-                    <option value="3">3-4 sessions</option>
-                    <option value="5">5-6 sessions</option>
-                    <option value="7">Daily</option>
-                </select>
+        <div class="section">
+            <div class="section-title">🏃 CARDIO ACTIVITY</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>CARDIO SESSIONS PER WEEK</label>
+                    <select id="cardioFreq" name="cardioFreq" required>
+                        <option value="">Select</option>
+                        <option value="0">None</option>
+                        <option value="1">1-2 sessions</option>
+                        <option value="3">3-4 sessions</option>
+                        <option value="5">5-6 sessions</option>
+                        <option value="7">Daily</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>CARDIO TYPE</label>
+                    <select id="cardioType" name="cardioType">
+                        <option value="">Select (if applicable)</option>
+                        <option value="liss">LISS</option>
+                        <option value="miss">MISS</option>
+                        <option value="hiit">HIIT</option>
+                        <option value="mixed">Mixed</option>
+                    </select>
+                </div>
             </div>
-            <div style="flex: 1;">
-                <label>Cardio Type</label>
-                <select id="cardioType" name="cardioType" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+
+            <div class="form-group">
+                <label>CARDIO DURATION</label>
+                <select id="cardioDuration" name="cardioDuration">
                     <option value="">Select (if applicable)</option>
-                    <option value="liss">LISS</option>
-                    <option value="miss">MISS</option>
-                    <option value="hiit">HIIT</option>
-                    <option value="mixed">Mixed</option>
+                    <option value="15">10-20 min</option>
+                    <option value="30">20-40 min</option>
+                    <option value="45">40-60 min</option>
+                    <option value="60">60+ min</option>
                 </select>
             </div>
         </div>
 
-        <label>Cardio Duration</label>
-        <select id="cardioDuration" name="cardioDuration" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:15px;">
-            <option value="">Select (if applicable)</option>
-            <option value="15">10-20 min</option>
-            <option value="30">20-40 min</option>
-            <option value="45">40-60 min</option>
-            <option value="60">60+ min</option>
-        </select>
-
         <!-- Daily Activity -->
-        <h3 style="color: #f5f5f5; margin: 25px 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 8px;">Daily Activity</h3>
-        
-        <label>Job Activity Level</label>
-        <select id="job" name="job" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:15px;">
-            <option value="">Select</option>
-            <option value="sedentary">Sedentary (desk job)</option>
-            <option value="light">Light Activity</option>
-            <option value="moderate">Moderate Activity</option>
-            <option value="heavy">Heavy Activity</option>
-        </select>
-
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Daily Steps (if tracked)</label>
-                <input id="steps" name="steps" type="number" placeholder="e.g. 8000" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-            </div>
-            <div style="flex: 1;">
-                <label>Non-Exercise Activity</label>
-                <select id="neat" name="neat" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
+        <div class="section">
+            <div class="section-title">📱 DAILY ACTIVITY</div>
+            
+            <div class="form-group">
+                <label>JOB ACTIVITY LEVEL</label>
+                <select id="job" name="job" required>
                     <option value="">Select</option>
-                    <option value="low">Low</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="high">High</option>
+                    <option value="sedentary">Sedentary (desk job)</option>
+                    <option value="light">Light Activity</option>
+                    <option value="moderate">Moderate Activity</option>
+                    <option value="heavy">Heavy Activity</option>
                 </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>DAILY STEPS (IF TRACKED)</label>
+                    <input type="number" id="steps" name="steps" placeholder="e.g. 8000">
+                    <div class="info-text">OPTIONAL - HELPS FINE-TUNE</div>
+                </div>
+                <div class="form-group">
+                    <label>NON-EXERCISE ACTIVITY</label>
+                    <select id="neat" name="neat" required>
+                        <option value="">Select</option>
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
             </div>
         </div>
 
         <!-- Enhancement Status -->
-        <h3 style="color: #f5f5f5; margin: 25px 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 8px;">Enhancement Status</h3>
-        
-        <label>Current Status</label>
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; background: #2a2a2a; padding: 10px; border-radius: 5px; border: 1px solid #444;">
-                <input type="radio" id="natural" name="enhancement" value="natural" required>
-                Natural
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; background: #2a2a2a; padding: 10px; border-radius: 5px; border: 1px solid #444;">
-                <input type="radio" id="enhanced" name="enhancement" value="enhanced" required>
-                Enhanced (TRT/PEDs)
-            </label>
-        </div>
+        <div class="section">
+            <div class="section-title">💉 ENHANCEMENT STATUS</div>
+            
+            <div class="form-group">
+                <label>CURRENT STATUS</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="natural" name="enhancement" value="natural" required>
+                        <span class="radio-label">Natural</span>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="enhanced" name="enhancement" value="enhanced" required>
+                        <span class="radio-label">Enhanced (TRT/PEDs)</span>
+                    </div>
+                </div>
+            </div>
 
-        <div id="enhancementDetails" style="display: none;">
-            <label>Current Compounds (optional)</label>
-            <textarea id="compounds" name="compounds" rows="2" placeholder="e.g. Test 200mg/week" style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:15px; resize: vertical;"></textarea>
+            <div class="form-group hidden" id="enhancementDetails">
+                <label>CURRENT COMPOUNDS (OPTIONAL)</label>
+                <textarea id="compounds" name="compounds" rows="2" placeholder="e.g. Test 200mg/week"></textarea>
+                <div class="info-text">HELPS ACCOUNT FOR METABOLIC DEMANDS</div>
+            </div>
         </div>
 
         <!-- Goals & Lifestyle -->
-        <h3 style="color: #f5f5f5; margin: 25px 0 15px 0; border-bottom: 1px solid #333; padding-bottom: 8px;">Goals & Lifestyle</h3>
-        
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Primary Goal</label>
-                <select id="goal" name="goal" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="maintain">Maintain physique</option>
-                    <option value="lean_bulk">Lean bulk</option>
-                    <option value="bulk">Moderate bulk</option>
-                    <option value="cut">Fat loss/cutting</option>
-                    <option value="recomp">Body recomposition</option>
-                </select>
+        <div class="section">
+            <div class="section-title">🎯 GOALS & LIFESTYLE</div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>PRIMARY GOAL</label>
+                    <select id="goal" name="goal" required>
+                        <option value="">Select</option>
+                        <option value="maintain">Maintain physique</option>
+                        <option value="lean_bulk">Lean bulk</option>
+                        <option value="bulk">Moderate bulk</option>
+                        <option value="cut">Fat loss/cutting</option>
+                        <option value="recomp">Body recomposition</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>TRAINING PHASE</label>
+                    <select id="phase" name="phase" required>
+                        <option value="">Select</option>
+                        <option value="offseason">Off-season</option>
+                        <option value="prep">Contest prep</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="recovery">Recovery/Deload</option>
+                    </select>
+                </div>
             </div>
-            <div style="flex: 1;">
-                <label>Training Phase</label>
-                <select id="phase" name="phase" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="offseason">Off-season</option>
-                    <option value="prep">Contest prep</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="recovery">Recovery/Deload</option>
-                </select>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>SLEEP PER NIGHT</label>
+                    <select id="sleep" name="sleep" required>
+                        <option value="">Select</option>
+                        <option value="5">< 6 hours</option>
+                        <option value="6">6-7 hours</option>
+                        <option value="7">7-8 hours</option>
+                        <option value="8">8+ hours</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>STRESS LEVEL</label>
+                    <select id="stress" name="stress" required>
+                        <option value="">Select</option>
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="dietHistory" name="dietHistory">
+                    <label for="dietHistory">HISTORY OF EXTREME DIETING OR METABOLIC DAMAGE</label>
+                </div>
+                <div class="info-text">CHECK IF SUSPECTED METABOLIC ISSUES</div>
             </div>
         </div>
 
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Sleep Per Night</label>
-                <select id="sleep" name="sleep" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="5">< 6 hours</option>
-                    <option value="6">6-7 hours</option>
-                    <option value="7">7-8 hours</option>
-                    <option value="8">8+ hours</option>
-                </select>
-            </div>
-            <div style="flex: 1;">
-                <label>Stress Level</label>
-                <select id="stress" name="stress" required style="width:100%; padding:10px; background:#2a2a2a; color:#fff; border:1px solid #444; border-radius:5px; margin-bottom:10px;">
-                    <option value="">Select</option>
-                    <option value="low">Low</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="high">High</option>
-                </select>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: #2a2a2a; padding: 12px; border-radius: 5px; border: 1px solid #444;">
-                <input type="checkbox" id="dietHistory" name="dietHistory">
-                History of extreme dieting or metabolic damage
-            </label>
-        </div>
-
-        <button type="submit" style="width:100%; padding:12px; font-size:16px; background-color:#333; color:white; border:none; border-radius:6px; cursor: pointer;">Calculate My Maintenance Macros</button>
+        <button type="submit" class="calculate-btn">🚀 CALCULATE MY MAINTENANCE MACROS</button>
     </form>
 
-    <div id="mealPlanResponse" style="margin-top: 30px; white-space: pre-wrap; background: #1b1b1b; padding: 15px; border-radius: 8px; border: 1px solid #333; display: none;"></div>
+    <!-- Results Output -->
+    <div class="results-output" id="resultsOutput">
+        <h3 class="results-title">YOUR BUILT FUEL RESULTS</h3>
+        <div id="resultsContent"></div>
+        
+        <div class="macro-summary">
+            <h3 style="color: #DC2626; text-align: center; margin-bottom: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">DAILY MACRO BREAKDOWN</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-number" id="totalProtein">0</div>
+                    <div class="summary-label">PROTEIN (G)</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill protein-fill" id="proteinProgress"></div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="totalCarbs">0</div>
+                    <div class="summary-label">CARBS (G)</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill carbs-fill" id="carbsProgress"></div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="totalFat">0</div>
+                    <div class="summary-label">FAT (G)</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill fat-fill" id="fatProgress"></div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-number" id="totalCalories">0</div>
+                    <div class="summary-label">CALORIES</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill calories-fill" id="caloriesProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <button onclick="downloadImage()" style="display:none; margin-top: 15px; width: 100%; padding: 12px; font-size: 16px; background-color: #444; color: white; border: none; border-radius: 6px; cursor: pointer;" id="downloadBtn">Download Results as Image</button>
+        <div class="notes-section">
+            <h4>BUILT TRAINING NOTES:</h4>
+            <ul>
+                <li><strong>BMR:</strong> <span id="bmrValue">0</span> calories (your base metabolic rate)</li>
+                <li><strong>PROTEIN:</strong> Set at 1.1g per lb bodyweight for muscle preservation</li>
+                <li><strong>FATS:</strong> 25-28% of calories for optimal hormone production</li>
+                <li><strong>CARBS:</strong> Remaining calories to fuel your training</li>
+                <li><strong>TRACKING:</strong> Monitor weight/performance and adjust by ±100-200 calories if needed</li>
+                <li><strong>PHILOSOPHY:</strong> These are MAINTENANCE macros for sustainable bodybuilding without burnout</li>
+            </ul>
+        </div>
 
-    <div style="margin-top: 30px; padding: 15px; background: #2a2a2a; border-radius: 8px; border: 1px solid #444; font-size: 12px; opacity: 0.8;">
-        <strong>Educational Purpose:</strong> This tool is provided for educational purposes only. It does not promote or condone the use of performance-enhancing drugs. This is not medical advice. Always consult a licensed healthcare professional before making any decisions regarding diet, supplementation, or training.
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="download-btn" onclick="downloadResults()">📥 DOWNLOAD RESULTS</button>
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+        <div class="disclaimer-title">📚 Educational Purpose</div>
+        This tool is provided for educational purposes only. It does not promote or condone the use of performance-enhancing drugs. The calculations are intended to help individuals understand macro breakdowns based on inputs they provide. This is not medical advice. Always consult a licensed healthcare professional before making any decisions regarding diet, supplementation, or training.
     </div>
 </div>
 
@@ -270,9 +885,9 @@ document.querySelectorAll('input[name="enhancement"]').forEach(radio => {
     radio.addEventListener('change', function() {
         const details = document.getElementById('enhancementDetails');
         if (this.value === 'enhanced') {
-            details.style.display = 'block';
+            details.classList.remove('hidden');
         } else {
-            details.style.display = 'none';
+            details.classList.add('hidden');
         }
     });
 });
@@ -476,8 +1091,8 @@ function displayResults(results) {
 
     const resultsText = `BUILT FUEL CALCULATOR RESULTS – ${formattedDate}
 
-MAINTENANCE MACROS:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MAINTENANCE MACROS FOR SUSTAINABLE BODYBUILDING:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🔥 DAILY CALORIES: ${results.tdee}
 
@@ -485,26 +1100,42 @@ MAINTENANCE MACROS:
 🍞 CARBS: ${results.carbs.grams}g (${results.carbs.calories} calories)  
 🥑 FATS: ${results.fats.grams}g (${results.fats.calories} calories)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-BUILT TRAINING NOTES:
+BUILT TRAINING INSIGHTS:
 • BMR: ${results.bmr} calories (base metabolic rate)
 • Protein: 1.1g per lb bodyweight for muscle preservation
 • Fats: 25-28% of calories for hormone optimization
-• Carbs: Remaining calories to fuel training
-• Monitor weight/performance, adjust ±100-200 calories if needed
+• Carbs: Remaining calories to fuel training performance
+• Tracking: Monitor weight/performance, adjust ±100-200 calories as needed
 
-Remember: These are MAINTENANCE macros for sustainable bodybuilding without burnout.`;
+🎯 BODYBUILDING WITHOUT BURNOUT PHILOSOPHY:
+These maintenance macros support sustainable muscle building and recovery 
+without the obsession that leads to burnout. Focus on consistency over perfection.`;
 
-    document.getElementById("mealPlanResponse").innerText = resultsText;
-    document.getElementById("mealPlanResponse").style.display = "block";
-    document.getElementById("downloadBtn").style.display = "block";
+    document.getElementById("resultsContent").innerText = resultsText;
     
-    document.getElementById("mealPlanResponse").scrollIntoView({ behavior: 'smooth' });
+    // Update macro displays
+    document.getElementById('totalProtein').textContent = results.protein.grams;
+    document.getElementById('totalCarbs').textContent = results.carbs.grams;
+    document.getElementById('totalFat').textContent = results.fats.grams;
+    document.getElementById('totalCalories').textContent = results.tdee;
+    document.getElementById('bmrValue').textContent = results.bmr;
+    
+    // Update progress bars (for visual reference, assuming 100% = target achieved)
+    document.getElementById('proteinProgress').style.width = '100%';
+    document.getElementById('carbsProgress').style.width = '100%';
+    document.getElementById('fatProgress').style.width = '100%';
+    document.getElementById('caloriesProgress').style.width = '100%';
+    
+    // Show results
+    document.getElementById("resultsOutput").classList.add("active");
+    document.getElementById("resultsOutput").scrollIntoView({ behavior: 'smooth' });
 }
 
-function downloadImage() {
-    const mealPlanElement = document.getElementById("mealPlanResponse");
+function downloadResults() {
+    const resultsElement = document.getElementById("resultsContent");
+    if (!resultsElement) return;
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString("en-CA", {
@@ -519,11 +1150,11 @@ function downloadImage() {
     wrapper.style.color = "#000";
     wrapper.style.padding = "40px";
     wrapper.style.fontFamily = "Arial, sans-serif";
-    wrapper.style.maxWidth = "700px";
+    wrapper.style.maxWidth = "800px";
     wrapper.style.lineHeight = "1.6";
 
     const content = document.createElement("pre");
-    content.innerText = mealPlanElement.innerText;
+    content.innerText = resultsElement.innerText;
     content.style.whiteSpace = "pre-wrap";
     content.style.fontSize = "14px";
     content.style.color = "#000";
@@ -531,7 +1162,7 @@ function downloadImage() {
     wrapper.appendChild(content);
     document.body.appendChild(wrapper);
 
-    // Use html2canvas if available, otherwise fallback to simple download
+    // Use html2canvas if available
     if (typeof html2canvas !== 'undefined') {
         html2canvas(wrapper, { scale: 2 }).then(canvas => {
             const link = document.createElement("a");
@@ -541,8 +1172,8 @@ function downloadImage() {
             document.body.removeChild(wrapper);
         });
     } else {
-        // Fallback - just copy to clipboard or save as text
-        navigator.clipboard.writeText(mealPlanElement.innerText).then(() => {
+        // Fallback - copy to clipboard
+        navigator.clipboard.writeText(resultsElement.innerText).then(() => {
             alert('Results copied to clipboard!');
         });
         document.body.removeChild(wrapper);
@@ -565,7 +1196,7 @@ document.getElementById('macroCalculator').addEventListener('submit', function(e
     // Validate required fields
     if (!data.age || !data.gender || (!data.weightLbs && !data.weightKg) || 
         (!data.heightFeet && !data.heightCm) || !data.trainingDays) {
-        alert('Please fill in all required fields before calculating.');
+        alert('⚠️ Please fill in all required fields before calculating.');
         return;
     }
     
