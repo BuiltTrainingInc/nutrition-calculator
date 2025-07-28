@@ -489,6 +489,229 @@
             }
         });
         
+        // Maintenance Macro Calculation Logic
+        function calculateMaintenanceMacros(data) {
+            // Convert measurements to standard units
+            const weightLbs = parseFloat(data.weightLbs) || (parseFloat(data.weightKg) * 2.20462);
+            const heightInches = (parseFloat(data.heightFeet) * 12) + parseFloat(data.heightInches) || (parseFloat(data.heightCm) / 2.54);
+            const age = parseInt(data.age);
+            
+            // Calculate BMR using Mifflin-St Jeor equation
+            let bmr;
+            if (data.gender === 'male') {
+                bmr = (10 * (weightLbs / 2.20462)) + (6.25 * (heightInches * 2.54)) - (5 * age) + 5;
+            } else {
+                bmr = (10 * (weightLbs / 2.20462)) + (6.25 * (heightInches * 2.54)) - (5 * age) - 161;
+            }
+            
+            // Adjust BMR for body composition if known
+            if (data.bodyFat && parseFloat(data.bodyFat) > 0) {
+                const bodyFatPercent = parseFloat(data.bodyFat) / 100;
+                const leanMass = weightLbs * (1 - bodyFatPercent);
+                // Bodybuilders with more muscle mass have higher metabolic rates
+                const muscleMultiplier = 1 + (leanMass / weightLbs - 0.75) * 0.3;
+                bmr *= Math.max(0.9, Math.min(1.3, muscleMultiplier));
+            }
+            
+            // Training Activity Multiplier
+            let trainingMultiplier = 1.0;
+            const trainingDays = parseInt(data.trainingDays);
+            const sessionDuration = parseInt(data.sessionDuration);
+            
+            // Base training multiplier
+            if (trainingDays >= 6) trainingMultiplier += 0.25;
+            else if (trainingDays >= 4) trainingMultiplier += 0.20;
+            else if (trainingDays >= 3) trainingMultiplier += 0.15;
+            else trainingMultiplier += 0.10;
+            
+            // Session duration adjustment
+            if (sessionDuration >= 120) trainingMultiplier += 0.08;
+            else if (sessionDuration >= 90) trainingMultiplier += 0.06;
+            else if (sessionDuration >= 60) trainingMultiplier += 0.04;
+            else trainingMultiplier += 0.02;
+            
+            // Training intensity adjustment
+            switch (data.trainingIntensity) {
+                case 'extreme': trainingMultiplier += 0.12; break;
+                case 'veryHigh': trainingMultiplier += 0.08; break;
+                case 'high': trainingMultiplier += 0.05; break;
+                case 'moderate': trainingMultiplier += 0.02; break;
+            }
+            
+            // Experience level adjustment (advanced lifters burn more)
+            switch (data.experience) {
+                case 'expert': trainingMultiplier += 0.05; break;
+                case 'advanced': trainingMultiplier += 0.03; break;
+                case 'intermediate': trainingMultiplier += 0.01; break;
+            }
+            
+            // Cardio Activity Multiplier
+            let cardioMultiplier = 1.0;
+            const cardioFreq = parseInt(data.cardioFreq);
+            const cardioDuration = parseInt(data.cardioDuration);
+            
+            if (cardioFreq > 0) {
+                let cardioBase = cardioFreq * 0.02; // Base multiplier
+                
+                // Duration adjustment
+                if (cardioDuration >= 60) cardioBase *= 1.5;
+                else if (cardioDuration >= 45) cardioBase *= 1.3;
+                else if (cardioDuration >= 30) cardioBase *= 1.1;
+                
+                // Cardio type adjustment
+                switch (data.cardioType) {
+                    case 'hiit': cardioBase *= 1.4; break;
+                    case 'miss': cardioBase *= 1.2; break;
+                    case 'mixed': cardioBase *= 1.3; break;
+                    case 'liss': cardioBase *= 1.0; break;
+                }
+                
+                cardioMultiplier += cardioBase;
+            }
+            
+            // Daily Activity/NEAT Multiplier
+            let neatMultiplier = 1.0;
+            
+            // Job activity
+            switch (data.job) {
+                case 'heavy': neatMultiplier += 0.30; break;
+                case 'moderate': neatMultiplier += 0.20; break;
+                case 'light': neatMultiplier += 0.10; break;
+                case 'sedentary': neatMultiplier += 0.00; break;
+            }
+            
+            // NEAT level
+            switch (data.neat) {
+                case 'high': neatMultiplier += 0.15; break;
+                case 'moderate': neatMultiplier += 0.08; break;
+                case 'low': neatMultiplier += 0.00; break;
+            }
+            
+            // Steps adjustment
+            if (data.steps) {
+                const steps = parseInt(data.steps);
+                if (steps >= 15000) neatMultiplier += 0.10;
+                else if (steps >= 10000) neatMultiplier += 0.05;
+                else if (steps >= 7500) neatMultiplier += 0.02;
+            }
+            
+            // Enhancement Status Adjustment
+            let enhancementMultiplier = 1.0;
+            if (data.enhancement === 'enhanced') {
+                enhancementMultiplier = 1.15; // Enhanced individuals have ~15% higher metabolic rate
+            }
+            
+            // Lifestyle Factors
+            let lifestyleMultiplier = 1.0;
+            
+            // Sleep quality
+            switch (data.sleep) {
+                case '5': lifestyleMultiplier *= 0.95; break; // Poor sleep lowers metabolism
+                case '6': lifestyleMultiplier *= 0.98; break;
+                case '7': lifestyleMultiplier *= 1.00; break;
+                case '8': lifestyleMultiplier *= 1.02; break; // Good sleep optimizes metabolism
+            }
+            
+            // Stress level
+            switch (data.stress) {
+                case 'high': lifestyleMultiplier *= 0.96; break; // High stress can lower metabolism
+                case 'moderate': lifestyleMultiplier *= 1.00; break;
+                case 'low': lifestyleMultiplier *= 1.02; break;
+            }
+            
+            // Metabolic damage adjustment
+            if (data.dietHistory) {
+                lifestyleMultiplier *= 0.92; // Account for potential metabolic damage
+            }
+            
+            // Training phase adjustment
+            let phaseMultiplier = 1.0;
+            switch (data.phase) {
+                case 'prep': phaseMultiplier = 0.95; break; // Contest prep often involves metabolic slowdown
+                case 'recovery': phaseMultiplier = 0.98; break;
+                case 'maintenance': phaseMultiplier = 1.00; break;
+                case 'offseason': phaseMultiplier = 1.02; break; // Building phase with higher activity
+            }
+            
+            // Calculate Total Daily Energy Expenditure (TDEE)
+            const tdee = Math.round(bmr * trainingMultiplier * cardioMultiplier * neatMultiplier * enhancementMultiplier * lifestyleMultiplier * phaseMultiplier);
+            
+            // Macro Distribution for Bodybuilders (Maintenance)
+            // Higher protein for muscle preservation/building
+            const proteinGrams = Math.round(weightLbs * 1.1); // 1.1g per lb bodyweight
+            const proteinCalories = proteinGrams * 4;
+            
+            // Fat: 25-30% of total calories (bodybuilders need adequate fats for hormone production)
+            const fatPercentage = data.gender === 'male' ? 0.25 : 0.28; // Women need slightly more fat
+            const fatCalories = Math.round(tdee * fatPercentage);
+            const fatGrams = Math.round(fatCalories / 9);
+            
+            // Carbs: Remaining calories
+            const carbCalories = tdee - proteinCalories - fatCalories;
+            const carbGrams = Math.round(carbCalories / 4);
+            
+            return {
+                tdee: tdee,
+                protein: { grams: proteinGrams, calories: proteinCalories },
+                carbs: { grams: carbGrams, calories: carbCalories },
+                fats: { grams: fatGrams, calories: fatCalories },
+                bmr: Math.round(bmr)
+            };
+        }
+        
+        // Display Results
+        function displayResults(results) {
+            const resultsHTML = `
+                <div class="results-section" style="margin-top: 30px; padding: 30px; background: rgba(78, 205, 196, 0.1); border-radius: 15px; border: 2px solid #4ecdc4;">
+                    <h2 style="color: #4ecdc4; text-align: center; margin-bottom: 25px; font-size: 1.8rem;">Your Maintenance Macros</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                        <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                            <h3 style="color: #ff6b6b; margin-bottom: 10px;">Daily Calories</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: white;">${results.tdee}</p>
+                            <p style="color: #aaa; font-size: 0.9rem;">Total Energy</p>
+                        </div>
+                        
+                        <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                            <h3 style="color: #4ecdc4; margin-bottom: 10px;">Protein</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: white;">${results.protein.grams}g</p>
+                            <p style="color: #aaa; font-size: 0.9rem;">${results.protein.calories} calories</p>
+                        </div>
+                        
+                        <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                            <h3 style="color: #45b7d1; margin-bottom: 10px;">Carbs</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: white;">${results.carbs.grams}g</p>
+                            <p style="color: #aaa; font-size: 0.9rem;">${results.carbs.calories} calories</p>
+                        </div>
+                        
+                        <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+                            <h3 style="color: #f7b731; margin-bottom: 10px;">Fats</h3>
+                            <p style="font-size: 2rem; font-weight: bold; color: white;">${results.fats.grams}g</p>
+                            <p style="color: #aaa; font-size: 0.9rem;">${results.fats.calories} calories</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 10px; margin-top: 20px;">
+                        <h4 style="color: #4ecdc4; margin-bottom: 15px;">BUILT Training Notes:</h4>
+                        <ul style="color: #ccc; line-height: 1.6;">
+                            <li><strong>BMR:</strong> ${results.bmr} calories (your base metabolic rate)</li>
+                            <li><strong>Protein:</strong> Set at 1.1g per lb bodyweight for muscle preservation</li>
+                            <li><strong>Fats:</strong> 25-28% of calories for optimal hormone production</li>
+                            <li><strong>Carbs:</strong> Remaining calories to fuel your training</li>
+                            <li><strong>Tracking:</strong> Monitor weight/performance and adjust by ±100-200 calories if needed</li>
+                        </ul>
+                    </div>
+                    
+                    <button onclick="window.print()" style="width: 100%; margin-top: 20px; padding: 12px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                        Save/Print Results
+                    </button>
+                </div>
+            `;
+            
+            document.querySelector('.container').insertAdjacentHTML('beforeend', resultsHTML);
+            document.querySelector('.results-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
         // Form submission handler
         document.getElementById('macroCalculator').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -505,11 +728,24 @@
             // Add checkbox values manually
             data.dietHistory = document.getElementById('dietHistory').checked;
             
-            // Here you would typically send this data to your calculation function
-            console.log('Form data collected:', data);
+            // Validate required fields
+            if (!data.age || !data.gender || (!data.weightLbs && !data.weightKg) || 
+                (!data.heightFeet && !data.heightCm) || !data.trainingDays) {
+                alert('Please fill in all required fields before calculating.');
+                return;
+            }
             
-            // Placeholder for actual calculation
-            alert('Form submitted! Data logged to console. Integrate with your macro calculation logic.');
+            // Remove any existing results
+            const existingResults = document.querySelector('.results-section');
+            if (existingResults) {
+                existingResults.remove();
+            }
+            
+            // Calculate and display results
+            const results = calculateMaintenanceMacros(data);
+            displayResults(results);
+            
+            console.log('Calculation completed:', results);
         });
     </script>
 </body>
