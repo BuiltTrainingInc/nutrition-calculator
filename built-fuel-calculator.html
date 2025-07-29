@@ -720,26 +720,14 @@
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>STRESS LEVEL</label>
-                    <select id="stress" name="stress" required>
-                        <option value="">Select</option>
-                        <option value="low">Low (well-managed)</option>
-                        <option value="moderate">Moderate (normal)</option>
-                        <option value="high">High (chronic stress)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>CURRENT PHASE</label>
-                    <select id="phase" name="phase" required>
-                        <option value="">Select</option>
-                        <option value="maintenance">Maintenance</option>
-                        <option value="offseason">Off-season/Building</option>
-                        <option value="prep">Contest prep</option>
-                        <option value="recovery">Recovery/Deload</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>STRESS LEVEL</label>
+                <select id="stress" name="stress" required>
+                    <option value="">Select</option>
+                    <option value="low">Low (well-managed)</option>
+                    <option value="moderate">Moderate (normal)</option>
+                    <option value="high">High (chronic stress)</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -969,17 +957,8 @@ function calculateMaintenanceMacros(data) {
         lifestyleMultiplier *= 0.92;
     }
     
-    // Training phase adjustment
-    let phaseMultiplier = 1.0;
-    switch (data.phase) {
-        case 'prep': phaseMultiplier = 0.95; break;
-        case 'recovery': phaseMultiplier = 0.98; break;
-        case 'maintenance': phaseMultiplier = 1.00; break;
-        case 'offseason': phaseMultiplier = 1.02; break;
-    }
-    
-    // Calculate TDEE
-    const tdee = Math.round(bmr * trainingMultiplier * cardioMultiplier * neatMultiplier * enhancementMultiplier * lifestyleMultiplier * phaseMultiplier);
+    // Calculate TDEE (Training phase removed since this is maintenance-focused)
+    const tdee = Math.round(bmr * trainingMultiplier * cardioMultiplier * neatMultiplier * enhancementMultiplier * lifestyleMultiplier);
     
     // Macro Distribution for Maintenance
     const proteinGrams = Math.round(weightLbs * 1.1); // 1.1g per lb for muscle preservation
@@ -1112,13 +1091,13 @@ document.getElementById('macroCalculator').addEventListener('submit', function(e
         data[key] = value;
     }
     
-    // Set goal to maintenance (hardcoded since we removed the dropdown)
+    // Set goal to maintenance (hardcoded since this is a maintenance calculator)
     data.goal = 'maintain';
     data.dietHistory = document.getElementById('dietHistory').checked;
     
     // Validate required fields
     if (!data.age || !data.gender || (!data.weightLbs && !data.weightKg) || 
-        (!data.heightFeet && !data.heightCm) || !data.trainingDays) {
+        (!data.heightFeet && !data.heightCm) || !data.trainingDays || !data.stress) {
         alert('⚠️ Please fill in all required fields before calculating.');
         return;
     }
