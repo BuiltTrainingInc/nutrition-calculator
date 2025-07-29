@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BUILT Fuel Calculator</title>
+    <title>BUILT Maintenance Macro Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Global Mobile Touch Optimizations */
@@ -40,7 +40,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: auto;
             font-family: 'Arial Black', Arial, sans-serif;
             padding: 20px;
@@ -514,8 +514,8 @@
 </head>
 <body>
 <div class="container">
-    <h2 style="text-align: center; color: #FFFFFF; margin-bottom: 10px; font-weight: 900; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">BUILT FUEL CALCULATOR</h2>
-    <p style="text-align: center; margin-bottom: 30px; color: #6B7280; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">CALCULATE THE BEST MAINTENANCE MACROS FOR YOUR LIFE • <span style="color: #DC2626; font-weight: 900; text-shadow: 0 0 5px #DC2626;">BODYBUILDING WITHOUT BURNOUT 🔥</span></p>
+    <h2 style="text-align: center; color: #FFFFFF; margin-bottom: 10px; font-weight: 900; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;">BUILT MAINTENANCE CALCULATOR</h2>
+    <p style="text-align: center; margin-bottom: 30px; color: #6B7280; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">CALCULATE YOUR MAINTENANCE MACROS • <span style="color: #DC2626; font-weight: 900; text-shadow: 0 0 5px #DC2626;">BODYBUILDING WITHOUT BURNOUT 🔥</span></p>
 
     <style>
         @media (max-width: 768px) {
@@ -583,22 +583,22 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Body Composition -->
-        <div class="section">
-            <div class="section-title">📊 BODY COMPOSITION</div>
-            
             <div class="form-row">
                 <div class="form-group">
-                    <label>BODY FAT % (IF KNOWN)</label>
+                    <label>BODY FAT % (OPTIONAL)</label>
                     <input type="number" id="bodyFat" name="bodyFat" step="0.1" placeholder="e.g. 12.5">
                     <div class="info-text">LEAVE BLANK IF UNKNOWN</div>
                 </div>
                 <div class="form-group">
-                    <label>LEAN MASS (LBS - IF KNOWN)</label>
-                    <input type="number" id="leanMass" name="leanMass" step="0.1" placeholder="Optional">
-                    <div class="info-text">FROM DEXA SCAN, BODPOD, ETC.</div>
+                    <label>TRAINING EXPERIENCE</label>
+                    <select id="experience" name="experience" required>
+                        <option value="">Select</option>
+                        <option value="beginner">< 2 years</option>
+                        <option value="intermediate">2-5 years</option>
+                        <option value="advanced">5-10 years</option>
+                        <option value="expert">10+ years</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -644,25 +644,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>TRAINING EXPERIENCE</label>
-                    <select id="experience" name="experience" required>
-                        <option value="">Select</option>
-                        <option value="beginner">< 2 years</option>
-                        <option value="intermediate">2-5 years</option>
-                        <option value="advanced">5-10 years</option>
-                        <option value="expert">10+ years</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cardio Activity -->
-        <div class="section">
-            <div class="section-title">🏃 CARDIO ACTIVITY</div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>CARDIO SESSIONS PER WEEK</label>
+                    <label>CARDIO PER WEEK</label>
                     <select id="cardioFreq" name="cardioFreq" required>
                         <option value="">Select</option>
                         <option value="0">None</option>
@@ -672,27 +654,6 @@
                         <option value="7">Daily</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>CARDIO TYPE</label>
-                    <select id="cardioType" name="cardioType">
-                        <option value="">Select (if applicable)</option>
-                        <option value="liss">LISS</option>
-                        <option value="miss">MISS</option>
-                        <option value="hiit">HIIT</option>
-                        <option value="mixed">Mixed</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>CARDIO DURATION</label>
-                <select id="cardioDuration" name="cardioDuration">
-                    <option value="">Select (if applicable)</option>
-                    <option value="15">10-20 min</option>
-                    <option value="30">20-40 min</option>
-                    <option value="45">40-60 min</option>
-                    <option value="60">60+ min</option>
-                </select>
             </div>
         </div>
 
@@ -700,41 +661,53 @@
         <div class="section">
             <div class="section-title">📱 DAILY ACTIVITY</div>
             
-            <div class="form-group">
-                <label>JOB ACTIVITY LEVEL</label>
-                <select id="job" name="job" required>
-                    <option value="">Select</option>
-                    <option value="sedentary">Sedentary (desk job)</option>
-                    <option value="light">Light Activity</option>
-                    <option value="moderate">Moderate Activity</option>
-                    <option value="heavy">Heavy Activity</option>
-                </select>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>JOB ACTIVITY LEVEL</label>
+                    <select id="job" name="job" required>
+                        <option value="">Select</option>
+                        <option value="sedentary">Sedentary (desk job)</option>
+                        <option value="light">Light Activity</option>
+                        <option value="moderate">Moderate Activity</option>
+                        <option value="heavy">Heavy Activity</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>NON-GYM ACTIVITY</label>
+                    <select id="neat" name="neat" required>
+                        <option value="">Select</option>
+                        <option value="low">Low (mostly sedentary)</option>
+                        <option value="moderate">Moderate (some movement)</option>
+                        <option value="high">High (active lifestyle)</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>DAILY STEPS (IF TRACKED)</label>
+                    <label>DAILY STEPS (OPTIONAL)</label>
                     <input type="number" id="steps" name="steps" placeholder="e.g. 8000">
-                    <div class="info-text">OPTIONAL - HELPS FINE-TUNE</div>
+                    <div class="info-text">HELPS FINE-TUNE CALCULATIONS</div>
                 </div>
                 <div class="form-group">
-                    <label>NON-EXERCISE ACTIVITY</label>
-                    <select id="neat" name="neat" required>
+                    <label>SLEEP PER NIGHT</label>
+                    <select id="sleep" name="sleep" required>
                         <option value="">Select</option>
-                        <option value="low">Low</option>
-                        <option value="moderate">Moderate</option>
-                        <option value="high">High</option>
+                        <option value="5">< 6 hours</option>
+                        <option value="6">6-7 hours</option>
+                        <option value="7">7-8 hours</option>
+                        <option value="8">8+ hours</option>
                     </select>
                 </div>
             </div>
         </div>
 
-        <!-- Enhancement Status -->
+        <!-- Enhancement & Lifestyle -->
         <div class="section">
-            <div class="section-title">💉 ENHANCEMENT STATUS</div>
+            <div class="section-title">⚡ LIFESTYLE FACTORS</div>
             
             <div class="form-group">
-                <label>CURRENT STATUS</label>
+                <label>ENHANCEMENT STATUS</label>
                 <div class="radio-group">
                     <div class="radio-item">
                         <input type="radio" id="natural" name="enhancement" value="natural" required>
@@ -747,59 +720,24 @@
                 </div>
             </div>
 
-            <div class="form-group hidden" id="enhancementDetails">
-                <label>CURRENT COMPOUNDS (OPTIONAL)</label>
-                <textarea id="compounds" name="compounds" rows="2" placeholder="e.g. Test 200mg/week"></textarea>
-                <div class="info-text">HELPS ACCOUNT FOR METABOLIC DEMANDS</div>
-            </div>
-        </div>
-
-        <!-- Goals & Lifestyle -->
-        <div class="section">
-            <div class="section-title">🎯 GOALS & LIFESTYLE</div>
-            
             <div class="form-row">
-                <div class="form-group">
-                    <label>PRIMARY GOAL</label>
-                    <select id="goal" name="goal" required>
-                        <option value="">Select</option>
-                        <option value="maintain">Maintain physique</option>
-                        <option value="lean_bulk">Lean bulk</option>
-                        <option value="bulk">Moderate bulk</option>
-                        <option value="cut">Fat loss/cutting</option>
-                        <option value="recomp">Body recomposition</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>TRAINING PHASE</label>
-                    <select id="phase" name="phase" required>
-                        <option value="">Select</option>
-                        <option value="offseason">Off-season</option>
-                        <option value="prep">Contest prep</option>
-                        <option value="maintenance">Maintenance</option>
-                        <option value="recovery">Recovery/Deload</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>SLEEP PER NIGHT</label>
-                    <select id="sleep" name="sleep" required>
-                        <option value="">Select</option>
-                        <option value="5">< 6 hours</option>
-                        <option value="6">6-7 hours</option>
-                        <option value="7">7-8 hours</option>
-                        <option value="8">8+ hours</option>
-                    </select>
-                </div>
                 <div class="form-group">
                     <label>STRESS LEVEL</label>
                     <select id="stress" name="stress" required>
                         <option value="">Select</option>
-                        <option value="low">Low</option>
-                        <option value="moderate">Moderate</option>
-                        <option value="high">High</option>
+                        <option value="low">Low (well-managed)</option>
+                        <option value="moderate">Moderate (normal)</option>
+                        <option value="high">High (chronic stress)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>CURRENT PHASE</label>
+                    <select id="phase" name="phase" required>
+                        <option value="">Select</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="offseason">Off-season/Building</option>
+                        <option value="prep">Contest prep</option>
+                        <option value="recovery">Recovery/Deload</option>
                     </select>
                 </div>
             </div>
@@ -809,7 +747,7 @@
                     <input type="checkbox" id="dietHistory" name="dietHistory">
                     <label for="dietHistory">HISTORY OF EXTREME DIETING OR METABOLIC DAMAGE</label>
                 </div>
-                <div class="info-text">CHECK IF SUSPECTED METABOLIC ISSUES</div>
+                <div class="info-text">CHECK IF SUSPECTED METABOLIC ISSUES FROM PAST EXTREME DIETS</div>
             </div>
         </div>
 
@@ -818,12 +756,19 @@
 
     <!-- Results Output -->
     <div class="results-output" id="resultsOutput">
-        <h3 class="results-title">YOUR BUILT FUEL RESULTS</h3>
+        <h3 class="results-title">YOUR MAINTENANCE MACROS</h3>
         <div id="resultsContent"></div>
         
         <div class="macro-summary">
-            <h3 style="color: #DC2626; text-align: center; margin-bottom: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">DAILY MACRO BREAKDOWN</h3>
+            <h3 style="color: #DC2626; text-align: center; margin-bottom: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">DAILY MAINTENANCE BREAKDOWN</h3>
             <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-number" id="totalCalories">0</div>
+                    <div class="summary-label">CALORIES</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill calories-fill" id="caloriesProgress"></div>
+                    </div>
+                </div>
                 <div class="summary-item">
                     <div class="summary-number" id="totalProtein">0</div>
                     <div class="summary-label">PROTEIN (G)</div>
@@ -845,50 +790,39 @@
                         <div class="progress-fill fat-fill" id="fatProgress"></div>
                     </div>
                 </div>
-                <div class="summary-item">
-                    <div class="summary-number" id="totalCalories">0</div>
-                    <div class="summary-label">CALORIES</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill calories-fill" id="caloriesProgress"></div>
-                    </div>
-                </div>
             </div>
         </div>
 
         <div class="notes-section">
-            <h4>BUILT TRAINING NOTES:</h4>
+            <h4>BUILT MAINTENANCE NOTES:</h4>
             <ul>
-                <li><strong>BMR:</strong> <span id="bmrValue">0</span> calories (your base metabolic rate)</li>
-                <li><strong>PROTEIN:</strong> Set at 1.1g per lb bodyweight for muscle preservation</li>
-                <li><strong>FATS:</strong> 25-28% of calories for optimal hormone production</li>
-                <li><strong>CARBS:</strong> Remaining calories to fuel your training</li>
-                <li><strong>TRACKING:</strong> Monitor weight/performance and adjust by ±100-200 calories if needed</li>
-                <li><strong>PHILOSOPHY:</strong> These are MAINTENANCE macros for sustainable bodybuilding without burnout</li>
+                <li><strong>PURPOSE:</strong> These macros maintain your current physique and performance</li>
+                <li><strong>PROTEIN:</strong> 1.1g per lb bodyweight for muscle preservation and recovery</li>
+                <li><strong>FATS:</strong> 25-28% of calories for optimal hormone production and health</li>
+                <li><strong>CARBS:</strong> Remaining calories to fuel training and daily activities</li>
+                <li><strong>TRACKING:</strong> Monitor weight stability (±2-3 lbs) over 2-3 weeks</li>
+                <li><strong>ADJUSTMENTS:</strong> If losing weight, add 100-150 calories. If gaining, subtract 100-150 calories</li>
+                <li><strong>PHILOSOPHY:</strong> Sustainable nutrition for long-term muscle building without burnout</li>
             </ul>
         </div>
 
         <div style="text-align: center; margin-top: 20px;">
-            <button class="download-btn" onclick="downloadResults()">📥 DOWNLOAD RESULTS</button>
+            <button class="download-btn" onclick="downloadResults()">📥 DOWNLOAD MAINTENANCE PLAN</button>
         </div>
     </div>
 
     <!-- Disclaimer -->
     <div class="disclaimer">
         <div class="disclaimer-title">📚 Educational Purpose</div>
-        This tool is provided for educational purposes only. It does not promote or condone the use of performance-enhancing drugs. The calculations are intended to help individuals understand macro breakdowns based on inputs they provide. This is not medical advice. Always consult a licensed healthcare professional before making any decisions regarding diet, supplementation, or training.
+        This tool is provided for educational purposes only. It does not promote or condone the use of performance-enhancing drugs. The calculations are intended to help individuals understand maintenance macro needs based on inputs they provide. This is not medical advice. Always consult a licensed healthcare professional before making any decisions regarding diet, supplementation, or training.
     </div>
 </div>
 
 <script>
-// Toggle enhancement details
+// Toggle enhancement details (removed since we simplified)
 document.querySelectorAll('input[name="enhancement"]').forEach(radio => {
     radio.addEventListener('change', function() {
-        const details = document.getElementById('enhancementDetails');
-        if (this.value === 'enhanced') {
-            details.classList.remove('hidden');
-        } else {
-            details.classList.add('hidden');
-        }
+        // No additional fields to show/hide in simplified version
     });
 });
 
@@ -977,25 +911,12 @@ function calculateMaintenanceMacros(data) {
         case 'intermediate': trainingMultiplier += 0.01; break;
     }
     
-    // Cardio Activity Multiplier
+    // Cardio Activity Multiplier (simplified)
     let cardioMultiplier = 1.0;
     const cardioFreq = parseInt(data.cardioFreq);
-    const cardioDuration = parseInt(data.cardioDuration);
     
     if (cardioFreq > 0) {
-        let cardioBase = cardioFreq * 0.02;
-        
-        if (cardioDuration >= 60) cardioBase *= 1.5;
-        else if (cardioDuration >= 45) cardioBase *= 1.3;
-        else if (cardioDuration >= 30) cardioBase *= 1.1;
-        
-        switch (data.cardioType) {
-            case 'hiit': cardioBase *= 1.4; break;
-            case 'miss': cardioBase *= 1.2; break;
-            case 'mixed': cardioBase *= 1.3; break;
-            case 'liss': cardioBase *= 1.0; break;
-        }
-        
+        let cardioBase = cardioFreq * 0.02; // 2% per session
         cardioMultiplier += cardioBase;
     }
     
@@ -1060,11 +981,11 @@ function calculateMaintenanceMacros(data) {
     // Calculate TDEE
     const tdee = Math.round(bmr * trainingMultiplier * cardioMultiplier * neatMultiplier * enhancementMultiplier * lifestyleMultiplier * phaseMultiplier);
     
-    // Macro Distribution
-    const proteinGrams = Math.round(weightLbs * 1.1);
+    // Macro Distribution for Maintenance
+    const proteinGrams = Math.round(weightLbs * 1.1); // 1.1g per lb for muscle preservation
     const proteinCalories = proteinGrams * 4;
     
-    const fatPercentage = data.gender === 'male' ? 0.25 : 0.28;
+    const fatPercentage = data.gender === 'male' ? 0.25 : 0.28; // 25% for males, 28% for females
     const fatCalories = Math.round(tdee * fatPercentage);
     const fatGrams = Math.round(fatCalories / 9);
     
@@ -1089,7 +1010,7 @@ function displayResults(results) {
         day: "numeric"
     });
 
-    const resultsText = `BUILT FUEL CALCULATOR RESULTS – ${formattedDate}
+    const resultsText = `BUILT MAINTENANCE CALCULATOR RESULTS – ${formattedDate}
 
 MAINTENANCE MACROS FOR SUSTAINABLE BODYBUILDING:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1102,31 +1023,31 @@ MAINTENANCE MACROS FOR SUSTAINABLE BODYBUILDING:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-BUILT TRAINING INSIGHTS:
-• BMR: ${results.bmr} calories (base metabolic rate)
-• Protein: 1.1g per lb bodyweight for muscle preservation
-• Fats: 25-28% of calories for hormone optimization
-• Carbs: Remaining calories to fuel training performance
-• Tracking: Monitor weight/performance, adjust ±100-200 calories as needed
+MAINTENANCE GUIDELINES:
+• PURPOSE: Maintain current physique while supporting recovery and performance
+• TRACKING: Monitor weight stability (±2-3 lbs) over 2-3 weeks
+• ADJUSTMENTS: Add 100-150 cals if losing weight, subtract if gaining
+• PROTEIN: 1.1g per lb bodyweight for muscle preservation
+• FATS: 25-28% of calories for hormone optimization
+• CARBS: Remaining calories for training fuel and recovery
 
-🎯 BODYBUILDING WITHOUT BURNOUT PHILOSOPHY:
+🎯 BODYBUILDING WITHOUT BURNOUT:
 These maintenance macros support sustainable muscle building and recovery 
-without the obsession that leads to burnout. Focus on consistency over perfection.`;
+without the obsession that leads to burnout. Consistency beats perfection.`;
 
     document.getElementById("resultsContent").innerText = resultsText;
     
-    // Update macro displays
+    // Update macro displays (reordered to put calories first)
+    document.getElementById('totalCalories').textContent = results.tdee;
     document.getElementById('totalProtein').textContent = results.protein.grams;
     document.getElementById('totalCarbs').textContent = results.carbs.grams;
     document.getElementById('totalFat').textContent = results.fats.grams;
-    document.getElementById('totalCalories').textContent = results.tdee;
-    document.getElementById('bmrValue').textContent = results.bmr;
     
-    // Update progress bars (for visual reference, assuming 100% = target achieved)
+    // Update progress bars (visual indicator)
+    document.getElementById('caloriesProgress').style.width = '100%';
     document.getElementById('proteinProgress').style.width = '100%';
     document.getElementById('carbsProgress').style.width = '100%';
     document.getElementById('fatProgress').style.width = '100%';
-    document.getElementById('caloriesProgress').style.width = '100%';
     
     // Show results
     document.getElementById("resultsOutput").classList.add("active");
@@ -1166,7 +1087,7 @@ function downloadResults() {
     if (typeof html2canvas !== 'undefined') {
         html2canvas(wrapper, { scale: 2 }).then(canvas => {
             const link = document.createElement("a");
-            link.download = `BUILT_Fuel_Calculator_${formattedDate.replace(/\s/g, "_")}.png`;
+            link.download = `BUILT_Maintenance_Calculator_${formattedDate.replace(/\s/g, "_")}.png`;
             link.href = canvas.toDataURL();
             link.click();
             document.body.removeChild(wrapper);
@@ -1191,6 +1112,8 @@ document.getElementById('macroCalculator').addEventListener('submit', function(e
         data[key] = value;
     }
     
+    // Set goal to maintenance (hardcoded since we removed the dropdown)
+    data.goal = 'maintain';
     data.dietHistory = document.getElementById('dietHistory').checked;
     
     // Validate required fields
