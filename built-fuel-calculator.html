@@ -220,6 +220,10 @@
             border-color: #DC2626;
         }
 
+        .radio-item .radio-label {
+            cursor: pointer;
+        }
+
         @media (max-width: 768px) {
             .radio-group {
                 flex-direction: column;
@@ -553,11 +557,11 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label>AGE</label>
+                    <label for="age">AGE</label>
                     <input type="number" id="age" name="age" min="16" max="80" required placeholder="e.g. 25">
                 </div>
                 <div class="form-group">
-                    <label>BIOLOGICAL SEX</label>
+                    <label for="gender">BIOLOGICAL SEX</label>
                     <select id="gender" name="gender" required>
                         <option value="">Select</option>
                         <option value="male">Male</option>
@@ -568,7 +572,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>HEIGHT</label>
+                    <label for="heightFeet">HEIGHT</label>
                     <div class="height-inputs">
                         <input type="number" id="heightFeet" name="heightFeet" placeholder="Feet" min="4" max="7">
                         <input type="number" id="heightInches" name="heightInches" placeholder="Inches" min="0" max="11">
@@ -576,7 +580,7 @@
                     <div class="height-cm-input">Or CM: <input type="number" id="heightCm" name="heightCm" placeholder="cm" min="120" max="220"></div>
                 </div>
                 <div class="form-group">
-                    <label>CURRENT WEIGHT</label>
+                    <label for="weightLbs">CURRENT WEIGHT</label>
                     <div class="weight-inputs">
                         <input type="number" id="weightLbs" name="weightLbs" placeholder="lbs" step="0.1">
                         <input type="number" id="weightKg" name="weightKg" placeholder="kg" step="0.1">
@@ -586,12 +590,12 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>BODY FAT % (OPTIONAL)</label>
+                    <label for="bodyFat">BODY FAT % (OPTIONAL)</label>
                     <input type="number" id="bodyFat" name="bodyFat" step="0.1" placeholder="e.g. 12.5">
                     <div class="info-text">LEAVE BLANK IF UNKNOWN</div>
                 </div>
                 <div class="form-group">
-                    <label>TRAINING EXPERIENCE</label>
+                    <label for="experience">TRAINING EXPERIENCE</label>
                     <select id="experience" name="experience" required>
                         <option value="">Select</option>
                         <option value="beginner">< 2 years</option>
@@ -609,7 +613,7 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label>TRAINING DAYS PER WEEK</label>
+                    <label for="trainingDays">TRAINING DAYS PER WEEK</label>
                     <select id="trainingDays" name="trainingDays" required>
                         <option value="">Select</option>
                         <option value="2">2 days</option>
@@ -621,7 +625,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>SESSION DURATION</label>
+                    <label for="sessionDuration">SESSION DURATION</label>
                     <select id="sessionDuration" name="sessionDuration" required>
                         <option value="">Select</option>
                         <option value="30">30-45 min</option>
@@ -634,7 +638,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>TRAINING INTENSITY</label>
+                    <label for="trainingIntensity">TRAINING INTENSITY</label>
                     <select id="trainingIntensity" name="trainingIntensity" required>
                         <option value="">Select</option>
                         <option value="moderate">Moderate (RPE 6-7)</option>
@@ -644,7 +648,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>CARDIO PER WEEK</label>
+                    <label for="cardioFreq">CARDIO PER WEEK</label>
                     <select id="cardioFreq" name="cardioFreq" required>
                         <option value="">Select</option>
                         <option value="0">None</option>
@@ -663,7 +667,7 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label>JOB ACTIVITY LEVEL</label>
+                    <label for="job">JOB ACTIVITY LEVEL</label>
                     <select id="job" name="job" required>
                         <option value="">Select</option>
                         <option value="sedentary">Sedentary (desk job)</option>
@@ -673,7 +677,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>NON-GYM ACTIVITY</label>
+                    <label for="neat">NON-GYM ACTIVITY</label>
                     <select id="neat" name="neat" required>
                         <option value="">Select</option>
                         <option value="low">Low (mostly sedentary)</option>
@@ -685,12 +689,12 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>DAILY STEPS (OPTIONAL)</label>
+                    <label for="steps">DAILY STEPS (OPTIONAL)</label>
                     <input type="number" id="steps" name="steps" placeholder="e.g. 8000">
                     <div class="info-text">HELPS FINE-TUNE CALCULATIONS</div>
                 </div>
                 <div class="form-group">
-                    <label>SLEEP PER NIGHT</label>
+                    <label for="sleep">SLEEP PER NIGHT</label>
                     <select id="sleep" name="sleep" required>
                         <option value="">Select</option>
                         <option value="5">< 6 hours</option>
@@ -711,17 +715,17 @@
                 <div class="radio-group">
                     <div class="radio-item">
                         <input type="radio" id="natural" name="enhancement" value="natural" required>
-                        <span class="radio-label">Natural</span>
+                        <label for="natural" class="radio-label">Natural</label>
                     </div>
                     <div class="radio-item">
                         <input type="radio" id="enhanced" name="enhancement" value="enhanced" required>
-                        <span class="radio-label">Enhanced (TRT/PEDs)</span>
+                        <label for="enhanced" class="radio-label">Enhanced (TRT/PEDs)</label>
                     </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>STRESS LEVEL</label>
+                <label for="stress">STRESS LEVEL</label>
                 <select id="stress" name="stress" required>
                     <option value="">Select</option>
                     <option value="low">Low (well-managed)</option>
@@ -1096,8 +1100,12 @@ document.getElementById('macroCalculator').addEventListener('submit', function(e
     data.dietHistory = document.getElementById('dietHistory').checked;
     
     // Validate required fields
-    if (!data.age || !data.gender || (!data.weightLbs && !data.weightKg) || 
-        (!data.heightFeet && !data.heightCm) || !data.trainingDays || !data.stress) {
+    const hasHeight = (data.heightFeet && data.heightInches) || data.heightCm;
+    const hasWeight = data.weightLbs || data.weightKg;
+    
+    if (!data.age || !data.gender || !hasWeight || !hasHeight || !data.trainingDays || 
+        !data.sessionDuration || !data.trainingIntensity || !data.cardioFreq || !data.job || 
+        !data.neat || !data.sleep || !data.stress || !data.enhancement || !data.experience) {
         alert('⚠️ Please fill in all required fields before calculating.');
         return;
     }
