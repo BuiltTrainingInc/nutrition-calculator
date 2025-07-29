@@ -788,13 +788,10 @@
         <div class="notes-section">
             <h4>BUILT MAINTENANCE NOTES:</h4>
             <ul>
-                <li><strong>PURPOSE:</strong> These macros maintain your current physique and performance</li>
-                <li><strong>PROTEIN:</strong> 1.1g per lb bodyweight for muscle preservation and recovery</li>
-                <li><strong>FATS:</strong> 25-28% of calories for optimal hormone production and health</li>
-                <li><strong>CARBS:</strong> Remaining calories to fuel training and daily activities</li>
-                <li><strong>TRACKING:</strong> Monitor weight stability (±2-3 lbs) over 2-3 weeks</li>
-                <li><strong>ADJUSTMENTS:</strong> If losing weight, add 100-150 calories. If gaining, subtract 100-150 calories</li>
-                <li><strong>PHILOSOPHY:</strong> Sustainable nutrition for long-term muscle building without burnout</li>
+                <li><strong>ROUGH ESTIMATES:</strong> These are your estimated maintenance macros</li>
+                <li><strong>PROTEIN:</strong> 1.1g per lb bodyweight for muscle preservation</li>
+                <li><strong>FATS:</strong> 25-28% of calories for hormone health</li>
+                <li><strong>CARBS:</strong> Remaining calories for training fuel</li>
             </ul>
         </div>
 
@@ -995,7 +992,7 @@ function displayResults(results) {
 
     const resultsText = `BUILT MAINTENANCE CALCULATOR RESULTS – ${formattedDate}
 
-MAINTENANCE MACROS FOR SUSTAINABLE BODYBUILDING:
+ROUGH MAINTENANCE MACROS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🔥 DAILY CALORIES: ${results.tdee}
@@ -1006,17 +1003,8 @@ MAINTENANCE MACROS FOR SUSTAINABLE BODYBUILDING:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-MAINTENANCE GUIDELINES:
-• PURPOSE: Maintain current physique while supporting recovery and performance
-• TRACKING: Monitor weight stability (±2-3 lbs) over 2-3 weeks
-• ADJUSTMENTS: Add 100-150 cals if losing weight, subtract if gaining
-• PROTEIN: 1.1g per lb bodyweight for muscle preservation
-• FATS: 25-28% of calories for hormone optimization
-• CARBS: Remaining calories for training fuel and recovery
-
-🎯 BODYBUILDING WITHOUT BURNOUT:
-These maintenance macros support sustainable muscle building and recovery 
-without the obsession that leads to burnout. Consistency beats perfection.`;
+These are rough estimates for your maintenance macros.
+Use as a starting point and adjust based on real-world results.`;
 
     document.getElementById("resultsContent").innerText = resultsText;
     
