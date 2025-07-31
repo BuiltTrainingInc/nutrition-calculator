@@ -4,155 +4,537 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BUILT Phase Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Arial Black", Arial, sans-serif;
+            background: #1A1A1A;
+            color: #FFFFFF;
+            line-height: 1.4;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #1A1A1A;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .header-section {
+            background: #000000;
+            border: 2px solid #DC2626;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .main-title {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6B7280;
+        }
+
+        .form-section {
+            background: #000000;
+            border: 1px solid #6B7280;
+            margin-top: 20px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #FFFFFF;
+            border-bottom: 2px solid #DC2626;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #FFFFFF;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 15px;
+            background: #1A1A1A;
+            border: 2px solid #6B7280;
+            border-radius: 6px;
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            min-height: 44px;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #DC2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+            transform: translateY(-1px);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #6B7280;
+            font-weight: 600;
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23DC2626' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            background: #1A1A1A;
+            border: 2px dashed #6B7280;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper:hover {
+            border-color: #DC2626;
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-text {
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6B7280;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #6B7280;
+            margin-top: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .primary-button {
+            width: 100%;
+            padding: 18px 20px;
+            background: #DC2626;
+            color: #FFFFFF;
+            border: 2px solid #DC2626;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+            min-height: 44px;
+        }
+
+        .primary-button:hover {
+            background: #FFFFFF;
+            color: #DC2626;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .primary-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .primary-button:disabled {
+            background: #6B7280;
+            border-color: #6B7280;
+            color: #FFFFFF;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .response-section {
+            background: #000000;
+            border: 1px solid #6B7280;
+            margin-top: 20px;
+            padding: 25px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            color: #DC2626;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .main-title {
+                font-size: 24px;
+                letter-spacing: 1.5px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .header-section,
+            .form-section {
+                padding: 20px;
+            }
+
+            input[type="text"],
+            input[type="number"],
+            select,
+            textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 16px;
+            }
+
+            .primary-button {
+                padding: 20px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 20px;
+                letter-spacing: 1px;
+            }
+
+            .section-title {
+                font-size: 16px;
+                letter-spacing: 1px;
+            }
+
+            .header-section,
+            .form-section {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #f0f0f0; border-radius: 10px;">
-  <h2 style="text-align: center; font-size: 22px;">BUILT PHASE GUIDE</h2>
-  <p style="text-align: center; margin-bottom: 30px;">Find out which BUILT phase you're ready for.</p>
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <h1 class="main-title">BUILT PHASE GUIDE</h1>
+            <p class="subtitle">DISCOVER YOUR OPTIMAL TRAINING PHASE</p>
+        </div>
 
-  <label>Height</label>
-  <input id="height" type="text" placeholder="e.g. 5'10 or 178cm" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+        <!-- Physical Metrics Section -->
+        <div class="form-section">
+            <h2 class="section-title">PHYSICAL METRICS</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="height">HEIGHT</label>
+                    <input id="height" type="text" placeholder="E.G. 5'10 OR 178CM">
+                </div>
+                <div class="form-group">
+                    <label for="weight">CURRENT WEIGHT</label>
+                    <input id="weight" type="text" placeholder="E.G. 185 LBS">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="bodyfat">BODY FAT % (ESTIMATE)</label>
+                <select id="bodyfat">
+                    <option>UNDER 10%</option>
+                    <option>10–15%</option>
+                    <option>15–20%</option>
+                    <option>20–25%</option>
+                    <option>25–30%</option>
+                    <option>30%+</option>
+                </select>
+            </div>
+        </div>
 
-  <label>Current Weight</label>
-  <input id="weight" type="text" placeholder="e.g. 185 lbs" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+        <!-- Training Status Section -->
+        <div class="form-section">
+            <h2 class="section-title">TRAINING STATUS</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phaseLength">TIME IN CURRENT PHASE</label>
+                    <select id="phaseLength">
+                        <option>< 4 WEEKS</option>
+                        <option>4–8 WEEKS</option>
+                        <option>8–16 WEEKS</option>
+                        <option>16+ WEEKS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="training">TRAINING PERFORMANCE</label>
+                    <select id="training">
+                        <option>CRUSHING IT</option>
+                        <option>DECENT BUT INCONSISTENT</option>
+                        <option>STALLED OUT</option>
+                        <option>BURNT OUT</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="recovered">RECOVERED FROM CURRENT PHASE?</label>
+                <select id="recovered">
+                    <option>YES</option>
+                    <option>SOMEWHAT</option>
+                    <option>NO – I FEEL DRAINED OR INFLAMED</option>
+                </select>
+            </div>
+        </div>
 
-  <label>Body Fat % (Estimate)</label>
-  <select id="bodyfat" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>Under 10%</option>
-    <option>10–15%</option>
-    <option>15–20%</option>
-    <option>20–25%</option>
-    <option>25–30%</option>
-    <option>30%+</option>
-  </select>
+        <!-- Health Metrics Section -->
+        <div class="form-section">
+            <h2 class="section-title">HEALTH METRICS</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="sleep">SLEEP QUALITY (1–10)</label>
+                    <input id="sleep" type="number" min="1" max="10" placeholder="1-10">
+                </div>
+                <div class="form-group">
+                    <label for="stress">STRESS LEVEL (1–10)</label>
+                    <input id="stress" type="number" min="1" max="10" placeholder="1-10">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="digestion">DIGESTION QUALITY</label>
+                    <select id="digestion">
+                        <option>CONSISTENT & SOLID</option>
+                        <option>SOME BLOAT OR IRREGULARITY</option>
+                        <option>POOR OR INCONSISTENT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appetite">APPETITE</label>
+                    <select id="appetite">
+                        <option>ALWAYS HUNGRY</option>
+                        <option>NEUTRAL</option>
+                        <option>LOW APPETITE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="energy">ENERGY LEVELS</label>
+                <select id="energy">
+                    <option>HIGH</option>
+                    <option>MEDIUM</option>
+                    <option>LOW</option>
+                </select>
+            </div>
+        </div>
 
-  <label>Time in Current Phase</label>
-  <select id="phaseLength" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>< 4 weeks</option>
-    <option>4–8 weeks</option>
-    <option>8–16 weeks</option>
-    <option>16+ weeks</option>
-  </select>
+        <!-- Goals & Readiness Section -->
+        <div class="form-section">
+            <h2 class="section-title">GOALS & READINESS</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="goal">PRIMARY GOAL</label>
+                    <select id="goal">
+                        <option>LOSE FAT</option>
+                        <option>BUILD MUSCLE</option>
+                        <option>GET LEANER SLOWLY</option>
+                        <option>FEEL BETTER & GET HEALTHY</option>
+                        <option>NOT SURE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="readiness">READINESS TO PUSH</label>
+                    <select id="readiness">
+                        <option>LOCKED IN</option>
+                        <option>WILLING BUT BUSY/STRESSED</option>
+                        <option>NOT READY FOR INTENSITY</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-  <label>Training Performance</label>
-  <select id="training" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>Crushing it</option>
-    <option>Decent but inconsistent</option>
-    <option>Stalled out</option>
-    <option>Burnt out</option>
-  </select>
+        <!-- Additional Information Section -->
+        <div class="form-section">
+            <h2 class="section-title">ADDITIONAL INFORMATION</h2>
+            <div class="form-group">
+                <label for="health">HEALTH CONCERNS / BLOODWORK</label>
+                <textarea id="health" rows="3" placeholder="LIST ANYTHING RELEVANT..."></textarea>
+                <div class="help-text">Include any medical conditions, medications, or recent bloodwork results</div>
+            </div>
+            
+            <div class="form-group">
+                <label>PROGRESS PHOTOS (OPTIONAL)</label>
+                <div class="file-input-wrapper" onclick="document.getElementById('photos').click()">
+                    <input type="file" id="photos" class="file-input" accept="image/*" multiple>
+                    <div class="file-input-text">CLICK TO UPLOAD PHOTOS</div>
+                    <div class="help-text">Front / Side / Back if possible – used to better assess body fat % (not required)</div>
+                </div>
+            </div>
+        </div>
 
-  <label>Recovered from Current Phase?</label>
-  <select id="recovered" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>Yes</option>
-    <option>Somewhat</option>
-    <option>No – I feel drained or inflamed</option>
-  </select>
+        <!-- Submit Button -->
+        <div class="form-section">
+            <button class="primary-button" onclick="sendPhaseRequest()">
+                GET MY PHASE RECOMMENDATION
+            </button>
+        </div>
 
-  <label>Sleep Quality (1–10)</label>
-  <input id="sleep" type="number" min="1" max="10" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+        <!-- Response Section -->
+        <div id="response" class="response-section" style="display: none;"></div>
+    </div>
 
-  <label>Stress Level (1–10)</label>
-  <input id="stress" type="number" min="1" max="10" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
+    <script>
+        async function sendPhaseRequest() {
+            const inputs = {
+                height: document.getElementById("height").value,
+                weight: document.getElementById("weight").value,
+                bodyfat: document.getElementById("bodyfat").value,
+                phaseLength: document.getElementById("phaseLength").value,
+                training: document.getElementById("training").value,
+                recovered: document.getElementById("recovered").value,
+                sleep: document.getElementById("sleep").value,
+                stress: document.getElementById("stress").value,
+                digestion: document.getElementById("digestion").value,
+                appetite: document.getElementById("appetite").value,
+                energy: document.getElementById("energy").value,
+                goal: document.getElementById("goal").value,
+                readiness: document.getElementById("readiness").value,
+                health: document.getElementById("health").value,
+            };
 
-  <label>Digestion Quality</label>
-  <select id="digestion" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>Consistent & solid</option>
-    <option>Some bloat or irregularity</option>
-    <option>Poor or inconsistent</option>
-  </select>
+            const responseDiv = document.getElementById("response");
+            const button = document.querySelector(".primary-button");
+            
+            // Show response section and loading state
+            responseDiv.style.display = "block";
+            responseDiv.innerHTML = '<div class="loading">ANALYZING YOUR INPUTS...</div>';
+            button.disabled = true;
+            button.textContent = "PROCESSING...";
 
-  <label>Appetite</label>
-  <select id="appetite" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>Always hungry</option>
-    <option>Neutral</option>
-    <option>Low appetite</option>
-  </select>
+            try {
+                // Call your secure Vercel API instead of OpenAI directly
+                const res = await fetch("/api/phase-guide", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        inputs: inputs
+                    })
+                });
 
-  <label>Energy Levels</label>
-  <select id="energy" style="width: 100%; padding: 8px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>High</option>
-    <option>Medium</option>
-    <option>Low</option>
-  </select>
+                const data = await res.json();
+                
+                if (data.error) {
+                    responseDiv.innerHTML = `<div style="color: #DC2626; font-weight: 900;">ERROR: UNABLE TO GET RECOMMENDATION. PLEASE TRY AGAIN.</div>`;
+                    return;
+                }
 
-  <label>Primary Goal</label>
-  <select id="goal" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>Lose fat</option>
-    <option>Build muscle</option>
-    <option>Get leaner slowly</option>
-    <option>Feel better & get healthy</option>
-    <option>Not sure</option>
-  </select>
+                const reply = data.choices?.[0]?.message?.content || "SOMETHING WENT WRONG. PLEASE TRY AGAIN.";
+                responseDiv.innerHTML = reply;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.innerHTML = `<div style="color: #DC2626; font-weight: 900;">ERROR: CONNECTION FAILED. PLEASE CHECK YOUR INTERNET AND TRY AGAIN.</div>`;
+            } finally {
+                // Reset button
+                button.disabled = false;
+                button.textContent = "GET MY PHASE RECOMMENDATION";
+            }
+        }
 
-  <label>Readiness to Push</label>
-  <select id="readiness" style="width: 100%; padding: 8px; margin-bottom: 10px; background: #1e1e1e; color: white; border: 1px solid #333;">
-    <option>Locked in</option>
-    <option>Willing but busy/stressed</option>
-    <option>Not ready for intensity</option>
-  </select>
+        // File input feedback
+        document.getElementById('photos').addEventListener('change', function(e) {
+            const wrapper = document.querySelector('.file-input-wrapper');
+            const text = wrapper.querySelector('.file-input-text');
+            
+            if (e.target.files.length > 0) {
+                text.textContent = `${e.target.files.length} FILE(S) SELECTED`;
+                wrapper.style.borderColor = '#DC2626';
+                wrapper.style.background = 'rgba(220, 38, 38, 0.1)';
+            } else {
+                text.textContent = 'CLICK TO UPLOAD PHOTOS';
+                wrapper.style.borderColor = '#6B7280';
+                wrapper.style.background = '#1A1A1A';
+            }
+        });
 
-  <label>Health Concerns / Bloodwork</label>
-  <textarea id="health" rows="3" placeholder="List anything relevant..." style="width: 100%; padding: 10px; margin-bottom: 20px; background: #1e1e1e; color: white; border: 1px solid #333;"></textarea>
-
-  <label>Optional: Upload Progress Photos</label>
-  <input type="file" accept="image/*" style="width: 100%; padding: 8px; background: #1e1e1e; color: white; border: 1px solid #333; margin-bottom: 5px;">
-  <small style="color: #888;">Front / Side / Back if possible – used to better assess body fat % (not required).</small>
-  <br><br>
-
-  <button onclick="sendPhaseRequest()" style="width: 100%; padding: 12px; font-size: 16px; background-color: #2e2e2e; color: white; border: none; border-radius: 6px;">Get My Phase Recommendation</button>
-
-  <div id="response" style="margin-top: 30px; white-space: pre-wrap; background: #1b1b1b; padding: 15px; border-radius: 8px; border: 1px solid #333;"></div>
-</div>
-
-<script>
-  async function sendPhaseRequest() {
-    const inputs = {
-      height: document.getElementById("height").value,
-      weight: document.getElementById("weight").value,
-      bodyfat: document.getElementById("bodyfat").value,
-      phaseLength: document.getElementById("phaseLength").value,
-      training: document.getElementById("training").value,
-      recovered: document.getElementById("recovered").value,
-      sleep: document.getElementById("sleep").value,
-      stress: document.getElementById("stress").value,
-      digestion: document.getElementById("digestion").value,
-      appetite: document.getElementById("appetite").value,
-      energy: document.getElementById("energy").value,
-      goal: document.getElementById("goal").value,
-      readiness: document.getElementById("readiness").value,
-      health: document.getElementById("health").value,
-    };
-
-    document.getElementById("response").innerText = "Analyzing your inputs...";
-
-    try {
-      // Call your secure Vercel API instead of OpenAI directly
-      const res = await fetch("/api/phase-guide", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          inputs: inputs
-        })
-      });
-
-      const data = await res.json();
-      
-      if (data.error) {
-        document.getElementById("response").innerText = "Error getting recommendation. Please try again.";
-        return;
-      }
-
-      const reply = data.choices?.[0]?.message?.content || "Something went wrong.";
-      document.getElementById("response").innerText = reply;
-      
-    } catch (error) {
-      console.error('Error:', error);
-      document.getElementById("response").innerText = "Error connecting to server. Please try again.";
-    }
-  }
-</script>
+        // Form validation feedback
+        document.querySelectorAll('input, select, textarea').forEach(element => {
+            element.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value) {
+                    this.style.borderColor = '#DC2626';
+                } else if (this.value) {
+                    this.style.borderColor = '#6B7280';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
